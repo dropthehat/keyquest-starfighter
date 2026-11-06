@@ -1,5 +1,7 @@
 # KeyQuest: Starfighter Edition
 
+> **New: Act 1 · Cold Boot** — open [`act1.html`](act1.html). The story-driven rework: you wake aboard a dark ship and type its five systems back online (Reactor, Life support, Thrusters, Sensors, Navigation) with ORA, the ship AI, on a CRT screen. Each system teaches new home-row keys, with no timer. EN and UA tracks. `index.html` is the original Starfighter build.
+
 A single-file, browser-based typing trainer that turns touch typing into a space shooter. Type English or Ukrainian words to fire weapons at an incoming armada, while a vinyl-style synth soundtrack speeds up and slows down with your typing tempo.
 
 ## Features
