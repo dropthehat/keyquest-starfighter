@@ -198,6 +198,8 @@ kbd { font-family: var(--f-mono); border: 1px solid var(--seam); border-bottom-w
 /* deck: brushed metal console */
 .deck { background: repeating-linear-gradient(90deg, rgba(255,255,255,.016) 0 2px, transparent 2px 5px), linear-gradient(180deg, #1c232a, #11161b) !important; }
 .deck-right { display: flex; align-items: center; gap: 12px; }
+.deck.collapsed { padding-block: 12px 10px; }
+.deck.collapsed .kb-scroll, .deck.collapsed .fingers, .deck.collapsed #handsBtn { display: none; }
 .btn.mini { padding: 3px 9px; font-size: 10px; }
 /* fingertip guides */
 .kb-wrap { position: relative; min-width: 560px; }
@@ -342,7 +344,7 @@ kbd { font-family: var(--f-mono); border: 1px solid var(--seam); border-bottom-w
   <section class="deck plate">
     <div class="deck-head">
       <span class="tag" id="deckLabel">Control deck</span>
-      <span class="deck-right"><span class="label" id="deckHint">Space continues · Tab restarts the line</span><button class="btn mini" id="handsBtn">HANDS ON</button></span>
+      <span class="deck-right"><span class="label" id="deckHint">Space continues · Tab restarts the line</span><button class="btn mini" id="handsBtn">HANDS ON</button><button class="btn mini" id="kbBtn">HIDE KEYBOARD</button></span>
     </div>
     <div class="kb-scroll"><div class="kb-wrap" id="kbWrap"><div class="kb" id="kb"></div><svg class="reach" id="reach"></svg><div class="pads" id="pads"></div></div></div>
     <div class="fingers" id="fingers"></div>
@@ -596,7 +598,7 @@ const S = {
   lines: [], lineIdx: 0, ch: 0, levelDone: false, ending: 0, speaker: 'ora',
   correct: 0, total: 0, startT: null, lastStars: 0, lastWpm: 0, lastAcc: 100,
   msg: '', done: { en: blank(), uk: blank() },
-  sound: true, music: true, hands: true, miss: null, cadence: 0, lastKey: 0,
+  sound: true, music: true, hands: true, kb: true, miss: null, cadence: 0, lastKey: 0,
   dlg: [], dlgIdx: 0, dlgCb: null, full: '', shown: '', speaking: false, typer: null, blocking: false,
   dec: null, name: ''
 };
@@ -618,7 +620,7 @@ function codeOf(ch, lang = S.lang) { if (ch === ' ') return 'Space'; for (const 
 function keyLabel(code) { return code === 'Space' ? t('space') : (charOf(code) || '').toUpperCase(); }
 
 /* ---------- Save ---------- */
-function save() { try { localStorage.setItem('keyquest.story', JSON.stringify({ done: S.done, lang: S.lang, name: S.name, music: S.music, hands: S.hands, miss: S.miss })); } catch (e) {} }
+function save() { try { localStorage.setItem('keyquest.story', JSON.stringify({ done: S.done, lang: S.lang, name: S.name, music: S.music, hands: S.hands, kb: S.kb, miss: S.miss })); } catch (e) {} }
 function load() {
   try {
     const d = JSON.parse(localStorage.getItem('keyquest.story') || localStorage.getItem('keyquest.act1') || 'null');
@@ -628,6 +630,7 @@ function load() {
       if (typeof d.name === 'string') S.name = d.name.slice(0, 16);
       if (typeof d.music === 'boolean') S.music = d.music;
       if (typeof d.hands === 'boolean') S.hands = d.hands;
+      if (typeof d.kb === 'boolean') S.kb = d.kb;
       if (d.miss && d.miss.words) S.miss = d.miss;
     }
   } catch (e) {}
@@ -1440,17 +1443,53 @@ function drawTarget(ctx, now) {
 }
 function drawBanner(ctx, now) {
   const b = view.banner; if (!b) return;
-  const age = now - b.t, life = 1700;
+  const age = now - b.t, life = 1600;
   if (age > life) { view.banner = null; return; }
-  const a = age < 150 ? age / 150 : (age > life - 400 ? (life - age) / 400 : 1);
-  const W = view.w, H = view.h, y = H * 0.4, sc = 1 + Math.max(0, 1 - age / 200) * 0.25;
-  ctx.save(); ctx.globalAlpha = a; ctx.translate(W / 2, y); ctx.scale(sc, sc);
-  ctx.font = `52px ${MONO}`; const w = ctx.measureText(b.text).width + 48;
-  ctx.fillStyle = 'rgba(2,8,4,.82)'; ctx.fillRect(-w / 2, -32, w, 64);
-  ctx.strokeStyle = b.hot ? HOT() : G(); ctx.lineWidth = 2; ctx.shadowColor = b.hot ? HOT(.8) : G(.8); ctx.shadowBlur = 12;
-  line(ctx, [[-w / 2, -18], [-w / 2, -32], [-w / 2 + 18, -32]]); line(ctx, [[w / 2 - 18, -32], [w / 2, -32], [w / 2, -18]]);
-  line(ctx, [[-w / 2, 18], [-w / 2, 32], [-w / 2 + 18, 32]]); line(ctx, [[w / 2 - 18, 32], [w / 2, 32], [w / 2, 18]]);
-  vtext(ctx, b.text, 0, 2, 52, 'center', b.hot ? HOT() : G());
+  const W = view.w, H = view.h, cy = H * 0.5;
+  const open = Math.min(1, age / 140), close = age > life - 220 ? Math.max(0, (life - age) / 220) : 1;
+  const k = open * close, col = b.hot ? HOT : G;
+  ctx.save(); ctx.shadowBlur = 0;
+  // dim the monitor behind the alert
+  ctx.fillStyle = `rgba(1,6,3,${0.62 * k})`; ctx.fillRect(0, 0, W, H);
+  // full-width strip that snaps open from the centre line
+  const hh = 46 * k;
+  ctx.fillStyle = 'rgba(3,12,6,.94)'; ctx.fillRect(0, cy - hh, W, hh * 2);
+  ctx.strokeStyle = col(.95); ctx.lineWidth = 2;
+  line(ctx, [[0, cy - hh], [W, cy - hh]]); line(ctx, [[0, cy + hh], [W, cy + hh]]);
+  ctx.strokeStyle = col(.35); ctx.lineWidth = 1;
+  line(ctx, [[0, cy - hh + 5], [W, cy - hh + 5]]); line(ctx, [[0, cy + hh - 5], [W, cy + hh - 5]]);
+  if (k > 0.6) {
+    // hazard striping on the ends for alerts, tick marks for status
+    ctx.save(); ctx.beginPath(); ctx.rect(0, cy - hh + 6, W, hh * 2 - 12); ctx.clip();
+    if (b.hot) {
+      ctx.fillStyle = col(.8);
+      for (const x0 of [16, W - 106]) for (let i = 0; i < 6; i++) { const x = x0 + i * 16 - ((now * 0.06) % 16); ctx.beginPath(); ctx.moveTo(x, cy + hh); ctx.lineTo(x + 8, cy + hh); ctx.lineTo(x + 30, cy - hh); ctx.lineTo(x + 22, cy - hh); ctx.fill(); }
+    } else {
+      ctx.fillStyle = col(.7);
+      for (let i = 0; i < 6; i++) { ctx.fillRect(22 + i * 10, cy - 8, 4, 16); ctx.fillRect(W - 26 - i * 10, cy - 8, 4, 16); }
+    }
+    ctx.restore();
+    // small kind label above the strip
+    const kind = b.hot ? (S.lang === 'uk' ? 'УВАГА' : 'ALERT') : (S.lang === 'uk' ? 'СТАТУС' : 'STATUS');
+    ctx.font = `16px ${MONO}`; const kw = ctx.measureText(kind).width + 20;
+    ctx.fillStyle = 'rgba(3,12,6,.94)'; ctx.fillRect(W / 2 - kw / 2, cy - hh - 10, kw, 18);
+    vtext(ctx, kind, W / 2, cy - hh - 1, 16, 'center', col(.9));
+    // the words type in, widely spaced
+    const n = Math.min(b.text.length, Math.floor((age - 120) / 28) + 1);
+    if (n > 0) {
+      const size = Math.min(48, (W - 260) / Math.max(6, b.text.length * 0.95));
+      ctx.font = `${size}px ${MONO}`;
+      const sp = size * 0.28, chars = [...b.text];
+      const widths = chars.map(c => ctx.measureText(c).width);
+      const total = widths.reduce((a, w) => a + w + sp, -sp);
+      let x = W / 2 - total / 2;
+      ctx.shadowColor = col(.9); ctx.shadowBlur = 14;
+      chars.forEach((c, i) => {
+        if (i < n) vtext(ctx, c, x, cy + 2, size, 'left', i === n - 1 && n < chars.length ? '#ffffff' : col());
+        x += widths[i] + sp;
+      });
+    }
+  }
   ctx.restore();
 }
 
@@ -1722,6 +1761,8 @@ function renderChrome() {
   $('#deckHint').textContent = t('tabHint');
   $('#soundBtn').textContent = t('sound')[S.sound ? 0 : 1];
   $('#musicBtn').textContent = (S.lang === 'uk' ? ['МУЗИКА УВІМК', 'МУЗИКА ВИМК'] : ['MUSIC ON', 'MUSIC OFF'])[S.music ? 0 : 1];
+  $('.deck').classList.toggle('collapsed', !S.kb);
+  $('#kbBtn').textContent = (S.lang === 'uk' ? ['СХОВАТИ КЛАВІАТУРУ', 'ПОКАЗАТИ КЛАВІАТУРУ'] : ['HIDE KEYBOARD', 'SHOW KEYBOARD'])[S.kb ? 0 : 1];
   $('#handsBtn').textContent = (S.lang === 'uk' ? ['РУКИ УВІМК', 'РУКИ ВИМК'] : ['HANDS ON', 'HANDS OFF'])[S.hands ? 0 : 1];
   $('#langEN').classList.toggle('on', S.lang === 'en');
   $('#langUK').classList.toggle('on', S.lang === 'uk');
@@ -2462,6 +2503,7 @@ $('#langUK').onclick = (e) => { e.currentTarget.blur(); if (S.phase === 'intro')
 $('#act1').onclick = (e) => { e.currentTarget.blur(); initAudio(); startLevel(firstOpen(ACTS[0].from, ACTS[0].to)); };
 $('#act2').onclick = (e) => { e.currentTarget.blur(); initAudio(); startLevel(firstOpen(ACTS[1].from, ACTS[1].to)); };
 $('#musicBtn').onclick = (e) => { e.currentTarget.blur(); initAudio(); S.music = !S.music; save(); renderChrome(); };
+$('#kbBtn').onclick = (e) => { e.currentTarget.blur(); S.kb = !S.kb; save(); renderChrome(); requestAnimationFrame(resize); };
 $('#handsBtn').onclick = (e) => { e.currentTarget.blur(); S.hands = !S.hands; save(); renderChrome(); renderKeyboard(); };
 $('#soundBtn').onclick = (e) => {
   e.currentTarget.blur(); initAudio();
