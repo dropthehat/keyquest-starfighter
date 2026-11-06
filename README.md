@@ -1,6 +1,6 @@
 # KeyQuest: Starfighter Edition
 
-> **New: Act 1 · Cold Boot** — open [`act1.html`](act1.html). The story-driven rework: you wake aboard a dark ship and type its five systems back online (Reactor, Life support, Thrusters, Sensors, Navigation) with ORA, the ship AI, on a CRT screen. Each system teaches new home-row keys, with no timer. EN and UA tracks. `index.html` is the original Starfighter build.
+> **Story mode** — open [`story.html`](story.html). **Act 1 · Cold Boot**: wake a dark ship and type its five systems back online with ORA, the ship AI (home row, no timer). **Act 2 · First Contact**: Commander Vex attacks — decrypt his transmissions before the signal fades, then type the words on his raiders to shoot them down (top-row keys R U E I W O P Q). EN and UA tracks. `index.html` is the original Starfighter build.
 
 A single-file, browser-based typing trainer that turns touch typing into a space shooter. Type English or Ukrainian words to fire weapons at an incoming armada, while a vinyl-style synth soundtrack speeds up and slows down with your typing tempo.
 

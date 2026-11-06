@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-<title>KeyQuest Cold Boot</title>
+<title>KeyQuest</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -189,12 +189,22 @@ kbd { font-family: var(--f-mono); border: 1px solid var(--seam); border-bottom-w
 @media (prefers-reduced-motion: reduce) {
   .c.cur, .key.powering, .sys.booting .led, .comms.enemy .crt-text, .shake { animation: none !important; }
 }
+
+/* Act 2: decrypt + combat */
+.crt-text .noise { opacity: .5; }
+.crt-text .kopen { color: #fff; text-shadow: 0 0 12px var(--tint); }
+.crt-text .kcur { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 5px; opacity: .9; }
+.sig { height: 6px; background: #151d25; border-radius: 3px; overflow: hidden; }
+.sig i { display: block; height: 100%; background: var(--phos); }
+.sig.low i { background: var(--alert); }
+.pips { color: var(--live); letter-spacing: .25em; font-size: 15px; }
+.pips .off { color: var(--dim); }
 </style>
 </head>
 <body>
 <div class="app">
   <header class="top plate">
-    <div class="brand"><h1>KEYQUEST</h1><span class="act" id="actLabel">ACT 1 · COLD BOOT</span><span class="leds" id="leds"><i></i><i></i><i></i><i></i><i></i></span></div>
+    <div class="brand"><h1>KEYQUEST</h1><div class="seg" role="group" aria-label="Act"><button id="act1">ACT 1</button><button id="act2">ACT 2</button></div><span class="act" id="actLabel">COLD BOOT</span><span class="leds" id="leds"><i></i><i></i><i></i><i></i><i></i></span></div>
     <div class="controls">
       <div class="seg" role="group" aria-label="Language">
         <button id="langEN" class="on">EN · QWERTY</button>
@@ -236,10 +246,10 @@ kbd { font-family: var(--f-mono); border: 1px solid var(--seam); border-bottom-w
 
 <script>
 /* ======================================================================
-   KEYQUEST · ACT 1 · COLD BOOT
-   Story: the player wakes aboard a dark ship. ORA, the ship AI, guides
-   them through booting 5 systems. Each system = one typing lesson that
-   powers on new keys. Typing is the only way anything happens.
+   KEYQUEST
+   ACT 1 · COLD BOOT     — wake the ship with ORA, learn the home row.
+   ACT 2 · FIRST CONTACT — Commander Vex: decrypt his transmissions,
+                           then shoot down his raiders by typing words.
    ====================================================================== */
 
 /* ---------- Physical keyboard: [code, finger, width units, en, uk, label] ---------- */
@@ -266,23 +276,40 @@ const FINGER_SHORT = {
 
 /* ---------- UI strings ---------- */
 const T = {
-  en: { act:'ACT 1 · COLD BOOT', deck:'Control deck', tabHint:'Space continues · Tab restarts the line', spaceKey:'Space ␣', locate:'LOCATE KEY', boot:'BOOT SEQUENCE', step:'Step',
-        next:'Next', online:'ONLINE', offline:'OFFLINE', booting:'BOOTING', acc:'Accuracy', wpm:'WPM', cont:'to continue', nextSys:'next system',
-        find:'Find', lastOne:'Last line. Enter the code.', offKey:'That key is still offline.', wrongKey:'Not that one.', use:'Use',
-        incoming:'Message from ORA', oraName:'ORA · SHIP AI', unknown:'UNKNOWN SIGNAL', encrypted:'TRANSMISSION ENCRYPTED',
-        decOff:'The decryption module needs more keys. That comes next.', act2:'ACT 2 · FIRST CONTACT — next build', replay:'Replay Act 1', reset:'Reset progress',
-        space:'SPACE', sound:['SOUND ON','SOUND OFF'], systems:'Ship systems', keys:'Keys' },
-  uk: { act:'ДІЯ 1 · ХОЛОДНИЙ СТАРТ', deck:'Пульт керування', tabHint:'Пробіл — далі · Tab — рядок заново', spaceKey:'Пробіл ␣', locate:'ЗНАЙДИ КЛАВІШУ', boot:'ПОСЛІДОВНІСТЬ ЗАПУСКУ', step:'Крок',
-        next:'Далі', online:'ПРАЦЮЄ', offline:'ВИМКНЕНО', booting:'ЗАПУСК', acc:'Точність', wpm:'Слів/хв', cont:'щоб продовжити', nextSys:'наступна система',
-        find:'Знайди', lastOne:'Останній рядок. Введи код.', offKey:'Ця клавіша ще вимкнена.', wrongKey:'Не та клавіша.', use:'Використай',
-        incoming:'Повідомлення від ОРИ', oraName:'ОРА · БОРТОВИЙ ШІ', unknown:'НЕВІДОМИЙ СИГНАЛ', encrypted:'ПЕРЕДАЧА ЗАШИФРОВАНА',
-        decOff:'Модулю дешифрування потрібно більше клавіш. Це далі.', act2:'ДІЯ 2 · ПЕРШИЙ КОНТАКТ — у наступній версії', replay:'Пройти знову', reset:'Скинути прогрес',
-        space:'ПРОБІЛ', sound:['ЗВУК УВІМК','ЗВУК ВИМК'], systems:'Системи корабля', keys:'Клавіші' }
+  en: { deck:'Control deck', tabHint:'Space continues · Tab restarts the line', spaceKey:'Space ␣',
+        locate:'LOCATE KEY', boot:'BOOT SEQUENCE', warm:'WARM-UP', step:'Step', next:'Next',
+        online:'ONLINE', offline:'OFFLINE', booting:'BOOTING', cleared:'CLEARED', acc:'Accuracy', wpm:'WPM', cont:'to continue', nextSys:'next',
+        find:'Find', lastOne:'Last line. Enter the code.', offKey:'That key is still offline.', wrongKey:'Not that one.',
+        incoming:'Message', oraName:'ORA · SHIP AI', unknown:'UNKNOWN SIGNAL', vexName:'VEX · RAIDER COMMAND',
+        encrypted:'TRANSMISSION ENCRYPTED', decOff:'The decryption module needs more keys. Act 2 adds them.', startAct2:'start Act 2',
+        act2done:'ACT 2 COMPLETE', act3:'ACT 3 · CIPHER WAR — next build', replay:'Replay this act', reset:'Reset progress',
+        space:'SPACE', sound:['SOUND ON','SOUND OFF'], systems:'Ship systems', sectors:'Sectors',
+        decrypting:'DECRYPTING', key:'Key', signal:'Signal', signalLost:'Signal lost. He will repeat it. Try again.',
+        decHint:'Type each cipher key before the signal fades.',
+        target:'TARGET LOCK', shields:'Shields', left:'left', incomingShips:'Ships inbound…', breach:'Hull breach! Shields are down. Regroup, and try again.',
+        acts:['COLD BOOT','FIRST CONTACT'] },
+  uk: { deck:'Пульт керування', tabHint:'Пробіл — далі · Tab — рядок заново', spaceKey:'Пробіл ␣',
+        locate:'ЗНАЙДИ КЛАВІШУ', boot:'ПОСЛІДОВНІСТЬ ЗАПУСКУ', warm:'РОЗМИНКА', step:'Крок', next:'Далі',
+        online:'ПРАЦЮЄ', offline:'ВИМКНЕНО', booting:'ЗАПУСК', cleared:'ЗАЧИЩЕНО', acc:'Точність', wpm:'Слів/хв', cont:'щоб продовжити', nextSys:'далі',
+        find:'Знайди', lastOne:'Останній рядок. Введи код.', offKey:'Ця клавіша ще вимкнена.', wrongKey:'Не та клавіша.',
+        incoming:'Повідомлення', oraName:'ОРА · БОРТОВИЙ ШІ', unknown:'НЕВІДОМИЙ СИГНАЛ', vexName:'ВЕКС · КОМАНДУВАННЯ РЕЙДЕРІВ',
+        encrypted:'ПЕРЕДАЧА ЗАШИФРОВАНА', decOff:'Модулю дешифрування потрібно більше клавіш. Дія 2 їх додає.', startAct2:'почати Дію 2',
+        act2done:'ДІЮ 2 ЗАВЕРШЕНО', act3:'ДІЯ 3 · ВІЙНА ШИФРІВ — у наступній версії', replay:'Пройти дію знову', reset:'Скинути прогрес',
+        space:'ПРОБІЛ', sound:['ЗВУК УВІМК','ЗВУК ВИМК'], systems:'Системи корабля', sectors:'Сектори',
+        decrypting:'ДЕШИФРУВАННЯ', key:'Ключ', signal:'Сигнал', signalLost:'Сигнал втрачено. Він повторить. Спробуй ще.',
+        decHint:'Набери кожен ключ, поки сигнал не зник.',
+        target:'ЦІЛЬ ЗАХОПЛЕНО', shields:'Щити', left:'лишилось', incomingShips:'Кораблі наближаються…', breach:'Пробоїна! Щити впали. Збираємось і пробуємо знову.',
+        acts:['ХОЛОДНИЙ СТАРТ','ПЕРШИЙ КОНТАКТ'] }
 };
 
-/* ---------- ACT 1 curriculum: 5 systems ---------- */
+/* ======================================================================
+   CURRICULUM
+   ====================================================================== */
+const ACTS = [{ from: 0, to: 4 }, { from: 5, to: 8 }];
+
 const LEVELS = [
-  { sys:{ en:'Reactor', uk:'Реактор' }, newKeys:['KeyF','KeyJ'], codeLabel:{ en:'IGNITION CODE', uk:'КОД ЗАПУСКУ' },
+  /* ---------------- ACT 1 · COLD BOOT ---------------- */
+  { type:'boot', sys:{ en:'Reactor', uk:'Реактор' }, newKeys:['KeyF','KeyJ'], codeLabel:{ en:'IGNITION CODE', uk:'КОД ЗАПУСКУ' },
     en:{ intro:['...power at 2%. Hello? Engineer, you are awake. Good.', 'I am ORA, this ship\'s computer. Most of me is offline.', 'The reactor needs an ignition code. Rest your index fingers on F and J. Feel the bumps?'],
          tip:'Keep both index fingers on the bumps. Look at the screen, not your hands.',
          drills:['fjfj','jfjf','ffjj','fjjf'], code:'fjfjfj', outro:'Reactor online. I can think again. Thank you.' },
@@ -290,7 +317,7 @@ const LEVELS = [
          tip:'Тримай вказівні пальці на виступах. Дивись на екран, а не на руки.',
          drills:['аоао','оаоа','ааоо','аооа'], code:'аоаоао', outro:'Реактор працює. Я знову можу думати. Дякую.' } },
 
-  { sys:{ en:'Life support', uk:'Життєзабезпечення' }, newKeys:['KeyD','KeyK'], codeLabel:{ en:'AIRFLOW CODE', uk:'КОД ПОВІТРЯ' },
+  { type:'boot', sys:{ en:'Life support', uk:'Життєзабезпечення' }, newKeys:['KeyD','KeyK'], codeLabel:{ en:'AIRFLOW CODE', uk:'КОД ПОВІТРЯ' },
     en:{ intro:['Life support is next. Air would be nice.', 'Add your middle fingers: D on the left, K on the right. Index fingers stay on the bumps.'],
          tip:'Middle fingers press, index fingers rest. Small moves.',
          drills:['dfjk','kjfd','ddkk','fdjk','dkfj'], code:'kdfjkd', outro:'Air is flowing. You can breathe easier now.' },
@@ -298,7 +325,7 @@ const LEVELS = [
          tip:'Середні натискають, вказівні відпочивають. Малі рухи.',
          drills:['ваол','лоав','ввлл','авол','влао'], code:'лваолв', outro:'Повітря пішло. Тепер можна дихати спокійно.' } },
 
-  { sys:{ en:'Thrusters', uk:'Двигуни' }, newKeys:['Space'], codeLabel:{ en:'THRUST CODE', uk:'КОД ТЯГИ' },
+  { type:'boot', sys:{ en:'Thrusters', uk:'Двигуни' }, newKeys:['Space'], codeLabel:{ en:'THRUST CODE', uk:'КОД ТЯГИ' },
     en:{ intro:['Thrusters. Your thumbs rest on the space bar.', 'Either thumb works. Tap it between each pair of letters.'],
          tip:'Thumb taps space. The other fingers stay home.',
          drills:['fj dk','jf kd','ff jj dd kk','dk fj kd'], code:'dk fj dk fj', outro:'Engines warm. We are moving.' },
@@ -306,7 +333,7 @@ const LEVELS = [
          tip:'Великий палець — пробіл. Решта пальців на місці.',
          drills:['ао вл','оа лв','аа оо вв лл','вл ао лв'], code:'вл ао вл ао', outro:'Двигуни прогріті. Ми рушили.' } },
 
-  { sys:{ en:'Sensors', uk:'Сенсори' }, newKeys:['KeyS','KeyL'], codeLabel:{ en:'SCAN CODE', uk:'КОД СКАНУ' },
+  { type:'boot', sys:{ en:'Sensors', uk:'Сенсори' }, newKeys:['KeyS','KeyL'], codeLabel:{ en:'SCAN CODE', uk:'КОД СКАНУ' },
     en:{ intro:['The sensors are blind. We need eyes outside.', 'Ring fingers now: S on the left, L on the right.'],
          tip:'Ring fingers are weaker. Go slow, stay accurate.',
          drills:['sdf jkl','lkj fds','sl dk fj','fsd ljk'], code:'sld kfj', outro:'Sensors online... wait. Something is out there.' },
@@ -314,72 +341,142 @@ const LEVELS = [
          tip:'Безіменні пальці слабші. Повільно і точно.',
          drills:['іва олд','дло аві','ід вл ао','аві длі'], code:'дід лід', outro:'Сенсори працюють... стривай. Там щось є.' } },
 
-  { sys:{ en:'Navigation', uk:'Навігація' }, newKeys:['KeyA','Semicolon','KeyG','KeyH'], codeLabel:{ en:'NAV PASSWORD', uk:'ПАРОЛЬ НАВІГАЦІЇ' },
+  { type:'boot', sys:{ en:'Navigation', uk:'Навігація' }, newKeys:['KeyA','Semicolon','KeyG','KeyH'], codeLabel:{ en:'NAV PASSWORD', uk:'ПАРОЛЬ НАВІГАЦІЇ' },
     en:{ intro:['Navigation needs the full home row.', 'Pinkies on A and ;. Index fingers reach over to G and H, then come back.', 'From now on you type real words. Slow is fine.'],
          tip:'Reach for G and H, then snap back to F and J.',
          drills:['ask dad','a sad lad','had a glass','flash; hash'], code:'glass flask', outro:'All systems online. And... we are receiving a transmission.' },
     uk:{ intro:['Навігації потрібен весь базовий ряд.', 'Мізинці на Ф та Ж. Вказівні тягнуться до П та Р і повертаються назад.', 'Відтепер ти друкуєш справжні слова. Повільно — це нормально.'],
          tip:'Тягнись до П та Р і одразу повертайся на А та О.',
-         drills:['вода лава','пора і рід','фара жар','ліва фара'], code:'парад вода', outro:'Усі системи в нормі. І... ми отримуємо передачу.' } }
+         drills:['вода лава','пора і рід','фара жар','ліва фара'], code:'парад вода', outro:'Усі системи в нормі. І... ми отримуємо передачу.' } },
+
+  /* ---------------- ACT 2 · FIRST CONTACT ----------------
+     Each sector: ORA briefing → new keys → warm-up → encrypted transmission
+     (type the cipher keys before the signal fades) → raider wave → debrief.
+     [brackets] in msg = cipher keys the player types to decrypt.            */
+  { type:'encounter', sys:{ en:'Hail', uk:'Виклик' }, newKeys:['KeyR','KeyU'], cross:15000, gap:3400,
+    en:{ intro:['That signal is a ship. It is hailing us, but the message is encrypted.', 'The cipher core needs two more keys: R and U. Reach up with your index fingers, then come back to F and J.'],
+         tip:'Reach up, then return to the bumps.',
+         drills:['fur rug','hug a jar','rush; drag'],
+         msg:'Little ship, you sail in [dark] water. The [shark] smells you. [Rush] home before [dusk].',
+         after:'That is Commander Vex. Raiders. He is launching drones. Type each drone\'s code to shoot it down.',
+         wave:['fur','jar','hug','rush','dusk','shark','drag'],
+         retreat:'Lucky shots. We will meet again, little ship.', outro:'Drones down. Vex will not stop there.' },
+    uk:{ intro:['Цей сигнал — корабель. Він викликає нас, але повідомлення зашифроване.', 'Шифратору потрібні ще дві клавіші: К та Г. Вказівні тягнуться вгору і повертаються на А та О.'],
+         tip:'Тягнись вгору і повертайся на виступи.',
+         drills:['рік гора','крок кора','дорога далі'],
+         msg:'Я — Векс, твій [ворог]. Ця [дорога] не для тебе. Зроби [крок] назад і лети [далі].',
+         after:'Це командир Векс. Рейдери. Він запускає дрони. Набери код дрона, щоб його збити.',
+         wave:['рік','гора','крок','кора','ворог','дорога','порог'],
+         retreat:'Пощастило. Ми ще зустрінемось, кораблику.', outro:'Дрони збито. Векс на цьому не зупиниться.' } },
+
+  { type:'encounter', sys:{ en:'Warning shots', uk:'Попередження' }, newKeys:['KeyE','KeyI'], cross:14000, gap:3100,
+    en:{ intro:['Vex is coming back with more ships.', 'Two new keys: E and I. Middle fingers reach up from D and K.'],
+         tip:'Middle fingers reach up, then back to D and K.',
+         drills:['fire ride','hide; seek','skies glide'],
+         msg:'Your [shields] are weak. My [raiders] [seek] you. [Flee] while you still can.',
+         after:'He is bluffing. Mostly. Here they come.',
+         wave:['fire','ride','hide','seek','skies','glide','shield','raider'],
+         retreat:'Fine. You have teeth. So do I.', outro:'Two waves down. Rest your hands for a second.' },
+    uk:{ intro:['Векс повертається з більшою кількістю кораблів.', 'Дві нові клавіші: У та Ш. Середні пальці тягнуться вгору від В та Л.'],
+         tip:'Середні вгору, потім назад на В та Л.',
+         drills:['душа груша','пушка шлак','рука шукала'],
+         msg:'Твій корабель — [шкаралупа]. Моя [пушка] дасть [шквал] вогню. [Ура]!',
+         after:'Він блефує. Майже. Ось вони.',
+         wave:['душа','груша','пушка','шлак','рука','шквал','шукала','шкаралупа'],
+         retreat:'Гаразд. У тебе є зуби. У мене теж.', outro:'Дві хвилі позаду. Дай рукам хвилину відпочити.' } },
+
+  { type:'encounter', sys:{ en:'The pack', uk:'Зграя' }, newKeys:['KeyW','KeyO'], cross:13000, gap:2800,
+    en:{ intro:['A bigger pack is forming on the radar.', 'Ring fingers reach up now: W from S, O from L.'],
+         tip:'Ring fingers reach up. Keep the others resting.',
+         drills:['slow word','a wolf howls','glow; follow'],
+         msg:'[Fool]. Your [world] is [hollow]. My [wolf] pack will [follow] your [glow].',
+         after:'A wolf pack. Faster ships. Stay calm, stay accurate.',
+         wave:['slow','word','world','sword','howl','wolf','glow','follow','hollow'],
+         retreat:'Enough. Next time I come myself.', outro:'The pack is scattered. Vex is angry now. Good.' },
+    uk:{ intro:['На радарі збирається більша зграя.', 'Безіменні пальці тягнуться вгору: Ц від І, Щ від Д.'],
+         tip:'Безіменні вгору, решта відпочиває.',
+         drills:['щука щур','палац гуща','площа краща'],
+         msg:'Ти [щур] у [пащі]. Мій [палац] — [гуща] зірок.',
+         after:'Зграя. Швидші кораблі. Спокійно і точно.',
+         wave:['щур','щука','паща','палац','гуща','площа','краща','ціпок','щока'],
+         retreat:'Досить. Наступного разу прийду сам.', outro:'Зграю розбито. Векс злий. Це добре.' } },
+
+  { type:'encounter', sys:{ en:'Vex', uk:'Векс' }, newKeys:['KeyP','KeyQ'], cross:12000, gap:2500,
+    en:{ intro:['Vex\'s flagship is on approach.', 'The last two keys of this act: P and Q, both with your pinkies. P is up from ;. Q is up from A.'],
+         tip:'Pinkies reach up, then home.',
+         drills:['quad speed','pause; aqua','proud squad'],
+         msg:'Hear me, engineer. My [squad] [prowls] the [deep]. Your [power] fades. [Prepare].',
+         after:'This is it. His flagship and escorts. Every word counts.',
+         wave:['squad','prowl','deep','power','queue','speed','equip','quake','proud','prepare'],
+         retreat:'Impossible... Retreat! The Admiral will hear of you, engineer.', outro:'Vex is running. We held the sector. But an Admiral... that is a bigger problem.' },
+    uk:{ intro:['Флагман Векса наближається.', 'Останні дві клавіші цієї дії: З та Й, обидві мізинцями. З — вгору від Ж. Й — вгору від Ф.'],
+         tip:'Мізинці вгору і додому.',
+         drills:['гроза залп','зараз зло','край гай'],
+         msg:'[Гроза] вже тут. Мій [залп] — твоя [загроза]. [Зараз]!',
+         after:'Це воно. Флагман і супровід. Кожне слово важливе.',
+         wave:['гроза','залп','зло','край','гай','зорі','лазур','розлад','зараз','загроза'],
+         retreat:'Неможливо... Відступаємо! Адмірал дізнається про тебе, інженере.', outro:'Векс тікає. Ми втримали сектор. Але адмірал... це більша проблема.' } }
 ];
 
-const FINALE = {
+const ACT1_END = {
   en: ['...#%@ ENGINEER %&... YOU... SHOULD NOT... H@VE... WOKEN... THIS SHIP...', '...&&#... TURN BACK... OR... #%@&*...'],
   uk: ['...#%@ ІНЖЕНЕРЕ %&... ТИ... НЕ МАВ... ПРОКИД@ТИСЯ...', '...&&#... ПОВЕРТАЙСЯ... АБО... #%@&*...']
 };
 
 /* ---------- State ---------- */
+const N = LEVELS.length;
+const blank = () => Array(N).fill(0);
 const S = {
-  lang: 'en', lvl: 0, phase: 'dialogue',     // dialogue | drill | complete | finale
-  lines: [], lineIdx: 0, ch: 0,
-  levelDone: false, finale: false, crtMode: 'ora',
+  lang: 'en', lvl: 0, phase: 'dialogue',      // dialogue | drill | decrypt | combat | complete | ending
+  lines: [], lineIdx: 0, ch: 0, levelDone: false, ending: 0, speaker: 'ora',
   correct: 0, total: 0, startT: null, lastStars: 0, lastWpm: 0, lastAcc: 100,
-  msg: '', done: { en: [0,0,0,0,0], uk: [0,0,0,0,0] },
+  msg: '', done: { en: blank(), uk: blank() },
   sound: true, cadence: 0, lastKey: 0,
-  dlg: [], dlgIdx: 0, dlgCb: null, full: '', shown: '', speaking: false, typer: null, blocking: false
+  dlg: [], dlgIdx: 0, dlgCb: null, full: '', shown: '', speaking: false, typer: null, blocking: false,
+  dec: null
 };
+const C = { ships: [], queue: [], last: 0, lasers: [], booms: [], shields: 3, typed: 0, total: 0 };
 
 const $ = (s) => document.querySelector(s);
-const esc = (s) => s.replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
+const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
 const t = (k) => T[S.lang][k];
 const L = () => LEVELS[S.lvl];
 const LT = () => LEVELS[S.lvl][S.lang];
+const actOf = (i) => (i >= ACTS[1].from ? 1 : 0);
 
-function charOf(code, lang = S.lang) {
-  if (code === 'Space') return ' ';
-  return KEY[code] ? KEY[code][lang] : null;
-}
-function codeOf(ch, lang = S.lang) {
-  if (ch === ' ') return 'Space';
-  for (const c in KEY) if (KEY[c][lang] === ch) return c;
-  return null;
-}
+function charOf(code, lang = S.lang) { if (code === 'Space') return ' '; return KEY[code] ? KEY[code][lang] : null; }
+function codeOf(ch, lang = S.lang) { if (ch === ' ') return 'Space'; for (const c in KEY) if (KEY[c][lang] === ch) return c; return null; }
 function keyLabel(code) { return code === 'Space' ? t('space') : (charOf(code) || '').toUpperCase(); }
 
 /* ---------- Save ---------- */
-function save() { try { localStorage.setItem('keyquest.act1', JSON.stringify({ done: S.done, lang: S.lang })); } catch (e) {} }
+function save() { try { localStorage.setItem('keyquest.story', JSON.stringify({ done: S.done, lang: S.lang })); } catch (e) {} }
 function load() {
   try {
-    const d = JSON.parse(localStorage.getItem('keyquest.act1') || 'null');
-    if (d && d.done) { S.done = { en: d.done.en || [0,0,0,0,0], uk: d.done.uk || [0,0,0,0,0] }; S.lang = d.lang === 'uk' ? 'uk' : 'en'; }
+    const d = JSON.parse(localStorage.getItem('keyquest.story') || localStorage.getItem('keyquest.act1') || 'null');
+    if (d && d.done) {
+      const pad = (a) => { const b = blank(); (a || []).forEach((v, i) => { if (i < N) b[i] = v; }); return b; };
+      S.done = { en: pad(d.done.en), uk: pad(d.done.uk) }; S.lang = d.lang === 'uk' ? 'uk' : 'en';
+    }
   } catch (e) {}
 }
 
-/* ---------- Which keys are powered ---------- */
+/* ---------- Keys / progress ---------- */
 function onlineKeys() {
   const set = new Set();
   LEVELS.forEach((lv, i) => {
-    const live = i < S.lvl || S.done[S.lang][i] || S.finale || (i === S.lvl && (S.phase !== 'dialogue' || S.levelDone));
+    const live = i < S.lvl || S.done[S.lang][i] || S.ending || (i === S.lvl && (S.phase !== 'dialogue' || S.levelDone || S.dec));
     if (live) lv.newKeys.forEach(k => set.add(k));
   });
   return set;
 }
 function curLine() { return S.lines[S.lineIdx]; }
-function expectedCode() {
-  if (S.phase !== 'drill') return null;
-  const line = curLine(); if (!line) return null;
-  return codeOf(line.text[S.ch]);
+function expectedChar() {
+  if (S.phase === 'drill') { const l = curLine(); return l ? l.text[S.ch] : null; }
+  if (S.phase === 'decrypt') { const k = S.dec.keys[S.dec.ki]; return k ? k.k[S.dec.ch] : null; }
+  if (S.phase === 'combat') { const s = C.ships[0]; return s ? s.word[C.typed] : null; }
+  return null;
 }
+function expectedCode() { const ch = expectedChar(); return ch ? codeOf(ch) : null; }
 function liveProgress() {
   if (S.levelDone) return 1;
   if (S.phase !== 'drill' || !S.lines.length) return 0;
@@ -387,19 +484,19 @@ function liveProgress() {
   return (S.lineIdx + (line ? S.ch / line.text.length : 0)) / S.lines.length;
 }
 function targetPowers() {
-  if (S.finale) return [1,1,1,1,1];
+  if (S.ending || S.lvl >= ACTS[1].from) return [1,1,1,1,1];
   return [0,1,2,3,4].map(i => S.done[S.lang][i] || i < S.lvl ? 1 : (i === S.lvl ? liveProgress() : 0));
 }
+const hostile = () => S.speaker !== 'ora' || S.phase === 'decrypt';
 
 /* ======================================================================
-   AUDIO: key clicks, error buzz, unlock chime + reactor hum whose pitch
-   follows your typing cadence (the "engine output").
+   AUDIO
    ====================================================================== */
 let AC = null, master = null, hum = null, nextPulse = 0;
 function initAudio() {
   if (!AC) {
-    const C = window.AudioContext || window.webkitAudioContext; if (!C) return;
-    AC = new C(); master = AC.createGain(); master.gain.value = S.sound ? 0.9 : 0; master.connect(AC.destination);
+    const Ctor = window.AudioContext || window.webkitAudioContext; if (!Ctor) return;
+    AC = new Ctor(); master = AC.createGain(); master.gain.value = S.sound ? 0.9 : 0; master.connect(AC.destination);
     const o1 = AC.createOscillator(), o2 = AC.createOscillator(), f = AC.createBiquadFilter(), g = AC.createGain();
     o1.type = 'sawtooth'; o1.frequency.value = 55; o2.type = 'sine'; o2.frequency.value = 110;
     f.type = 'lowpass'; f.frequency.value = 160; g.gain.value = 0;
@@ -418,9 +515,13 @@ function blip(type, f0, f1, dur, vol, delay = 0) {
 const sfx = {
   key: () => blip('triangle', 900 + Math.random() * 80, 620, 0.04, 0.05),
   err: () => blip('sawtooth', 140, 70, 0.16, 0.08),
-  talk: () => blip('square', S.crtMode === 'enemy' ? 90 + Math.random() * 60 : 320 + Math.random() * 160, null, 0.025, 0.01),
+  talk: () => blip('square', S.speaker !== 'ora' ? 90 + Math.random() * 60 : 320 + Math.random() * 160, null, 0.025, 0.01),
   unlock: () => { blip('sine', 523, null, 0.12, 0.07); blip('sine', 784, null, 0.2, 0.07, 0.11); },
+  reveal: () => { blip('triangle', 660, 990, 0.12, 0.06); },
   online: () => [392, 494, 587, 784].forEach((f, i) => blip('triangle', f, null, 0.55, 0.05, i * 0.07)),
+  laser: () => blip('square', 1300 + Math.random() * 200, 300, 0.07, 0.035),
+  boom: () => { blip('sawtooth', 300, 40, 0.3, 0.08); blip('triangle', 120, 30, 0.35, 0.07); },
+  breach: () => { blip('square', 200, 35, 0.5, 0.1); blip('sawtooth', 90, 30, 0.6, 0.08, 0.05); },
   glitch: () => { for (let i = 0; i < 7; i++) blip('sawtooth', 70 + Math.random() * 700, 40, 0.09, 0.04, i * 0.06); }
 };
 function updateAudio(now, pw) {
@@ -430,7 +531,6 @@ function updateAudio(now, pw) {
   hum.o1.frequency.setTargetAtTime(50 + pw[0] * 5 + S.cadence * 12, at, 0.25);
   hum.o2.frequency.setTargetAtTime(100 + pw[0] * 10 + S.cadence * 24, at, 0.25);
   hum.f.frequency.setTargetAtTime(150 + pw[2] * 220 + S.cadence * 520, at, 0.2);
-  // engine pulse: speeds up with your rhythm once thrusters are lit
   if (pw[2] > 0.95 && S.cadence > 0.15 && now > nextPulse) {
     blip('sine', 165 + S.cadence * 60, 110, 0.08, 0.03);
     nextPulse = now + Math.max(160, 620 - S.cadence * 380);
@@ -438,7 +538,8 @@ function updateAudio(now, pw) {
 }
 
 /* ======================================================================
-   CRT: typewriter dialogue + pixel-art face
+   CRT DIALOGUE
+   Lines are strings (ORA) or { who: 'ora' | 'vex' | 'unknown', text }.
    ====================================================================== */
 function typeText(text, blocking, cb) {
   clearInterval(S.typer);
@@ -457,39 +558,62 @@ function finishTyping() {
   S.shown = S.full; S.speaking = false; renderCrtText();
   if (S.typeCb) { const cb = S.typeCb; S.typeCb = null; cb(); }
 }
+function sayLine(item) {
+  const who = typeof item === 'string' ? 'ora' : item.who;
+  const text = typeof item === 'string' ? item : item.text;
+  S.speaker = who;
+  typeText(text, true);
+}
 function say(lines, cb) {
   S.phase = 'dialogue'; S.dlg = lines; S.dlgIdx = 0; S.dlgCb = cb;
-  typeText(lines[0], true);
+  sayLine(lines[0]);
   renderAll();
 }
 function advanceDialogue() {
   if (S.speaking) { finishTyping(); return; }
   S.dlgIdx++;
-  if (S.dlgIdx < S.dlg.length) { typeText(S.dlg[S.dlgIdx], true); renderTerminal(); }
+  if (S.dlgIdx < S.dlg.length) { sayLine(S.dlg[S.dlgIdx]); renderAll(); }
   else { const cb = S.dlgCb; S.dlgCb = null; if (cb) cb(); }
 }
-function remark(text) { typeText(text, false); }
+function remark(text) { S.speaker = 'ora'; typeText(text, false); }
+
+const NOISE = '#%&@$*▓▒░<>/\\|=+';
+function noise(n) { let s = ''; for (let i = 0; i < n; i++) s += NOISE[(Math.random() * NOISE.length) | 0]; return s; }
 
 function renderCrtText() {
   const el = $('#crtText');
-  const showCaret = S.speaking || (S.blocking && S.phase === 'dialogue');
-  el.innerHTML = `<span class="who">${S.crtMode === 'enemy' ? '??' : 'ORA'}&gt;</span>` + esc(S.shown) + (showCaret ? '<span class="caret">▌</span>' : '');
-  const crt = $('#comms');
-  crt.classList.toggle('enemy', S.crtMode === 'enemy');
-  $('#crtName').textContent = S.crtMode === 'enemy' ? t('unknown') : t('oraName');
-  $('#crtChan').textContent = S.crtMode === 'enemy' ? 'CH ??' : 'CH 01';
+  const who = S.speaker === 'ora' ? 'ORA' : (S.speaker === 'vex' ? 'VEX' : '??');
+  if (S.phase === 'decrypt' && S.dec) {
+    const html = S.dec.segs.map((sg) => {
+      if (!sg.key) return esc(sg.s);
+      if (sg.open) return `<span class="kopen">${esc(sg.s)}</span>`;
+      const cur = S.dec.keys[S.dec.ki] === sg;
+      return `<span class="noise ${cur ? 'kcur' : ''}">${esc(noise(sg.s.length))}</span>`;
+    }).join('');
+    el.innerHTML = `<span class="who">??&gt;</span>` + html;
+  } else {
+    const showCaret = S.speaking || (S.blocking && S.phase === 'dialogue');
+    el.innerHTML = `<span class="who">${who}&gt;</span>` + esc(S.shown) + (showCaret ? '<span class="caret">▌</span>' : '');
+  }
+  $('#comms').classList.toggle('enemy', hostile());
+  $('#crtName').textContent = S.speaker === 'vex' ? t('vexName') : (hostile() ? t('unknown') : t('oraName'));
+  $('#crtChan').textContent = hostile() ? 'CH ??' : 'CH 01';
 }
 
+/* ---------- Pixel faces ---------- */
 const face = { cv: null, ctx: null, w: 0, h: 0 };
 function drawFace(now) {
   const c = face.ctx, W = face.w, H = face.h; if (!c || !W) return;
   c.clearRect(0, 0, W, H);
-  const enemy = S.crtMode === 'enemy';
+  const mode = S.phase === 'decrypt' ? 'unknown' : S.speaker;
+  const enemy = mode !== 'ora';
   const cols = 20, rows = 16;
   const cell = Math.max(3, Math.floor(Math.min(W / cols, H / rows)));
   const ox = Math.floor((W - cols * cell) / 2), oy = Math.floor((H - rows * cell) / 2);
   const rgb = enemy ? '255,90,82' : '255,181,71';
-  const powered = S.finale || S.done[S.lang][0] || S.lvl > 0 || S.phase !== 'dialogue' || S.dlgIdx > 0;
+  const powered = S.ending || S.lvl > 0 || S.phase !== 'dialogue' || S.dlgIdx > 0;
+  // decrypt: the face is mostly static until the signal is cleaned up
+  const clarity = mode === 'unknown' && S.dec ? S.dec.ki / Math.max(1, S.dec.keys.length) : 1;
   const flick = powered ? 1 : (0.55 + 0.45 * Math.random());
   c.shadowColor = `rgba(${rgb},.8)`; c.shadowBlur = cell * 0.9;
 
@@ -500,7 +624,10 @@ function drawFace(now) {
         return Math.abs(x - 9.5) <= hw;
       }
     : (x, y) => { const dx = (x - 9.5) / 8.4, dy = (y - 7.8) / 7.3; return dx * dx + dy * dy < 1; };
-  const px = (x, y, a) => { c.fillStyle = `rgba(${rgb},${a * flick})`; c.fillRect(ox + x * cell, oy + y * cell, cell - 1, cell - 1); };
+  const px = (x, y, a) => {
+    if (mode === 'unknown' && Math.random() > 0.35 + 0.65 * clarity) return;
+    c.fillStyle = `rgba(${rgb},${a * flick})`; c.fillRect(ox + x * cell, oy + y * cell, cell - 1, cell - 1);
+  };
 
   const glitchRow = enemy && Math.random() < 0.3 ? (Math.random() * rows) | 0 : -1;
   for (let y = 0; y < rows; y++) {
@@ -517,35 +644,70 @@ function drawFace(now) {
     for (const ex of [6, 12]) { px(ex, 7, 1); px(ex + 1, 7, 1); if (!blink) { px(ex, 6, 1); px(ex + 1, 6, 1); } }
     if (speakFrame) { for (let x = 8; x <= 11; x++) { px(x, 10, 1); px(x, 12, 1); } px(8, 11, 1); px(11, 11, 1); }
     else for (let x = 8; x <= 11; x++) px(x, 11, 1);
-    for (let y = 6; y <= 9; y++) { px(0, y, 0.7); px(19, y, 0.7); }   // sensor "ears"
+    for (let y = 6; y <= 9; y++) { px(0, y, 0.7); px(19, y, 0.7); }
   } else {
+    if (mode === 'vex') {           // Vex: swept crest fins + scar
+      [[3,0],[4,1],[5,2],[16,0],[15,1],[14,2]].forEach(([x, y]) => px(x, y, 1));
+      px(12, 8, 0.8); px(13, 9, 0.8); px(14, 10, 0.8);
+    }
     for (let x = 4; x <= 15; x++) px(x, 6, 0.95);
     const scan = 4 + Math.floor(now / 70) % 12; px(scan, 7, 1); px(Math.min(15, scan + 1), 7, 0.6);
     for (let x = 6; x <= 13; x++) if ((x + (speakFrame ? 1 : 0)) % 2) { px(x, 11, 0.9); px(x, 12, 0.6); }
-    for (let i = 0; i < 14; i++) px((Math.random() * cols) | 0, (Math.random() * rows) | 0, 0.25);
+    const n = mode === 'unknown' ? 40 : 10;
+    for (let i = 0; i < n; i++) { c.fillStyle = `rgba(${rgb},.25)`; c.fillRect(ox + ((Math.random() * cols) | 0) * cell, oy + ((Math.random() * rows) | 0) * cell, cell - 1, cell - 1); }
   }
   c.shadowBlur = 0;
 }
 
 /* ======================================================================
-   VIEWPORT: the cockpit window. Each system changes what you see.
-   reactor = light, life support = sill lights, thrusters = star motion,
-   sensors = radar, navigation = planet + course.
+   VIEWPORT
    ====================================================================== */
-const view = { cv: null, ctx: null, w: 0, h: 0, stars: [], pw: [0.02, 0, 0, 0, 0] };
+const view = { cv: null, ctx: null, w: 0, h: 0, stars: [], pw: [0.02, 0, 0, 0, 0], shake: 0 };
 function initStars() {
   view.stars = Array.from({ length: 140 }, () => ({ x: Math.random() * view.w, y: Math.random() * view.h, z: 0.4 + Math.random() * 1.6, tw: Math.random() * 6 }));
 }
+const cannon = () => ({ x: view.w * 0.5, y: view.h * 0.86 });
+const perimeterX = () => view.w * 0.1;
+
+function drawRaider(ctx, s, now, isTarget) {
+  const bob = Math.sin(now * 0.004 + s.phase) * 4;
+  const x = s.x, y = s.y + bob;
+  ctx.save(); ctx.translate(x, y);
+  const body = s.hit > 0 ? '#ffffff' : '#ff5a52';
+  ctx.fillStyle = body;
+  ctx.beginPath(); ctx.moveTo(-18, 0); ctx.lineTo(4, -10); ctx.lineTo(16, -14); ctx.lineTo(10, 0); ctx.lineTo(16, 14); ctx.lineTo(4, 10); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#2a0a0a'; ctx.fillRect(-4, -3, 7, 6);
+  ctx.fillStyle = `rgba(255,181,71,${0.6 + 0.4 * Math.random()})`; ctx.fillRect(14, -3, 6 + Math.random() * 6, 6);
+  if (isTarget) {
+    ctx.strokeStyle = 'rgba(111,240,168,.9)'; ctx.lineWidth = 1.5;
+    const r = 26;
+    [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([sx, sy]) => {
+      ctx.beginPath(); ctx.moveTo(sx * r, sy * (r - 8)); ctx.lineTo(sx * r, sy * r); ctx.lineTo(sx * (r - 8), sy * r); ctx.stroke();
+    });
+  }
+  ctx.restore();
+  // word label
+  ctx.font = '600 14px "IBM Plex Mono", monospace'; ctx.textBaseline = 'bottom';
+  const typed = isTarget ? C.typed : 0;
+  const a = s.word.slice(0, typed), b = s.word.slice(typed);
+  const wa = ctx.measureText(a).width, wb = ctx.measureText(b).width;
+  const lx = x - (wa + wb) / 2, ly = y - 22;
+  ctx.fillStyle = 'rgba(4,6,9,.75)'; ctx.fillRect(lx - 5, ly - 18, wa + wb + 10, 20);
+  ctx.fillStyle = '#6ff0a8'; ctx.fillText(a, lx, ly);
+  ctx.fillStyle = isTarget ? '#ffffff' : '#c9d4dc'; ctx.fillText(b, lx + wa, ly);
+}
+
 function drawView(now, pw) {
   const ctx = view.ctx, W = view.w, H = view.h; if (!ctx || !W) return;
-  ctx.fillStyle = '#02050a'; ctx.fillRect(0, 0, W, H);
+  ctx.save();
+  if (view.shake > 0) ctx.translate((Math.random() - 0.5) * 8, (Math.random() - 0.5) * 6);
+  ctx.fillStyle = '#02050a'; ctx.fillRect(-10, -10, W + 20, H + 20);
 
   if (pw[0] > 0.05) {
     const g = ctx.createRadialGradient(W * .28, H * .35, 0, W * .28, H * .35, W * .6);
     g.addColorStop(0, `rgba(48,78,120,${0.22 * pw[0]})`); g.addColorStop(1, 'rgba(0,0,0,0)');
     ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
   }
-  // stars
   const speed = pw[2] * (0.35 + S.cadence * 3.2);
   for (const s of view.stars) {
     s.x -= s.z * speed;
@@ -558,24 +720,25 @@ function drawView(now, pw) {
   }
   ctx.globalAlpha = 1;
 
-  // navigation: planet + course
   if (pw[4] > 0.01) {
     const px = W * .7, py = H * .45, r = Math.min(W, H) * .22;
-    ctx.globalAlpha = pw[4];
+    ctx.globalAlpha = pw[4] * (S.phase === 'combat' ? 0.45 : 1);
     const g = ctx.createRadialGradient(px - r * .4, py - r * .4, r * .1, px, py, r);
     g.addColorStop(0, '#8fdcc8'); g.addColorStop(.55, '#2b6e78'); g.addColorStop(1, '#081620');
     ctx.fillStyle = g; ctx.beginPath(); ctx.arc(px, py, r, 0, Math.PI * 2); ctx.fill();
     ctx.strokeStyle = 'rgba(190,235,225,.45)'; ctx.lineWidth = 1.5;
     ctx.beginPath(); ctx.ellipse(px, py, r * 1.6, r * .32, -.28, 0, Math.PI * 2); ctx.stroke();
-    ctx.setLineDash([5, 7]); ctx.strokeStyle = 'rgba(111,240,168,.75)';
-    ctx.beginPath(); ctx.moveTo(W * .5, H * .92); ctx.quadraticCurveTo(W * .52, H * .5, px - r * 1.15, py + r * .2); ctx.stroke();
-    ctx.setLineDash([]); ctx.globalAlpha = 1;
+    if (S.phase !== 'combat') {
+      ctx.setLineDash([5, 7]); ctx.strokeStyle = 'rgba(111,240,168,.75)';
+      ctx.beginPath(); ctx.moveTo(W * .5, H * .92); ctx.quadraticCurveTo(W * .52, H * .5, px - r * 1.15, py + r * .2); ctx.stroke();
+      ctx.setLineDash([]);
+    }
+    ctx.globalAlpha = 1;
   }
 
-  // sensors: radar with an unknown contact
   if (pw[3] > 0.01) {
     const rx = W * .13, ry = H * .66, r = Math.min(W, H) * .15;
-    ctx.globalAlpha = pw[3];
+    ctx.globalAlpha = pw[3] * (S.phase === 'combat' ? 0.4 : 1);
     ctx.strokeStyle = 'rgba(111,240,168,.45)'; ctx.lineWidth = 1;
     for (const k of [1, .66, .33]) { ctx.beginPath(); ctx.arc(rx, ry, r * k, 0, Math.PI * 2); ctx.stroke(); }
     const a = now * 0.0025;
@@ -584,42 +747,71 @@ function drawView(now, pw) {
       ctx.beginPath(); ctx.moveTo(rx, ry); ctx.lineTo(rx + Math.cos(a - i * .03) * r, ry + Math.sin(a - i * .03) * r); ctx.stroke();
     }
     if (pw[3] > 0.98) {
-      const bx = rx + Math.cos(-.7) * r * .7, by = ry + Math.sin(-.7) * r * .7;
-      ctx.fillStyle = `rgba(255,90,82,${0.5 + 0.5 * Math.sin(now * .008)})`;
-      ctx.beginPath(); ctx.arc(bx, by, 3.5, 0, Math.PI * 2); ctx.fill();
+      const blips = S.lvl >= ACTS[1].from ? [[-.7, .7], [-.4, .5], [-.95, .8]] : [[-.7, .7]];
+      blips.forEach(([ang, d]) => {
+        ctx.fillStyle = `rgba(255,90,82,${0.5 + 0.5 * Math.sin(now * .008 + ang * 5)})`;
+        ctx.beginPath(); ctx.arc(rx + Math.cos(ang) * r * d, ry + Math.sin(ang) * r * d, 3.5, 0, Math.PI * 2); ctx.fill();
+      });
     }
     ctx.globalAlpha = 1;
+  }
+
+  /* ---- combat layer ---- */
+  if (S.phase === 'combat' || C.booms.length || C.lasers.length) {
+    if (S.phase === 'combat') {
+      ctx.setLineDash([4, 6]); ctx.strokeStyle = 'rgba(255,90,82,.55)'; ctx.lineWidth = 1.5;
+      ctx.beginPath(); ctx.moveTo(perimeterX(), H * .14); ctx.lineTo(perimeterX(), H * .88); ctx.stroke(); ctx.setLineDash([]);
+    }
+    C.ships.forEach((s, i) => drawRaider(ctx, s, now, i === 0));
+    const cn = cannon();
+    C.lasers = C.lasers.filter(l => now - l.t < 140);
+    C.lasers.forEach(l => {
+      const a = 1 - (now - l.t) / 140;
+      ctx.strokeStyle = `rgba(111,240,168,${a})`; ctx.lineWidth = 2.5; ctx.shadowColor = '#6ff0a8'; ctx.shadowBlur = 10;
+      ctx.beginPath(); ctx.moveTo(cn.x + l.off, cn.y); ctx.lineTo(l.x, l.y); ctx.stroke(); ctx.shadowBlur = 0;
+    });
+    C.booms = C.booms.filter(b => now - b.t < 600);
+    C.booms.forEach(b => {
+      const k = (now - b.t) / 600;
+      ctx.strokeStyle = b.bad ? `rgba(255,90,82,${1 - k})` : `rgba(255,181,71,${1 - k})`; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.arc(b.x, b.y, 6 + k * 46, 0, Math.PI * 2); ctx.stroke();
+      ctx.fillStyle = `rgba(255,240,200,${(1 - k) * 0.8})`;
+      for (let i = 0; i < 8; i++) { const an = i / 8 * Math.PI * 2 + b.r; ctx.fillRect(b.x + Math.cos(an) * k * 40, b.y + Math.sin(an) * k * 40, 3, 3); }
+    });
   }
 
   // cockpit frame
   const win = [[W * .045, H * .13], [W * .955, H * .13], [W * .985, H * .88], [W * .015, H * .88]];
   ctx.fillStyle = '#0b1015';
-  ctx.beginPath(); ctx.rect(0, 0, W, H);
+  ctx.beginPath(); ctx.rect(-10, -10, W + 20, H + 20);
   ctx.moveTo(...win[0]); win.slice(1).forEach(p => ctx.lineTo(...p)); ctx.closePath();
   ctx.fill('evenodd');
   ctx.strokeStyle = '#1f2a35'; ctx.lineWidth = 2;
   ctx.beginPath(); ctx.moveTo(...win[0]); win.slice(1).forEach(p => ctx.lineTo(...p)); ctx.closePath(); ctx.stroke();
-  ctx.fillStyle = '#0b1015'; ctx.fillRect(W / 2 - 3, 0, 6, H * .13 + 6);
+  ctx.fillStyle = '#0b1015'; ctx.fillRect(W / 2 - 3, -10, 6, H * .13 + 16);
+  if (S.lvl >= ACTS[1].from) {   // cannon housing on the sill
+    const cn = cannon();
+    ctx.fillStyle = '#18222c'; ctx.fillRect(cn.x - 26, cn.y - 4, 52, 12);
+    ctx.fillStyle = S.phase === 'combat' ? '#6ff0a8' : '#34414c'; ctx.fillRect(cn.x - 5, cn.y - 10, 10, 8);
+  }
 
-  // life support: sill lights
   const n = 20;
   for (let i = 0; i < n; i++) {
     const x = W * .07 + i * (W * .86 / (n - 1)), y = H * .94;
     const lit = (i + 1) / n <= pw[1] + 0.001;
-    ctx.fillStyle = lit ? (i % 4 === 0 ? '#ffb547' : '#6ff0a8') : '#18212a';
+    const alarm = hostile() || S.phase === 'combat';
+    ctx.fillStyle = lit ? (alarm && Math.floor(now / 400) % 2 ? '#ff5a52' : (i % 4 === 0 ? '#ffb547' : '#6ff0a8')) : '#18212a';
     ctx.shadowColor = ctx.fillStyle; ctx.shadowBlur = lit ? 8 : 0;
     ctx.fillRect(x - 4, y - 1.5, 8, 3);
   }
   ctx.shadowBlur = 0;
 
-  // darkness until the reactor is up
   const dark = 0.8 * (1 - pw[0]);
   if (dark > 0.01) {
     ctx.fillStyle = `rgba(0,0,0,${Math.max(0, dark - (Math.random() < 0.05 ? 0.2 : 0))})`;
-    ctx.fillRect(0, 0, W, H);
+    ctx.fillRect(-10, -10, W + 20, H + 20);
   }
 
-  // HUD (dim until powered)
   const names = ['PWR', 'O2', 'THR', 'SNS', 'NAV'];
   ctx.font = '600 11px "IBM Plex Mono", monospace'; ctx.textBaseline = 'top';
   let hx = W * .06;
@@ -630,16 +822,22 @@ function drawView(now, pw) {
     ctx.fillText(txt, hx, H * .16);
     hx += ctx.measureText(txt).width + 16;
   });
+  if (S.phase === 'combat') {
+    const pips = '⬢'.repeat(C.shields) + '⬡'.repeat(3 - C.shields);
+    ctx.fillStyle = C.shields > 1 ? 'rgba(111,240,168,.95)' : 'rgba(255,90,82,.95)';
+    ctx.textAlign = 'right'; ctx.fillText(`SHIELDS ${pips}`, W * .94, H * .16); ctx.textAlign = 'left';
+  }
 
-  if (S.finale) {
-    ctx.fillStyle = `rgba(255,60,60,${0.1 + 0.08 * Math.sin(now * .006)})`; ctx.fillRect(0, 0, W, H);
+  if (hostile()) {
+    ctx.fillStyle = `rgba(255,60,60,${0.08 + 0.06 * Math.sin(now * .006)})`; ctx.fillRect(-10, -10, W + 20, H + 20);
     ctx.fillStyle = 'rgba(255,90,82,.95)'; ctx.font = '600 12px "IBM Plex Mono", monospace';
     if (Math.floor(now / 500) % 2) ctx.fillText('◤ INCOMING SIGNAL ◢', W * .06, H * .8);
   }
+  ctx.restore();
 }
 
 /* ======================================================================
-   RENDERING (DOM)
+   DOM RENDERING
    ====================================================================== */
 function buildKeyboard() {
   const kb = $('#kb'); kb.innerHTML = '';
@@ -648,8 +846,7 @@ function buildKeyboard() {
     row.forEach(([code, finger, u, en, uk, label]) => {
       const k = document.createElement('div');
       k.id = 'k-' + code;
-      k.className = 'key' + (code.startsWith('_') ? ' gap' : '') + (label && code !== 'Space' ? ' mod' : '') + (BUMPS.has(code) ? ' bump' : '');
-      if (code === 'Space') k.classList.add('mod');
+      k.className = 'key' + (code.startsWith('_') ? ' gap' : '') + (label ? ' mod' : '') + (BUMPS.has(code) ? ' bump' : '');
       k.style.setProperty('--u', u);
       k.style.setProperty('--fc', FINGER_COLOR[finger]);
       r.appendChild(k);
@@ -658,7 +855,7 @@ function buildKeyboard() {
   });
   const fg = $('#fingers'); fg.innerHTML = '';
   ['lp','lr','lm','li','th','ri','rm','rr','rp'].forEach(f => {
-    const p = document.createElement('span'); p.className = 'fp' + (f === 'li' ? ' split' : '') + (f === 'th' ? ' split' : '');
+    const p = document.createElement('span'); p.className = 'fp' + (f === 'li' || f === 'th' ? ' split' : '');
     p.dataset.f = f; p.style.setProperty('--fc', FINGER_COLOR[f]);
     fg.appendChild(p);
   });
@@ -682,73 +879,106 @@ function renderKeyboard() {
   });
 }
 
+function charsHtml(text, typedUpTo) {
+  return [...text].map((c, i) => {
+    const cls = ['c', i < typedUpTo ? 'ok' : (i === typedUpTo ? 'cur' : ''), c === ' ' ? 'sp' : ''].join(' ');
+    return `<span class="${cls}">${c === ' ' ? '␣' : esc(c)}</span>`;
+  }).join('');
+}
+function footHtml() {
+  const code = expectedCode();
+  const finger = code ? FINGER_NAME[S.lang][KEY[code].finger] : '';
+  return `<div class="term-foot"><span class="finger">${code ? `${esc(t('next'))}: <b>${esc(keyLabel(code))}</b> · ${esc(finger)}` : ''}</span><span class="msg">${esc(S.msg)}</span></div>`;
+}
+const cont = (label) => `<div class="waiting"><kbd>${esc(t('spaceKey'))}</kbd> ${esc(label || t('cont'))}</div>`;
+
 function renderTerminal() {
   const el = $('#terminal');
-  const lv = L(), lt = LT();
+  const lv = L();
 
-  if (S.finale && S.phase === 'finale') {
-    el.innerHTML = `<div class="done enc">
-      <span class="label">${esc(t('incoming'))}</span>
-      <h3>${esc(t('encrypted'))}</h3>
-      <div class="waiting">${esc(t('decOff'))}</div>
-      <div class="label" style="color:var(--phos)">${esc(t('act2'))}</div>
-      <div class="actions"><button class="btn" id="bReplay">${esc(t('replay'))}</button><button class="btn" id="bReset">${esc(t('reset'))}</button></div>
-    </div>`;
-    $('#bReplay').onclick = () => startLevel(0);
-    $('#bReset').onclick = () => { S.done = { en: [0,0,0,0,0], uk: [0,0,0,0,0] }; save(); startLevel(0); };
+  if (S.phase === 'ending' && S.ending === 1) {
+    el.innerHTML = `<div class="done enc"><h3>${esc(t('encrypted'))}</h3><div class="waiting">${esc(t('decOff'))}</div>${cont(t('startAct2'))}</div>`;
     return;
   }
-  if (S.finale) {
-    el.innerHTML = `<div class="term-head"><span class="label kind">${esc(t('encrypted'))}</span></div>
-      <div class="waiting"><kbd>${esc(t('spaceKey'))}</kbd> ${esc(t('cont'))}</div>`;
+  if (S.phase === 'ending' && S.ending === 2) {
+    el.innerHTML = `<div class="done"><h3>${esc(t('act2done'))}</h3><div class="label" style="color:var(--phos)">${esc(t('act3'))}</div>
+      <div class="actions"><button class="btn" id="bReplay">${esc(t('replay'))}</button><button class="btn" id="bReset">${esc(t('reset'))}</button></div></div>`;
+    $('#bReplay').onclick = (e) => { e.currentTarget.blur(); startLevel(ACTS[1].from); };
+    $('#bReset').onclick = (e) => { e.currentTarget.blur(); S.done = { en: blank(), uk: blank() }; save(); startLevel(0); };
     return;
   }
+  if (S.ending) { el.innerHTML = cont(); return; }
 
   if (S.levelDone) {
     const stars = [0, 1, 2].map(i => i < S.lastStars ? '★' : '☆').join('');
+    const word = lv.type === 'encounter' ? t('cleared') : t('online');
     el.innerHTML = `<div class="done">
-      <h3>${esc(lv.sys[S.lang].toUpperCase())} ${esc(t('online'))}</h3>
+      <h3>${esc(lv.sys[S.lang].toUpperCase())} · ${esc(word)}</h3>
       <div class="row"><span class="stars">${stars}</span><span class="label">${esc(t('acc'))}<b>${S.lastAcc}%</b></span><span class="label">${esc(t('wpm'))}<b>${S.lastWpm}</b></span></div>
-      <div class="waiting"><kbd>${esc(t('spaceKey'))}</kbd> ${esc(S.phase === 'complete' ? t('nextSys') : t('cont'))}</div>
+      ${cont(S.phase === 'complete' ? t('nextSys') : t('cont'))}
     </div>`;
     return;
   }
 
-  if (S.phase === 'dialogue') {
-    el.innerHTML = `<div class="term-head"><span class="label kind">${esc(t('incoming'))}</span><span class="label">${esc(lv.sys[S.lang])}</span></div>
-      <div class="waiting"><kbd>${esc(t('spaceKey'))}</kbd> ${esc(t('cont'))}</div>`;
+  if (S.phase === 'dialogue') { el.innerHTML = cont(); return; }
+
+  if (S.phase === 'drill') {
+    const line = curLine();
+    const kindLabel = line.kind === 'locate' ? t('locate') : (line.kind === 'code' ? lv.codeLabel[S.lang] : (lv.type === 'encounter' ? t('warm') : t('boot')));
+    const curCode = codeOf(line.text[S.ch]);
+    const curColor = curCode ? FINGER_COLOR[KEY[curCode].finger] : 'var(--phos)';
+    el.innerHTML = `
+      <div class="term-head"><span class="label kind">${esc(kindLabel)}</span><span class="label">${esc(lv.sys[S.lang])} · ${esc(t('step'))} ${S.lineIdx + 1}/${S.lines.length}</span></div>
+      <div class="progress"><i style="width:${(liveProgress() * 100).toFixed(1)}%"></i></div>
+      <div class="term-line" id="termLine" style="--cur:${curColor}"><span class="prompt">&gt;</span>${charsHtml(line.text, S.ch)}</div>
+      ${footHtml()}`;
     return;
   }
 
-  // drill
-  const line = curLine();
-  const kindLabel = line.kind === 'locate' ? t('locate') : (line.kind === 'code' ? lv.codeLabel[S.lang] : t('boot'));
-  const curCode = codeOf(line.text[S.ch]);
-  const curColor = curCode ? FINGER_COLOR[KEY[curCode].finger] : 'var(--phos)';
-  const chars = [...line.text].map((c, i) => {
-    const cls = ['c', i < S.ch ? 'ok' : (i === S.ch ? 'cur' : ''), c === ' ' ? 'sp' : ''].join(' ');
-    return `<span class="${cls}">${c === ' ' ? '␣' : esc(c)}</span>`;
-  }).join('');
-  const finger = curCode ? FINGER_NAME[S.lang][KEY[curCode].finger] : '';
-  el.innerHTML = `
-    <div class="term-head"><span class="label kind">${esc(kindLabel)}</span><span class="label">${esc(lv.sys[S.lang])} · ${esc(t('step'))} ${S.lineIdx + 1}/${S.lines.length}</span></div>
-    <div class="progress"><i style="width:${(liveProgress() * 100).toFixed(1)}%"></i></div>
-    <div class="term-line" id="termLine" style="--cur:${curColor}"><span class="prompt">&gt;</span>${chars}</div>
-    <div class="term-foot"><span class="finger">${esc(t('next'))}: <b>${esc(keyLabel(curCode || ''))}</b> · ${esc(finger)}</span><span class="msg">${esc(S.msg)}</span></div>`;
+  if (S.phase === 'decrypt') {
+    const d = S.dec, k = d.keys[d.ki];
+    const sig = Math.max(0, d.left / d.total);
+    const curCode = k ? codeOf(k.k[d.ch]) : null;
+    const curColor = curCode ? FINGER_COLOR[KEY[curCode].finger] : 'var(--alert)';
+    el.innerHTML = `
+      <div class="term-head"><span class="label kind">${esc(t('decrypting'))} · ${esc(t('key'))} ${Math.min(d.ki + 1, d.keys.length)}/${d.keys.length}</span><span class="label">${esc(t('signal'))} ${Math.round(sig * 100)}%</span></div>
+      <div class="sig ${sig < 0.3 ? 'low' : ''}" id="sigBar"><i style="width:${(sig * 100).toFixed(1)}%"></i></div>
+      <div class="term-line" id="termLine" style="--cur:${curColor}"><span class="prompt">&gt;</span>${k ? charsHtml(k.k, d.ch) : ''}</div>
+      ${footHtml()}`;
+    return;
+  }
+
+  if (S.phase === 'combat') {
+    const lead = C.ships[0];
+    const remaining = C.queue.length + C.ships.length;
+    const pips = `<span class="pips">${'⬢'.repeat(C.shields)}<span class="off">${'⬡'.repeat(3 - C.shields)}</span></span>`;
+    const curCode = lead ? codeOf(lead.word[C.typed]) : null;
+    const curColor = curCode ? FINGER_COLOR[KEY[curCode].finger] : 'var(--live)';
+    el.innerHTML = `
+      <div class="term-head"><span class="label kind">${esc(t('target'))}</span><span class="label">${esc(t('shields'))} ${pips} · ${remaining} ${esc(t('left'))}</span></div>
+      <div class="progress"><i style="width:${((1 - remaining / C.total) * 100).toFixed(1)}%"></i></div>
+      <div class="term-line" id="termLine" style="--cur:${curColor}"><span class="prompt">&gt;</span>${lead ? charsHtml(lead.word, C.typed) : `<span class="c">${esc(t('incomingShips'))}</span>`}</div>
+      ${footHtml()}`;
+  }
 }
 
 function renderSystems() {
   const el = $('#systems');
-  el.innerHTML = `<span class="tag">${esc(t('systems'))}</span>` + LEVELS.map((lv, i) => {
+  const a = ACTS[actOf(S.lvl)];
+  let html = `<span class="tag">${esc(actOf(S.lvl) ? t('sectors') : t('systems'))}</span>`;
+  for (let i = a.from; i <= a.to; i++) {
+    const lv = LEVELS[i];
     const stars = S.done[S.lang][i];
-    const current = i === S.lvl && !S.finale;
-    let cls = 'offline', st = t('offline');
+    const current = i === S.lvl && !S.ending;
+    let cls = 'offline', st = '—';
     if (stars) { cls = 'online'; st = '★★★'.slice(0, stars) + '☆☆☆'.slice(0, 3 - stars); }
-    else if (current && S.phase !== 'dialogue') { cls = 'booting'; st = Math.round(liveProgress() * 100) + '%'; }
+    else if (current && S.phase === 'drill') { cls = 'booting'; st = Math.round(liveProgress() * 100) + '%'; }
+    else if (current && (S.phase === 'decrypt' || S.phase === 'combat')) { cls = 'booting'; st = '!!'; }
     const keys = lv.newKeys.map(keyLabel).join(' ');
-    return `<button class="sys ${cls} ${current ? 'current' : ''}" data-i="${i}"><span class="led"></span><span class="nm">${esc(lv.sys[S.lang])}</span><span class="keys">${esc(keys)}</span><span class="st">${esc(st)}</span></button>`;
-  }).join('');
-  el.querySelectorAll('.sys').forEach(b => b.onclick = () => { initAudio(); startLevel(+b.dataset.i); b.blur(); });
+    html += `<button class="sys ${cls} ${current ? 'current' : ''}" data-i="${i}"><span class="led"></span><span class="nm">${esc(lv.sys[S.lang])}</span><span class="keys">${esc(keys)}</span><span class="st">${esc(st)}</span></button>`;
+  }
+  el.innerHTML = html;
+  el.querySelectorAll('.sys').forEach(b => b.onclick = () => { initAudio(); b.blur(); startLevel(+b.dataset.i); });
 }
 
 function renderStats() {
@@ -760,17 +990,22 @@ function renderStats() {
 }
 
 function renderChrome() {
-  $('#actLabel').textContent = t('act');
+  const a = actOf(S.lvl);
+  $('#actLabel').textContent = t('acts')[a];
+  $('#act1').classList.toggle('on', a === 0);
+  $('#act2').classList.toggle('on', a === 1);
   $('#deckLabel').textContent = t('deck');
   $('#deckHint').textContent = t('tabHint');
   $('#soundBtn').textContent = t('sound')[S.sound ? 0 : 1];
   $('#langEN').classList.toggle('on', S.lang === 'en');
   $('#langUK').classList.toggle('on', S.lang === 'uk');
   document.documentElement.lang = S.lang === 'uk' ? 'uk' : 'en';
+  const A = ACTS[a], leds = $('#leds');
+  leds.innerHTML = '';
+  for (let i = A.from; i <= A.to; i++) { const d = document.createElement('i'); if (S.done[S.lang][i]) d.className = 'on'; leds.appendChild(d); }
 }
 
-function renderLeds() { const d = S.done[S.lang]; document.querySelectorAll('#leds i').forEach((l, i) => l.classList.toggle('on', !!d[i] || S.finale)); }
-function renderAll() { renderLeds(); renderChrome(); renderTerminal(); renderSystems(); renderKeyboard(); renderStats(); renderCrtText(); }
+function renderAll() { renderChrome(); renderTerminal(); renderSystems(); renderKeyboard(); renderStats(); renderCrtText(); }
 
 /* ======================================================================
    FLOW
@@ -778,14 +1013,17 @@ function renderAll() { renderLeds(); renderChrome(); renderTerminal(); renderSys
 function buildLines(lv) {
   const lt = lv[S.lang], out = [];
   lv.newKeys.forEach(code => out.push({ kind: 'locate', text: charOf(code).repeat(3), code }));
-  lt.drills.forEach(text => out.push({ kind: 'boot', text }));
-  out.push({ kind: 'code', text: lt.code });
+  lt.drills.forEach(text => out.push({ kind: 'drill', text }));
+  if (lv.type === 'boot') out.push({ kind: 'code', text: lt.code });
   return out;
 }
 
+function resetCombat() { C.ships = []; C.queue = []; C.lasers = []; C.booms = []; C.typed = 0; C.shields = 3; }
+
 function startLevel(i) {
   clearInterval(S.typer);
-  S.lvl = i; S.finale = false; S.crtMode = 'ora'; S.levelDone = false;
+  S.lvl = i; S.ending = 0; S.levelDone = false; S.dec = null; S.speaker = 'ora';
+  resetCombat();
   S.lines = buildLines(L()); S.lineIdx = 0; S.ch = 0; S.msg = '';
   S.correct = 0; S.total = 0; S.startT = null;
   say(LT().intro, beginDrill);
@@ -804,13 +1042,80 @@ function beginDrill() {
 
 function lineRemark() {
   const line = curLine(); if (!line) return;
-  if (line.kind === 'locate') {
-    const code = line.code;
-    remark(`${t('find')} ${keyLabel(code)}. ${FINGER_NAME[S.lang][KEY[code].finger]}.`);
-  } else if (line.kind === 'code') remark(t('lastOne'));
+  if (line.kind === 'locate') remark(`${t('find')} ${keyLabel(line.code)}. ${FINGER_NAME[S.lang][KEY[line.code].finger]}.`);
+  else if (line.kind === 'code') remark(t('lastOne'));
   else if (S.lineIdx === 0 || S.lines[S.lineIdx - 1].kind === 'locate') remark(LT().tip);
 }
 
+function drillFinished() {
+  if (L().type === 'boot') completeLevel();
+  else startDecrypt();
+}
+
+/* ---------- Decrypt ---------- */
+function parseMsg(s) {
+  const segs = [];
+  s.split(/(\[[^\]]+\])/).forEach(p => {
+    if (!p) return;
+    if (p[0] === '[') { const w = p.slice(1, -1); segs.push({ key: true, s: w, k: w.toLowerCase(), open: false }); }
+    else segs.push({ key: false, s: p });
+  });
+  return segs;
+}
+function startDecrypt() {
+  clearInterval(S.typer); S.speaking = false; S.blocking = false;
+  const segs = parseMsg(LT().msg);
+  const keys = segs.filter(x => x.key);
+  const chars = keys.reduce((a, k) => a + k.k.length, 0);
+  const factor = [1, 0.92, 0.85, 0.78][S.lvl - ACTS[1].from] || 0.78;
+  const total = (chars * 1150 + keys.length * 1500 + 6000) * factor;
+  S.dec = { segs, keys, ki: 0, ch: 0, total, left: total };
+  S.speaker = 'unknown'; S.phase = 'decrypt'; S.msg = '';
+  sfx.glitch();
+  renderAll();
+}
+function decryptDone() {
+  const plain = S.dec.segs.map(sg => sg.s).join('');
+  S.dec = null;
+  sfx.online();
+  say([{ who: 'vex', text: plain }, LT().after], startCombat);
+}
+function signalLost() {
+  S.dec = null; sfx.glitch();
+  say([t('signalLost')], startDecrypt);
+}
+
+/* ---------- Combat ---------- */
+function startCombat() {
+  resetCombat();
+  C.queue = [...LT().wave]; C.total = C.queue.length; C.last = -1e9;
+  S.speaker = 'ora'; S.phase = 'combat'; S.msg = '';
+  renderAll();
+}
+function combatTick(now, dt) {
+  const lv = L(), W = view.w, H = view.h;
+  if (C.queue.length && C.ships.length < 3 && now - C.last > lv.gap) {
+    C.last = now;
+    C.ships.push({ word: C.queue.shift(), x: W + 30, y: H * (0.3 + Math.random() * 0.42), vx: (W * 0.85) / lv.cross, hit: 0, phase: Math.random() * 6 });
+    renderTerminal(); renderKeyboard();
+  }
+  C.ships.forEach(s => { s.x -= s.vx * dt; if (s.hit > 0) s.hit -= dt; });
+  const lead = C.ships[0];
+  if (lead && lead.x < perimeterX()) {
+    C.ships.shift(); C.typed = 0; C.shields--;
+    C.booms.push({ x: lead.x, y: lead.y, t: now, r: Math.random(), bad: true });
+    view.shake = 350; sfx.breach(); flashPlate();
+    if (C.shields <= 0) { S.phase = 'dialogue'; say([t('breach')], startCombat); return; }
+    renderTerminal(); renderKeyboard();
+  }
+  if (!C.queue.length && !C.ships.length && S.phase === 'combat') completeLevel();
+}
+function flashPlate() {
+  const v = $('.viewport'); v.style.boxShadow = '0 0 0 2px var(--alert), 0 0 30px rgba(255,90,82,.5)';
+  setTimeout(() => { v.style.boxShadow = ''; }, 300);
+}
+
+/* ---------- Level end / endings ---------- */
 function completeLevel() {
   const { wpm, acc } = renderStats();
   const stars = acc >= 97 ? 3 : acc >= 90 ? 2 : 1;
@@ -819,23 +1124,32 @@ function completeLevel() {
   save();
   S.levelDone = true;
   sfx.online();
-  say([LT().outro], () => { S.phase = 'complete'; renderAll(); });
+  const lt = LT();
+  const lines = L().type === 'encounter' ? [{ who: 'vex', text: lt.retreat }, lt.outro] : [lt.outro];
+  say(lines, () => { S.phase = 'complete'; S.speaker = 'ora'; renderAll(); });
 }
 
 function nextLevel() {
-  if (S.lvl < LEVELS.length - 1) startLevel(S.lvl + 1);
-  else startFinale();
+  if (S.lvl === ACTS[0].to) startEnding(1);
+  else if (S.lvl === ACTS[1].to) startEnding(2);
+  else startLevel(S.lvl + 1);
 }
 
-function startFinale() {
+function startEnding(n) {
   clearInterval(S.typer);
-  S.finale = true; S.levelDone = false; S.crtMode = 'enemy';
-  sfx.glitch();
-  say(FINALE[S.lang], () => { S.phase = 'finale'; renderAll(); });
+  S.ending = n; S.levelDone = false;
+  if (n === 1) {
+    sfx.glitch();
+    say(ACT1_END[S.lang].map(text => ({ who: 'unknown', text })), () => { S.phase = 'ending'; renderAll(); });
+  } else {
+    S.phase = 'ending'; S.speaker = 'ora'; renderAll();
+  }
 }
 
 /* ---------- Input ---------- */
 const MODS = ['ShiftLeft','ShiftRight','ControlLeft','ControlRight','AltLeft','AltRight','MetaLeft','MetaRight','CapsLock'];
+function shakeLine() { const tl = $('#termLine'); if (tl) { tl.classList.remove('shake'); void tl.offsetWidth; tl.classList.add('shake'); } }
+
 window.addEventListener('keydown', (e) => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;
   initAudio();
@@ -847,33 +1161,62 @@ window.addEventListener('keydown', (e) => {
     if (S.phase === 'drill') { S.ch = 0; S.msg = ''; renderTerminal(); renderKeyboard(); }
     return;
   }
-  if (S.phase === 'dialogue' || S.phase === 'complete') {
-    if (e.key === 'Enter' || e.code === 'Space') {
+  if (S.phase === 'dialogue' || S.phase === 'complete' || S.phase === 'ending') {
+    if (e.code === 'Space' || e.key === 'Enter') {
       e.preventDefault();
       if (e.repeat) return;
-      if (S.phase === 'dialogue') advanceDialogue(); else nextLevel();
+      if (S.phase === 'dialogue') advanceDialogue();
+      else if (S.phase === 'complete') nextLevel();
+      else if (S.ending === 1) startLevel(ACTS[1].from);
     }
     return;
   }
-  if (S.phase !== 'drill' || MODS.includes(e.code) || e.repeat) return;
+  if (MODS.includes(e.code) || e.repeat) return;
   if (KEY[e.code] || e.code === 'Space') e.preventDefault();
 
-  const line = curLine(); const expected = line.text[S.ch];
-  const mapped = charOf(e.code);                        // auto-map: physical key → layout char
+  const expected = expectedChar();
+  if (expected == null) return;
+  if (S.phase === 'combat' && e.code === 'Space') return;   // habit-space between words is harmless in combat
+
+  const mapped = charOf(e.code);
   const ok = mapped === expected || (e.key && e.key.toLowerCase() === expected);
   if (!S.startT) S.startT = performance.now();
   S.total++;
 
   if (ok) {
-    S.correct++; S.ch++; S.msg = '';
+    S.correct++; S.msg = '';
     const now = performance.now(), dt = now - S.lastKey; S.lastKey = now;
     const inst = dt < 1500 ? Math.min(1.6, (1000 / dt) / 4) : 0.15;
     S.cadence = S.cadence * 0.65 + inst * 0.35;
-    sfx.key();
-    if (S.ch >= line.text.length) {
-      S.lineIdx++; S.ch = 0;
-      if (S.lineIdx >= S.lines.length) { S.lineIdx = S.lines.length - 1; S.ch = line.text.length; completeLevel(); return; }
-      lineRemark();
+
+    if (S.phase === 'drill') {
+      sfx.key();
+      const line = curLine();
+      S.ch++;
+      if (S.ch >= line.text.length) {
+        S.lineIdx++; S.ch = 0;
+        if (S.lineIdx >= S.lines.length) { S.lineIdx = S.lines.length - 1; S.ch = line.text.length; drillFinished(); return; }
+        lineRemark();
+      }
+    } else if (S.phase === 'decrypt') {
+      sfx.key();
+      const d = S.dec, k = d.keys[d.ki];
+      d.ch++;
+      if (d.ch >= k.k.length) {
+        k.open = true; d.ki++; d.ch = 0; sfx.reveal();
+        if (d.ki >= d.keys.length) { decryptDone(); return; }
+      }
+      renderCrtText();
+    } else if (S.phase === 'combat') {
+      sfx.laser();
+      const s = C.ships[0];
+      C.typed++; s.hit = 90;
+      C.lasers.push({ x: s.x, y: s.y, t: now, off: (C.typed % 2 ? -8 : 8) });
+      if (C.typed >= s.word.length) {
+        C.ships.shift(); C.typed = 0;
+        C.booms.push({ x: s.x, y: s.y, t: now, r: Math.random() });
+        sfx.boom();
+      }
     }
   } else {
     sfx.err();
@@ -883,19 +1226,21 @@ window.addEventListener('keydown', (e) => {
     if (kEl) { kEl.classList.add('wrong'); setTimeout(() => kEl.classList.remove('wrong'), 220); }
   }
   renderTerminal(); renderKeyboard(); renderSystems(); renderStats();
-  if (!ok) { const tl = $('#termLine'); if (tl) { tl.classList.remove('shake'); void tl.offsetWidth; tl.classList.add('shake'); } }
+  if (!ok) shakeLine();
 });
 window.addEventListener('keyup', (e) => {
   const el = document.getElementById('k-' + e.code); if (el) el.classList.remove('pressed');
 });
 
-$('#langEN').onclick = (e) => { e.currentTarget.blur(); if (S.lang !== 'en') { S.lang = 'en'; save(); startLevel(firstOpen()); } };
-$('#langUK').onclick = (e) => { e.currentTarget.blur(); if (S.lang !== 'uk') { S.lang = 'uk'; save(); startLevel(firstOpen()); } };
+function firstOpen(from = 0, to = N - 1) { for (let i = from; i <= to; i++) if (!S.done[S.lang][i]) return i; return from; }
+$('#langEN').onclick = (e) => { e.currentTarget.blur(); if (S.lang !== 'en') { S.lang = 'en'; save(); const a = ACTS[actOf(S.lvl)]; startLevel(firstOpen(a.from, a.to)); } };
+$('#langUK').onclick = (e) => { e.currentTarget.blur(); if (S.lang !== 'uk') { S.lang = 'uk'; save(); const a = ACTS[actOf(S.lvl)]; startLevel(firstOpen(a.from, a.to)); } };
+$('#act1').onclick = (e) => { e.currentTarget.blur(); initAudio(); startLevel(firstOpen(ACTS[0].from, ACTS[0].to)); };
+$('#act2').onclick = (e) => { e.currentTarget.blur(); initAudio(); startLevel(firstOpen(ACTS[1].from, ACTS[1].to)); };
 $('#soundBtn').onclick = (e) => {
   e.currentTarget.blur(); initAudio();
   S.sound = !S.sound; if (master) master.gain.value = S.sound ? 0.9 : 0; renderChrome();
 };
-function firstOpen() { const i = S.done[S.lang].findIndex(s => !s); return i < 0 ? 0 : i; }
 
 /* ---------- Canvas sizing + loop ---------- */
 function fit(obj, sel) {
@@ -908,8 +1253,24 @@ function resize() { fit(view, '#view'); fit(face, '#face'); initStars(); }
 window.addEventListener('resize', resize);
 if (window.ResizeObserver) { const ro = new ResizeObserver(() => resize()); ro.observe($('#view')); ro.observe($('#face')); }
 
+let lastNow = performance.now(), lastNoise = 0, lastSig = 0;
 function loop(now) {
+  const dt = Math.min(50, now - lastNow); lastNow = now;
   if (now - S.lastKey > 900) S.cadence *= 0.985;
+  if (view.shake > 0) view.shake -= dt;
+
+  if (S.phase === 'decrypt' && S.dec) {
+    S.dec.left -= dt;
+    if (now - lastNoise > 110) { lastNoise = now; renderCrtText(); }
+    if (now - lastSig > 200) {
+      lastSig = now;
+      const bar = $('#sigBar');
+      if (bar) { const sig = Math.max(0, S.dec.left / S.dec.total); bar.firstElementChild.style.width = (sig * 100).toFixed(1) + '%'; bar.classList.toggle('low', sig < 0.3); }
+    }
+    if (S.dec.left <= 0) signalLost();
+  }
+  if (S.phase === 'combat') combatTick(now, dt);
+
   const target = targetPowers();
   for (let i = 0; i < 5; i++) view.pw[i] += (target[i] - view.pw[i]) * 0.05;
   drawView(now, view.pw);
