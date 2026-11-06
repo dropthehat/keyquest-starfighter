@@ -210,12 +210,13 @@ kbd { font-family: var(--f-mono); border: 1px solid var(--seam); border-bottom-w
 .pips .off { color: var(--dim); }
 
 /* Cinematic intro */
-.cinema { position: fixed; inset: 0; z-index: 50; background: #000; display: grid; grid-template-rows: 10vh 1fr 10vh; transition: opacity .9s ease; }
+.cinema { position: fixed; inset: 0; z-index: 50; background: #000; transition: opacity .9s ease; overflow: hidden; }
 .cinema.gone { opacity: 0; pointer-events: none; }
-.cinema .bar { background: #000; }
-.cinema .stage { position: relative; display: grid; place-items: center; overflow: hidden; background: radial-gradient(ellipse at 50% 50%, #07111b 0%, #000 72%); }
+.cinema .bar { position: absolute; left: 0; right: 0; height: 48px; background: #000; z-index: 1; }
+.cinema .bar:first-child { top: 0; } .cinema .bar:last-child { bottom: 0; }
+.cinema .stage { position: absolute; inset: 0; overflow: hidden; background: radial-gradient(ellipse at 50% 30%, #07111b 0%, #000 60%); }
 .cinema #cineStars { position: absolute; inset: 0; width: 100%; height: 100%; }
-.cine-inner { position: relative; display: grid; justify-items: center; gap: 22px; max-width: 900px; text-align: center;
+.cine-inner { position: absolute; left: 0; right: 0; top: clamp(70px, calc(50vh - 250px), 170px); margin: 0 auto; display: grid; justify-items: center; gap: 22px; max-width: 900px; text-align: center;
   padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
 .cine-title { font-family: var(--f-crt); font-size: clamp(26px, 3.2vw, 40px); line-height: 1.12; letter-spacing: .02em; color: #7dffa8;
   text-shadow: 0 0 10px rgba(96,255,150,.55); width: min(84vw, 780px); min-height: 3.4em; text-align: left; }
@@ -231,7 +232,7 @@ kbd { font-family: var(--f-mono); border: 1px solid var(--seam); border-bottom-w
 .cine-name input { flex: 1; min-width: 0; font: inherit; color: #fff; background: transparent; border: 0; outline: none; padding: 0; caret-color: var(--phos);
   text-shadow: 0 0 10px rgba(255,255,255,.35); user-select: text; }
 .cine-hint { font-family: var(--f-display); font-size: 11px; letter-spacing: .2em; color: var(--muted); text-transform: uppercase; animation: blink 1.6s steps(1) infinite; }
-.cine-skip { position: absolute; top: 14px; right: max(16px, env(safe-area-inset-right, 0px)); }
+.cine-skip { position: absolute; z-index: 2; top: 60px; right: max(16px, env(safe-area-inset-right, 0px)); }
 </style>
 </head>
 <body>
