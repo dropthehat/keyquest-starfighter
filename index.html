@@ -175,7 +175,7 @@
 
     <!-- LEVEL SELECTION BAR -->
     <div class="flex flex-wrap items-center justify-between gap-2 bg-slate-900/60 border border-slate-800/80 rounded-xl p-2">
-      <div class="flex flex-wrap items-center gap-1" id="levelTabsContainer"></div>
+      <div class="relative flex flex-nowrap items-center gap-1 overflow-x-auto min-w-0 flex-1 pb-1" id="levelTabsContainer"></div>
       <div class="flex items-center gap-2.5 text-xs text-slate-400 px-1">
         <div class="hidden xl:flex items-center gap-2 text-[11px] bg-slate-950/80 px-2.5 py-1 rounded-lg border border-slate-800 font-mono">
           <span class="text-cyan-400">[Key]</span> Plasma
@@ -574,63 +574,89 @@
 
     const CURRICULUM = {
       en: [
-        L('en', 1, 'Index Cluster', 'F J R U', 'Core Index Cluster: F, J, R, U', 'keys',
+        // --- NEW BEGINNER LEVELS (EN 1-5) ---
+        L('en', 1, 'Home Anchors', 'F · J', 'Find the Bumps: F & J', 'keys',
+          'Feel the tactile bumps with your left and right index fingers. No spacebar yet—just alternate smoothly.',
+          'Each key fires twin plasma bolts at the lead invader!', 'Scout Drone',
+          ['fjfjfj', 'jfjfjf', 'ffjjffjj', 'fjfjjfjf']),
+
+        L('en', 2, 'Two-Finger Groove', 'D · F · J · K', 'Index & Middle: D, F, J, K', 'keys',
+          'Add your middle fingers on D (left) and K (right). Keep your palms steady.',
+          'Steady rhythm spins the vinyl turntable up to 33 RPM!', 'Wing Interceptor',
+          ['dfjkdfjk', 'fjdkfjdk', 'ddffjjkk', 'dkfjdkfj', 'fkdjkfdj']),
+
+        L('en', 3, 'First Spacebar', 'F · J · SPACE', 'Adding the Thumb: Spacebar Salvo', 'keys',
+          'Use either thumb to tap Space between pairs. Completing a group launches homing missiles!',
+          'Spacebar launches a 3-missile homing salvo!', 'Twin Corvettes',
+          ['fj fj fj', 'df jk df jk', 'fk dj fk dj', 'fjd kjf fjd']),
+
+        L('en', 4, 'Ring Finger Trio', 'S · D · F · J · K · L', 'Six Home Keys: Adding S & L', 'keys',
+          'Bring in your ring fingers on S (left) and L (right). Short 3-letter rhythms.',
+          'Destroy each alien ship by finishing its 3-letter code!', 'Shield Frigate',
+          ['sdf jkl sdf jkl', 'fds lkj fds lkj', 'sl dk fj sl dk', 'dfl kjs dfl kjs']),
+
+        L('en', 5, 'Full Home Row', 'A..F · J..;', 'Full Home Row: Adding Pinkies (A & ;)', 'keys',
+          'Anchor all 8 fingers on A-S-D-F and J-K-L-;. Gently reach G and H with your index fingers.',
+          'Full home row online! Real mini-words begin.', 'Home-Row Cruiser',
+          ['asdf jkl; asdf jkl;', 'ask dad; a sad lad', 'fall all; ask a lass', 'had hall; glad flask']),
+
+        L('en', 6, 'Index Cluster', 'F J R U', 'Core Index Cluster: F, J, R, U', 'keys',
           'Anchor index fingers on F and J bumps, reaching up to R and U. Completing each cluster fires a homing missile salvo!',
           'Each key fires plasma; [Space] launches a Word Salvo!', 'Scout Drones',
           ['fur jar far', 'juf ruf fur', 'far jar fur ruf', 'jur far fur jar']),
-        L('en', 2, 'Vowel Cluster', 'E I D K', 'Middle Fingers & Vowels: D, K, E, I', 'keys',
+        L('en', 7, 'Vowel Cluster', 'E I D K', 'Middle Fingers & Vowels: D, K, E, I', 'keys',
           'Add your middle fingers (D and K) and reach up for vowels E and I to form real high-speed words.',
           'Build rhythm across 4-letter clusters!', 'Interceptor Wing',
           ['fire ride kid', 'red deerire', 'dire fire ride', 'kierired kid fire']),
-        L('en', 3, 'Ring Flow', 'S L W O', 'Outer Ring Cluster: S, L, W, O', 'keys',
+        L('en', 8, 'Ring Flow', 'S L W O', 'Outer Ring Cluster: S, L, W, O', 'keys',
           'Ring fingers control S/W on the left and L/O on the right. Flow smoothly from outside in.',
           'Steady cadence spins the vinyl synth up to 33 RPM!', 'Corvette Fleet',
           ['slow word rose', 'fold low sour', 'world sword lord', 'flow slow rose fold']),
-        L('en', 4, 'Home & Pinky', 'A ; P Q', 'Outer Edges & Pinky Power: A, ;, P, Q', 'keys',
+        L('en', 9, 'Home & Pinky', 'A ; P Q', 'Outer Edges & Pinky Power: A, ;, P, Q', 'keys',
           'Strengthen your pinkies with A, ;, P, and Q integrated into crisp word patterns.',
           'Full home & top row clusters online!', 'Shield Cruiser',
           ['spark quad flask', 'dark park lark;', 'plaza spark flask;', 'equal spark dark;']),
-        L('en', 5, 'Center Stretch', 'G H T Y', 'Central Index Stretch: G, H, T, Y', 'text',
+        L('en', 10, 'Center Stretch', 'G H T Y', 'Central Index Stretch: G, H, T, Y', 'text',
           'Reach inward with your index fingers for G, H, T, and Y, then snap right back to F and J.',
           'Transitioning to full squadron text radar!', 'Heavy Frigate',
           ['light right sight', 'truth thirty flight', 'bright night might', 'they fight the sky']),
-        L('en', 6, 'Bottom Sweep', 'C V M N', 'Bottom Row Sweeps: C, V, M, N', 'text',
+        L('en', 11, 'Bottom Sweep', 'C V M N', 'Bottom Row Sweeps: C, V, M, N', 'text',
           'Curl your index and middle fingers down to C, V, M, and N without moving your palms.',
           'Every completed word triggers a lock-on missile!', 'Ion Destroyer',
           ['music storm clever', 'vector momentaisen', 'silver cavernorman', 'seven comets gleam']),
-        L('en', 7, 'Full Alphabet', 'B X Z', 'Full Lowercase Mastery: B, X, Z', 'text',
+        L('en', 12, 'Full Alphabet', 'B X Z', 'Full Lowercase Mastery: B, X, Z', 'text',
           'All 26 lowercase letters unlocked! Keep your wrists floating and fingers curved.',
           'Maintain your combo multiplier for bonus score!', 'Nebula Carrier',
           ['breeze galaxy zenith', 'matrix puzzle blaze', 'frozen quartz vortex', 'pixel cyber horizon']),
-        L('en', 8, 'Ion Bridges', "' -", "Apostrophes & Hyphens (' and -)", 'text',
+        L('en', 13, 'Ion Bridges', "' -", "Apostrophes & Hyphens (' and -)", 'text',
           "Tap the quote key (') with your right pinky and hyphen (-) on the top row to fire piercing Ion Beams.",
           "Typing ' or - fires a Twin Ion Beam through enemy shields!", 'Shield Dreadnought',
           ["don't can't it's we're",
            "it's a well-known starfighter",
            "we're locked-on and won't miss",
            "state-of-the-art plasma cannons"]),
-        L('en', 9, 'EMP & Supernova', ', .', 'Comma EMP & Period Supernovas (, and .)', 'text',
+        L('en', 14, 'EMP & Supernova', ', .', 'Comma EMP & Period Supernovas (, and .)', 'text',
           'Commas (,) unleash an EMP shockwave; periods (.) fire the Supernova Orbital Finisher!',
           'Use [,] for EMP pushback and [.] for Supernova blasts!', 'Orbital Bastion',
           ['Lock targets, charge cannons, fire.',
            'Engines roar, shields glow, stars blur.',
            'Stay calm, hold cadence, clear the sector.',
            'One final shot, and the sky is ours.']),
-        L('en', 10, 'Shift Overdrive', 'Shift ! ?', 'Capital Shift & Exclamation Barrage', 'text',
+        L('en', 15, 'Shift Overdrive', 'Shift ! ?', 'Capital Shift & Exclamation Barrage', 'text',
           'Hold the opposite-hand Shift key for capitals, !, and ? to shatter heavy boss armor.',
           'Opposite-hand Shift unlocks high-voltage ordnance!', 'Star Dreadnought',
           ['Alert! Enemy armada detected ahead!',
            'Can you hear the vinyl synth spinning?',
            'Charge the core! Fire all batteries now!',
            'Victory! The outer rim is secure.']),
-        L('en', 11, 'Dialogue Shields', '" "', 'Tactical Comms & Quotation Shields', 'text',
+        L('en', 16, 'Dialogue Shields', '" "', 'Tactical Comms & Quotation Shields', 'text',
           'Use Shift + Quote (") to deploy reflective energy shields around squadron transmissions.',
           'Quotation marks & punctuation deal massive boss damage!', 'Omega Titan',
           ['"All wings, report in!" called the captain.',
            '"Targets locked, standing by!" replied Kursor.',
            '"Hold formation - don\'t break the rhythm!"',
            '"Fire at will!" echoed across the nebula.']),
-        L('en', 12, 'Polyglot Boss', 'EN ⇄ UA', 'Galactic Mothership: Bilingual Relay', 'text',
+        L('en', 17, 'Polyglot Boss', 'EN ⇄ UA', 'Galactic Mothership: Bilingual Relay', 'text',
           'Alternating English and Ukrainian transmissions! With Auto-Map ON, your physical keys adapt automatically.',
           'Final Boss! Switch seamlessly between QWERTY and ЙЦУКЕН!', 'Polyglot Mothership',
           [{ text: 'Starfighter squadron, lock onto the core!', lang: 'en' },
@@ -640,63 +666,89 @@
       ],
 
       uk: [
-        L('uk', 1, 'Ядро вказівних', 'А О К Г', 'Кластер вказівних: А, О, К, Г', 'keys',
+        // --- NEW BEGINNER LEVELS (UK 1-5) ---
+        L('uk', 1, 'Базові орієнтири', 'А · О', 'Знайди виступи: А та О', 'keys',
+          'Відчуй виступи на клавішах А (лівий вказівний) та О (правий вказівний). Без пробілу — просто чергуй руки.',
+          'Кожна клавіша випускає плазмові заряди по ворогу!', 'Дрон-розвідник',
+          ['аоаоао', 'оаоаоа', 'ааооааоо', 'аоаооаоа']),
+
+        L('uk', 2, 'Чотири пальці', 'В · А · О · Л', 'Вказівні та середні: В, А, О, Л', 'keys',
+          'Додай середні пальці на клавіші В (ліва рука) та Л (права рука).',
+          'Рівний ритм розкручує вінілову платівку до 33 об/хв!', 'Перехоплювач',
+          ['ваолваол', 'аолваолв', 'ввааоолл', 'влваолао', 'аловалов']),
+
+        L('uk', 3, 'Перший пробіл', 'А · О · ПРОБІЛ', 'Додаємо великий палець: Пробіл', 'keys',
+          'Натискай Пробіл великим пальцем між парами літер. Кожне слово запускає самонавідні ракети!',
+          'Пробіл запускає залп із 3 ракет по цілі!', 'Корвети-близнюки',
+          ['ао ао ао', 'ва ол ва ол', 'ал ов ал ов', 'вал ола вал']),
+
+        L('uk', 4, 'Шість клавіш', 'І · В · А · О · Л · Д', 'Підмізинні пальці: додаємо І та Д', 'keys',
+          'Підключи підмізинні пальці на І (зліва) та Д (справа). Короткі трибуквені комбінації.',
+          'Знищуй кораблі, завершуючи кожну групу літер!', 'Щитовий фрегат',
+          ['іва олд іва олд', 'аві дло аві дло', 'ід вл ао ід вл', 'вад лоі вад лоі']),
+
+        L('uk', 5, 'Весь базовий ряд', 'Ф..А · О..Ж', 'Повний базовий ряд: Ф, І, В, А — О, Л, Д, Ж', 'keys',
+          'Додай мізинці на Ф та Ж, а також внутрішні розтяжки вказівних на П та Р.',
+          'Базовий ряд активовано! Перші короткі слова.', 'Крейсер Бази',
+          ['фіва олдж фіва олдж', 'вода лава пора', 'дар жар пар лад', 'ліва фара парад']),
+
+        L('uk', 6, 'Ядро вказівних', 'А О К Г', 'Кластер вказівних: А, О, К, Г', 'keys',
           'Тримай вказівні пальці на виступах А та О, тягнись вгору до К та Г. Кожне слово запускає ракетний залп!',
           'Кожна літера стріляє плазмою; [Пробіл] — ракетний залп!', 'Дрони-розвідники',
           ['око гора кора', 'рак гра око', 'гора кора кроки', 'око гра гора']),
-        L('uk', 2, 'Голосні та рух', 'У І В Л', 'Середні пальці та голосні: В, Л, У, І', 'keys',
+        L('uk', 7, 'Голосні та рух', 'У І В Л', 'Середні пальці та голосні: В, Л, У, І', 'keys',
           'Додай середні пальці (В та Л) і голосні У, І для плавних справжніх слів.',
           'Тримай рівний темп, щоб розігнати вінілову платівку!', 'Перехоплювачі',
           ['вода коло рука', 'віра лівий дар', 'рука вода коло', 'кіло воля ріка']),
-        L('uk', 3, 'Кільцевий ритм', 'І Д Ц Щ', 'Підмізинні пальці: І, Д, Ц, Щ', 'keys',
+        L('uk', 8, 'Кільцевий ритм', 'І Д Ц Щ', 'Підмізинні пальці: І, Д, Ц, Щ', 'keys',
           'Підмізинні пальці контролюють І/Ц ліворуч та Д/Щ праворуч.',
           'Плавні комбінації прискорюють музику до 33 об/хв!', 'Корвети флоту',
           ['діло слово колос', 'воля доля рада', 'чудо крило схід', 'слово діло воля']),
-        L('uk', 4, 'Сила мізинців', 'Ф Ж Є З', 'Крайні клавіші: Ф, Ж, Є, З', 'keys',
+        L('uk', 9, 'Сила мізинців', 'Ф Ж Є З', 'Крайні клавіші: Ф, Ж, Є, З', 'keys',
           'Зміцнюємо мізинці: Ф ліворуч та Ж, Є, З праворуч у реальних словах.',
           'Весь базовий ряд заряджено на повну потужність!', 'Щитовий Крейсер',
           ['фаза живий казка', 'запах сфера жарт', 'зефір фреза казка', 'живий запах фаза']),
-        L('uk', 5, 'Центральний ривок', 'П Р Е Н', 'Розтяжка вказівних: П, Р, Е, Н', 'text',
+        L('uk', 10, 'Центральний ривок', 'П Р Е Н', 'Розтяжка вказівних: П, Р, Е, Н', 'text',
           'Вказівні пальці тягнуться всередину до П, Р, Е, Н і миттєво повертаються на А та О.',
           'Переходимо на повний текстовий радар ескадрильї!', 'Важкий Фрегат',
           ['небо берег перо', 'тепло зерно герой', 'нерв терен поріг', 'перед нами чисте небо']),
-        L('uk', 6, 'Нижній ряд', 'С М И Т', 'Нижній ряд: С, М, И, Т', 'text',
+        L('uk', 11, 'Нижній ряд', 'С М И Т', 'Нижній ряд: С, М, И, Т', 'text',
           'Спускай пальці на нижній ряд для С, М, И, Т, не зміщуючи долоні.',
           'Кожне завершене слово наводить самонавідні ракети!', 'Іонний Есмінець',
           ['місто синій світло', 'море ритм міст', 'символ космос старт', 'чисте небо і ясний світ']),
-        L('uk', 7, 'Повний алфавіт', 'Я Ч Б Ю Ь', 'Майстерність нижнього ряду: Я, Ч, Б, Ю, Ь', 'text',
+        L('uk', 12, 'Повний алфавіт', 'Я Ч Б Ю Ь', 'Майстерність нижнього ряду: Я, Ч, Б, Ю, Ь', 'text',
           'Усі основні літери відкрито! Тримай зап’ястя вільними, а пальці зігнутими.',
           'Зберігай комбо для максимального рахунку!', 'Туманний Авіаносець',
           ['земля хвиля буря', 'сяйво промінь знання', 'срібна зоря світить', 'швидкий корабель летить']),
-        L('uk', 8, 'Іонні Мости', "' -", "Апостроф ( ' ) та дефіс ( - )", 'text',
+        L('uk', 13, 'Іонні Мости', "' -", "Апостроф ( ' ) та дефіс ( - )", 'text',
           "Український апостроф (') — на верхній лівій клавіші [` / ~] під лівим мізинцем!",
           "Апостроф (') і дефіс (-) пробивають щити Подвійним Іонним Променем!", 'Броньований Дредноут',
           ["п'ять м'яч пам'ять ім'я",
            "по-перше, зв'язок працює чітко",
            "кам'яний астероїд з'явився з-за хмар",
            "солов'їний сигнал летить крізь зорі"]),
-        L('uk', 9, 'Імпульс та Наднова', ', .', 'Кома (Shift + /) та Крапка (/)', 'text',
+        L('uk', 14, 'Імпульс та Наднова', ', .', 'Кома (Shift + /) та Крапка (/)', 'text',
           'На ЙЦУКЕН крапка — це нижня права клавіша [/], а кома — це [Shift + /].',
           'Кома [,] відкидає ворогів хвилею ЕМІ; крапка [.] б’є Надновою!', 'Орбітальний Бастіон',
           ['Крок, приціл, постріл. Шлях вільний.',
            'Тиша, спокій, ритм. Кожна кома дає заряд.',
            'Зорі сяють, двигуни гудуть, флот летить.',
            'Один точний залп, і перемога наша.']),
-        L('uk', 10, 'Форсаж Shift', 'Shift ! ?', 'Великі літери, знак оклику та питання', 'text',
+        L('uk', 15, 'Форсаж Shift', 'Shift ! ?', 'Великі літери, знак оклику та питання', 'text',
           'Затискай Shift протилежною рукою. Знак питання (?) на ЙЦУКЕН — це Shift + 7.',
           'Потужні знаки ! та ? руйнують броню флагмана!', 'Зоряний Руйнівник',
           ['Увага! На радарі ворожий крейсер!',
            'Чуєш, як вініл набирає обертів?',
            'Заряджай гармати! Повний вперед!',
            'Перемога! Сектор повністю очищено.']),
-        L('uk', 11, 'Літери Ї Ґ Є', 'Ї Ґ Є "', 'Унікальні літери Ї, Ґ, Є та діалоги', 'text',
+        L('uk', 16, 'Літери Ї Ґ Є', 'Ї Ґ Є "', 'Унікальні літери Ї, Ґ, Є та діалоги', 'text',
           'Літера Ї — на клавіші `]`, Ґ — на `\\`, а Є — біля Enter.',
           'Особливі символи активують захисне поле ескадрильї!', 'Титан Омега',
           ["На ґанку фортеці засяяли сузір'я їжака!",
            '"Тримати стрій!" - передав командир ланки.',
            "Хіба це можливо? Пам'ять зберігає кожен код!",
            '"Вогонь за командою!" - пролунало в ефірі.']),
-        L('uk', 12, 'Поліглот-Бос', 'UA ⇄ EN', 'Флагман Галактики: Двомовна Естафета', 'text',
+        L('uk', 17, 'Поліглот-Бос', 'UA ⇄ EN', 'Флагман Галактики: Двомовна Естафета', 'text',
           'Чергування українських та англійських хвиль! З Auto-Map ON розкладка перемикається сама.',
           'Фінальний Бос! Перемикайся між ЙЦУКЕН та QWERTY на льоту!', 'Поліглот-Флагман',
           [{ text: 'Зоряний флот готовий до фінального бою!', lang: 'uk' },
@@ -996,13 +1048,17 @@
         const active = idx === state.currentLevelIdx;
         const btn = document.createElement('button');
         btn.className = active
-          ? 'px-2.5 py-1 rounded-lg text-xs font-bold bg-cyan-500 text-slate-950 shadow-sm transition flex items-center gap-1'
-          : 'px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-800/70 text-slate-300 hover:bg-slate-800 hover:text-white transition flex items-center gap-1';
+          ? 'shrink-0 whitespace-nowrap px-2 py-1 rounded-lg text-[11px] font-bold bg-cyan-500 text-slate-950 shadow-sm transition flex items-center gap-1'
+          : 'shrink-0 whitespace-nowrap px-2 py-1 rounded-lg text-[11px] font-medium bg-slate-800/70 text-slate-300 hover:bg-slate-800 hover:text-white transition flex items-center gap-1';
         btn.innerHTML = `<span class="font-mono opacity-75">${lvl.id}</span><span>${lvl.short}</span>`;
         btn.title = lvl.title;
         btn.onclick = () => selectLevel(idx);
         container.appendChild(btn);
       });
+      const activeBtn = container.children[state.currentLevelIdx];
+      if (activeBtn) {
+        container.scrollLeft = activeBtn.offsetLeft - container.clientWidth / 2 + activeBtn.offsetWidth / 2;
+      }
     }
 
     function renderPromptStage() {
@@ -1384,7 +1440,7 @@
         const wordLabel = words[i % words.length] || 'CORE';
         const row = i % 3;
         const col = Math.floor(i / 3);
-        const isBoss = i === count - 1 && getActiveLevel().id >= 8;
+        const isBoss = i === count - 1 && getActiveLevel().id >= 13;
         armada.invaders.push({
           x: Math.min(armada.width - 90, 290 + col * 135 + (row % 2) * 30),
           y: 38 + row * 34,
