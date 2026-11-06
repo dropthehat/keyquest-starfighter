@@ -1,0 +1,1909 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>KeyQuest: Starfighter Edition — EN / UA Typing Armada</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:ital,wght@0,400;0,500;0,600;0,700;1,400&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css" />
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'sans-serif'],
+            mono: ['JetBrains Mono', 'monospace'],
+          },
+          colors: {
+            obsidian: '#090d16',
+            slateCard: '#111827',
+            slateBorder: '#1f2937',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    * { box-sizing: border-box; user-select: none; }
+    body { background-color: #060913; color: #f3f4f6; overflow-x: hidden; }
+    @keyframes shakeError {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-5px) rotate(-1deg); }
+      40% { transform: translateX(5px) rotate(1deg); }
+      60% { transform: translateX(-4px); }
+      80% { transform: translateX(4px); }
+    }
+    .shake-error { animation: shakeError 0.28s cubic-bezier(0.36, 0.07, 0.19, 0.97) both; }
+    @keyframes pulseTarget {
+      0%, 100% { box-shadow: 0 0 0 0 rgba(34, 211, 238, 0.55); }
+      50% { box-shadow: 0 0 14px 3px rgba(34, 211, 238, 0.5); }
+    }
+    .target-char-active { animation: pulseTarget 1.4s infinite; }
+
+    .keycap {
+      position: relative;
+      transition: all 0.07s ease-out;
+      box-shadow: 0 4px 0 #090d16, inset 0 1px 0 rgba(255, 255, 255, 0.08);
+    }
+    .keycap.pressed {
+      transform: translateY(3px);
+      box-shadow: 0 1px 0 #090d16, inset 0 1px 0 rgba(255, 255, 255, 0.15);
+    }
+    .keycap.next-target {
+      border-color: #22d3ee !important;
+      background: linear-gradient(180deg, rgba(6, 182, 212, 0.38) 0%, rgba(14, 116, 144, 0.55) 100%) !important;
+      box-shadow: 0 4px 0 #0891b2, 0 0 20px rgba(34, 211, 238, 0.65) !important;
+      color: #ffffff !important;
+      z-index: 10;
+      opacity: 1 !important;
+    }
+    .keycap.shift-target {
+      border-color: #f59e0b !important;
+      background: linear-gradient(180deg, rgba(245, 158, 11, 0.35) 0%, rgba(180, 83, 9, 0.52) 100%) !important;
+      box-shadow: 0 4px 0 #b45309, 0 0 18px rgba(245, 158, 11, 0.55) !important;
+      color: #fef3c7 !important;
+      opacity: 1 !important;
+    }
+    .keycap.wrong-press {
+      border-color: #f43f5e !important;
+      background: rgba(244, 63, 94, 0.45) !important;
+      box-shadow: 0 2px 0 #9f1239, 0 0 16px rgba(244, 63, 94, 0.7) !important;
+    }
+    .keycap.dimmed { opacity: 0.32; }
+
+    /* High-contrast finger zone borders + subtle keycap tint */
+    .show-fingers .finger-lp { border-bottom: 3px solid #ec4899; }
+    .show-fingers .finger-lr { border-bottom: 3px solid #f97316; }
+    .show-fingers .finger-lm { border-bottom: 3px solid #eab308; }
+    .show-fingers .finger-li { border-bottom: 3px solid #10b981; }
+    .show-fingers .finger-th { border-bottom: 3px solid #6366f1; }
+    .show-fingers .finger-ri { border-bottom: 3px solid #06b6d4; }
+    .show-fingers .finger-rm { border-bottom: 3px solid #3b82f6; }
+    .show-fingers .finger-rr { border-bottom: 3px solid #8b5cf6; }
+    .show-fingers .finger-rp { border-bottom: 3px solid #d946ef; }
+
+    .tile { transition: transform 0.1s ease-out, box-shadow 0.1s ease-out, opacity 0.1s; }
+
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: #090d16; }
+    ::-webkit-scrollbar-thumb { background: #1e293b; border-radius: 3px; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col justify-between antialiased selection:bg-cyan-500 selection:text-slate-950">
+
+  <!-- ================= TOP HEADER BAR ================= -->
+  <header class="w-full bg-slate-950/90 backdrop-blur-md border-b border-slate-800/80 px-4 py-2 sticky top-0 z-30">
+    <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2.5">
+      
+      <!-- Brand Logo -->
+      <div class="flex items-center gap-3">
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-400 via-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
+          <i class="fa-solid fa-shuttle-space text-slate-950 text-lg"></i>
+        </div>
+        <div>
+          <h1 class="font-extrabold text-base tracking-tight text-white flex items-center gap-2">
+            KeyQuest <span class="text-[11px] font-mono uppercase px-2 py-0.5 rounded-full bg-cyan-500/15 text-cyan-400 border border-cyan-500/30">Armada</span>
+          </h1>
+          <p class="text-[11px] text-slate-400 hidden sm:block">Starfighter Word Armada • Vinyl Tempo Synth • EN &amp; UA</p>
+        </div>
+      </div>
+
+      <!-- Language & Control Toggles -->
+      <div class="flex flex-wrap items-center gap-1.5">
+        <div class="inline-flex rounded-lg bg-slate-900 p-1 border border-slate-800" role="group">
+          <button id="btnLangEN" onclick="setLanguageTrack('en')" class="px-2.5 py-1 text-xs font-semibold rounded-md transition-all bg-cyan-500 text-slate-950 shadow">🇬🇧 EN (QWERTY)</button>
+          <button id="btnLangUA" onclick="setLanguageTrack('uk')" class="px-2.5 py-1 text-xs font-semibold rounded-md transition-all text-slate-300 hover:text-white">🇺🇦 UA (ЙЦУКЕН)</button>
+        </div>
+
+        <button id="btnAutoMap" onclick="toggleAutoMap()" title="When ON, physical laptop keys automatically type the active track's layout without switching OS input." class="px-2.5 py-1.5 rounded-lg text-xs font-medium border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20 transition flex items-center gap-1.5">
+          <i class="fa-solid fa-microchip"></i>
+          <span class="hidden md:inline">Auto-Map:</span> <strong id="autoMapStatus">ON</strong>
+        </button>
+
+        <!-- Vinyl Turntable Music Toggle + Live RPM Indicator -->
+        <button id="btnVinylMusic" onclick="toggleVinylMusic()" title="Vinyl Turntable Synth: Music pitch & speed warp dynamically with your typing speed!" class="px-2.5 py-1.5 rounded-lg text-xs font-medium border border-amber-500/40 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20 transition flex items-center gap-2">
+          <i id="vinylDiscIcon" class="fa-solid fa-compact-disc text-amber-400 text-sm"></i>
+          <div class="text-left leading-none">
+            <div class="text-[10px] font-mono uppercase text-amber-200/80">Vinyl Groove</div>
+            <div id="vinylRpmText" class="text-[11px] font-mono font-bold text-amber-300">12 RPM • Slow</div>
+          </div>
+        </button>
+
+        <button id="btnZenMode" onclick="toggleZenMode()" class="px-2.5 py-1.5 rounded-lg text-xs font-medium border border-purple-500/40 bg-purple-500/10 text-purple-300 hover:bg-purple-500/20 transition flex items-center gap-1.5">
+          <i id="zenIcon" class="fa-solid fa-user-astronaut"></i>
+          <span id="zenLabel" class="hidden lg:inline">Armada Mode</span>
+        </button>
+
+        <button id="btnSound" onclick="toggleSound()" class="px-2.5 py-1.5 rounded-lg text-xs font-medium border border-slate-700 bg-slate-800/80 text-slate-300 hover:text-white transition flex items-center gap-1.5">
+          <i id="soundIcon" class="fa-solid fa-volume-high text-cyan-400"></i>
+          <span id="soundStatus" class="hidden xl:inline">SFX ON</span>
+        </button>
+      </div>
+
+      <!-- Live Telemetry Metrics -->
+      <div class="flex items-center gap-3 bg-slate-900/90 border border-slate-800 px-3 py-1.5 rounded-xl">
+        <div class="text-center">
+          <div class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">WPM</div>
+          <div id="statWpm" class="font-mono text-sm font-bold text-cyan-400">0</div>
+        </div>
+        <div class="h-6 w-[1px] bg-slate-800"></div>
+        <div class="text-center">
+          <div class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Acc</div>
+          <div id="statAcc" class="font-mono text-sm font-bold text-emerald-400">100%</div>
+        </div>
+        <div class="h-6 w-[1px] bg-slate-800"></div>
+        <div class="text-center">
+          <div class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Combo</div>
+          <div id="statCombo" class="font-mono text-sm font-bold text-amber-400">0x</div>
+        </div>
+        <div class="h-6 w-[1px] bg-slate-800"></div>
+        <div class="text-center">
+          <div class="text-[10px] uppercase tracking-wider text-slate-400 font-semibold">Score</div>
+          <div id="statXp" class="font-mono text-sm font-bold text-purple-400">0</div>
+        </div>
+      </div>
+
+    </div>
+  </header>
+
+  <!-- ================= MAIN WORKSPACE ================= -->
+  <main class="flex-1 max-w-7xl w-full mx-auto px-4 py-2.5 flex flex-col justify-between gap-2.5">
+
+    <!-- LEVEL SELECTION BAR -->
+    <div class="flex flex-wrap items-center justify-between gap-2 bg-slate-900/60 border border-slate-800/80 rounded-xl p-2">
+      <div class="flex flex-wrap items-center gap-1" id="levelTabsContainer"></div>
+      <div class="flex items-center gap-2.5 text-xs text-slate-400 px-1">
+        <div class="hidden xl:flex items-center gap-2 text-[11px] bg-slate-950/80 px-2.5 py-1 rounded-lg border border-slate-800 font-mono">
+          <span class="text-cyan-400">[Key]</span> Plasma
+          <span class="text-slate-600">•</span>
+          <span class="text-indigo-400">[Space]</span> Homing Salvo
+          <span class="text-slate-600">•</span>
+          <span class="text-emerald-400">[,]</span> EMP Wave
+          <span class="text-slate-600">•</span>
+          <span class="text-amber-400">[' -]</span> Ion Beam
+          <span class="text-slate-600">•</span>
+          <span class="text-rose-400">[. ! ?]</span> Supernova
+        </div>
+        <span id="stageProgressBadge" class="font-mono font-semibold text-slate-300 bg-slate-800 px-2.5 py-1 rounded-md">Wave 1 / 4</span>
+        <button onclick="restartCurrentPrompt()" title="Restart wave (Tab)" class="px-2 py-1 rounded bg-slate-800 hover:bg-slate-700 text-slate-300 transition">
+          <i class="fa-solid fa-rotate-right"></i>
+        </button>
+      </div>
+    </div>
+
+    <!-- ZONE 1: SPACE INVADERS "WORD ARMADA" COMBAT ARENA -->
+    <section id="actionStripContainer" class="relative w-full h-36 sm:h-40 rounded-2xl overflow-hidden border border-slate-800 bg-slate-950 shadow-inner">
+      <canvas id="armadaCanvas" class="w-full h-full block"></canvas>
+      <div class="absolute top-2.5 left-3 right-3 flex items-center justify-between pointer-events-none">
+        <div class="flex items-center gap-2 bg-slate-950/85 backdrop-blur-sm border border-slate-800/80 px-3 py-1 rounded-full">
+          <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
+          <span id="companionActionText" class="text-xs font-mono font-semibold text-cyan-300">STARFIGHTER LOCKED ON — TYPE TO FIRE PLASMA</span>
+        </div>
+        <div class="flex items-center gap-2.5 bg-slate-950/85 backdrop-blur-sm border border-rose-500/30 px-3 py-1 rounded-full">
+          <span id="bossNameLabel" class="text-[11px] font-mono uppercase tracking-wider text-rose-400 font-bold">Scout Squadron</span>
+          <div class="w-28 h-2.5 bg-slate-800 rounded-full overflow-hidden border border-slate-700">
+            <div id="bossHpBar" class="h-full bg-gradient-to-r from-rose-500 via-amber-500 to-emerald-400 transition-all duration-200" style="width: 100%;"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ZEN MODE BAR -->
+    <section id="zenStripContainer" class="hidden w-full bg-slate-900/70 border border-slate-800 rounded-xl px-4 py-2 items-center justify-between gap-4">
+      <div class="flex items-center gap-2 text-xs text-purple-300 font-mono"><i class="fa-solid fa-spa"></i><span>ZEN FLOW MODE</span></div>
+      <div class="flex-1 h-2 bg-slate-950 rounded-full overflow-hidden border border-slate-800">
+        <div id="zenProgressBar" class="h-full bg-gradient-to-r from-cyan-400 via-purple-400 to-emerald-400 transition-all duration-150" style="width: 0%"></div>
+      </div>
+    </section>
+
+    <!-- ZONE 2: TYPING STAGE -->
+    <section id="typingStageCard" class="relative w-full bg-gradient-to-b from-slate-900/95 to-slate-950/95 border border-slate-800/90 rounded-2xl p-4 sm:p-5 shadow-2xl flex flex-col gap-3">
+      <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800/80 pb-2.5">
+        <div>
+          <span id="levelCategoryBadge" class="text-[11px] font-mono uppercase tracking-wider text-cyan-400 font-semibold block">Level 1</span>
+          <h2 id="levelTitleDisplay" class="text-sm sm:text-base font-bold text-white">Title</h2>
+        </div>
+
+        <!-- Active Key + Finger Callout Pill -->
+        <div class="flex flex-wrap items-center gap-2">
+          <div id="mechanicCalloutBadge" class="hidden md:flex items-center gap-1.5 text-xs px-3 py-1 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-300 font-medium">
+            <i class="fa-solid fa-crosshairs"></i><span id="mechanicCalloutText"></span>
+          </div>
+
+          <div class="flex items-center gap-2.5 bg-slate-950 border border-slate-800 px-3 py-1 rounded-xl">
+            <span class="text-[10px] font-mono uppercase text-slate-400">Target:</span>
+            <span id="nextKeyBig" class="font-mono text-base sm:text-lg font-extrabold text-cyan-300">F</span>
+            <span class="text-slate-700">|</span>
+            <span id="fingerGuideText" class="text-xs font-semibold text-slate-200">Left index</span>
+            <span id="shiftGuideText" class="text-[11px] font-mono text-amber-300 hidden"></span>
+          </div>
+        </div>
+      </div>
+
+      <!-- PROMPT DISPLAY: Keycap Cluster Tiles or Flowing Text -->
+      <div id="promptDisplayBox" class="min-h-[82px] flex items-center justify-center py-1">
+        <div id="promptTextContainer" class="w-full flex flex-wrap items-center justify-center gap-2"></div>
+      </div>
+
+      <div class="flex flex-wrap items-center justify-between gap-2 pt-2 border-t border-slate-800/60 text-xs text-slate-400">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-circle-info text-cyan-400"></i>
+          <span id="ergonomicTipText"></span>
+        </div>
+        <div class="flex items-center gap-3 font-mono text-[11px] text-slate-500">
+          <span><kbd class="px-1.5 py-0.5 bg-slate-800 text-slate-300 rounded">Tab</kbd> Retry Wave</span>
+          <span><kbd class="px-1.5 py-0.5 bg-slate-800 text-slate-300 rounded">Esc</kbd> Reset Stats</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- ZONE 3: KEYBOARD WITH ARTICULATED HANDS / PAWS OVERLAY -->
+    <section class="w-full bg-slate-900/90 border border-slate-800/90 rounded-2xl p-3 sm:p-4 shadow-xl relative">
+      <div class="flex flex-wrap items-center justify-between gap-2 mb-2.5 px-1">
+        <span id="activeKeyboardLabel" class="text-xs font-mono font-bold uppercase tracking-wider text-cyan-400 flex items-center gap-1.5">
+          <i class="fa-solid fa-laptop-code"></i><span>English (QWERTY) Physical Map</span>
+        </span>
+
+        <div class="flex flex-wrap items-center gap-2">
+          <div class="hidden xl:flex items-center gap-2 text-[10px] font-mono text-slate-400 mr-2">
+            <span class="flex items-center gap-1"><i class="w-2 h-2 rounded-full bg-pink-500 inline-block"></i>L-Pinky</span>
+            <span class="flex items-center gap-1"><i class="w-2 h-2 rounded-full bg-orange-500 inline-block"></i>L-Ring</span>
+            <span class="flex items-center gap-1"><i class="w-2 h-2 rounded-full bg-yellow-500 inline-block"></i>L-Mid</span>
+            <span class="flex items-center gap-1"><i class="w-2 h-2 rounded-full bg-emerald-500 inline-block"></i>L-Index</span>
+            <span class="flex items-center gap-1"><i class="w-2 h-2 rounded-full bg-indigo-500 inline-block"></i>Thumb</span>
+            <span class="flex items-center gap-1"><i class="w-2 h-2 rounded-full bg-cyan-500 inline-block"></i>R-Index</span>
+            <span class="flex items-center gap-1"><i class="w-2 h-2 rounded-full bg-blue-500 inline-block"></i>R-Mid</span>
+            <span class="flex items-center gap-1"><i class="w-2 h-2 rounded-full bg-violet-500 inline-block"></i>R-Ring</span>
+            <span class="flex items-center gap-1"><i class="w-2 h-2 rounded-full bg-fuchsia-500 inline-block"></i>R-Pinky</span>
+          </div>
+
+          <!-- Hands Overlay Style Switcher (Cat Paws / Cyber Hands / Off) -->
+          <button id="btnHandsMode" onclick="cycleHandsOverlayMode()" class="px-2.5 py-1 rounded-md text-[11px] font-mono bg-amber-500/15 text-amber-300 border border-amber-500/40 hover:bg-amber-500/25 transition flex items-center gap-1.5">
+            <i class="fa-solid fa-paw"></i>
+            <span>Hands Overlay: <strong id="handsOverlayStateText">CAT PAWS</strong></span>
+          </button>
+
+          <button id="btnFingerZones" onclick="toggleFingerZones()" class="px-2.5 py-1 rounded-md text-[11px] font-mono bg-slate-800 text-slate-200 border border-slate-700 hover:border-slate-600 transition">
+            Zones: <strong id="fingerZoneStateText" class="text-cyan-400">ON</strong>
+          </button>
+        </div>
+      </div>
+
+      <!-- Keyboard + Overlaid Hands Wrapper -->
+      <div id="keyboardStageWrapper" class="relative w-full max-w-5xl mx-auto overflow-x-auto pb-2">
+        <div id="keyboardContainer" class="show-fingers w-full flex flex-col gap-1.5 select-none min-w-[680px]"></div>
+        <!-- Direct SVG Overlay for Articulated Paws / Hands over the physical keys -->
+        <svg id="keyboardHandsOverlaySvg" class="pointer-events-none absolute inset-0 w-full h-full z-20 overflow-visible"></svg>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ================= LEVEL COMPLETE MODAL ================= -->
+  <div id="levelCompleteModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/85 backdrop-blur-md p-4">
+    <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl">
+      <div class="flex items-center justify-between mb-4">
+        <div class="flex items-center gap-2.5">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 text-xl"><i class="fa-solid fa-trophy"></i></div>
+          <div>
+            <span class="text-xs font-mono uppercase text-emerald-400 font-semibold">Sector Cleared!</span>
+            <h3 id="modalLevelTitle" class="text-lg font-bold text-white"></h3>
+          </div>
+        </div>
+        <button onclick="closeModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+      </div>
+      <div class="grid grid-cols-3 gap-3 my-5">
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 text-center"><div class="text-[11px] font-mono uppercase text-slate-400">Speed</div><div id="modalWpm" class="text-2xl font-mono font-extrabold text-cyan-400 mt-0.5">0</div><div class="text-[10px] text-slate-500">WPM</div></div>
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 text-center"><div class="text-[11px] font-mono uppercase text-slate-400">Accuracy</div><div id="modalAcc" class="text-2xl font-mono font-extrabold text-emerald-400 mt-0.5">0%</div><div class="text-[10px] text-slate-500">Precision</div></div>
+        <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 text-center"><div class="text-[11px] font-mono uppercase text-slate-400">Max Combo</div><div id="modalCombo" class="text-2xl font-mono font-extrabold text-amber-400 mt-0.5">0x</div><div class="text-[10px] text-slate-500">Streak</div></div>
+      </div>
+      <p id="modalFeedbackText" class="text-xs text-slate-300 bg-slate-950/60 border border-slate-800 rounded-lg p-3 mb-5 leading-relaxed">
+        Enemy armada neutralized! Press <kbd class="px-1.5 py-0.5 bg-slate-800 text-cyan-300 rounded font-mono">Space</kbd> or <kbd class="px-1.5 py-0.5 bg-slate-800 text-cyan-300 rounded font-mono">Enter</kbd> to launch the next sector.
+      </p>
+      <div class="flex items-center justify-end gap-2.5">
+        <button onclick="replayCurrentLevel()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 transition"><i class="fa-solid fa-rotate-left mr-1"></i> Replay</button>
+        <button onclick="advanceToNextLevel()" class="px-5 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 shadow-lg shadow-cyan-500/20 transition">
+          Next Level [Space / Enter] <i class="fa-solid fa-arrow-right ml-1"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    /********************************************************************
+     * 1. PHYSICAL KEYBOARD LAYOUT (QWERTY & ЙЦУКЕН)
+     ********************************************************************/
+    const KEYBOARD_ROWS = [
+      [
+        { code: 'Backquote', finger: 'lp', w: 'w-10', en: ['`', '~'], uk: ["'", '₴'] },
+        { code: 'Digit1', finger: 'lp', w: 'w-10', en: ['1', '!'], uk: ['1', '!'] },
+        { code: 'Digit2', finger: 'lr', w: 'w-10', en: ['2', '@'], uk: ['2', '"'] },
+        { code: 'Digit3', finger: 'lm', w: 'w-10', en: ['3', '#'], uk: ['3', '№'] },
+        { code: 'Digit4', finger: 'li', w: 'w-10', en: ['4', '$'], uk: ['4', ';'] },
+        { code: 'Digit5', finger: 'li', w: 'w-10', en: ['5', '%'], uk: ['5', '%'] },
+        { code: 'Digit6', finger: 'ri', w: 'w-10', en: ['6', '^'], uk: ['6', ':'] },
+        { code: 'Digit7', finger: 'ri', w: 'w-10', en: ['7', '&'], uk: ['7', '?'] },
+        { code: 'Digit8', finger: 'rm', w: 'w-10', en: ['8', '*'], uk: ['8', '*'] },
+        { code: 'Digit9', finger: 'rr', w: 'w-10', en: ['9', '('], uk: ['9', '('] },
+        { code: 'Digit0', finger: 'rp', w: 'w-10', en: ['0', ')'], uk: ['0', ')'] },
+        { code: 'Minus', finger: 'rp', w: 'w-10', en: ['-', '_'], uk: ['-', '_'] },
+        { code: 'Equal', finger: 'rp', w: 'w-10', en: ['=', '+'], uk: ['=', '+'] },
+        { code: 'Backspace', finger: 'rp', w: 'w-20', label: '⌫', isMod: true }
+      ],
+      [
+        { code: 'Tab', finger: 'lp', w: 'w-14', label: 'Tab', isMod: true },
+        { code: 'KeyQ', finger: 'lp', w: 'w-10', en: ['q', 'Q'], uk: ['й', 'Й'] },
+        { code: 'KeyW', finger: 'lr', w: 'w-10', en: ['w', 'W'], uk: ['ц', 'Ц'] },
+        { code: 'KeyE', finger: 'lm', w: 'w-10', en: ['e', 'E'], uk: ['у', 'У'] },
+        { code: 'KeyR', finger: 'li', w: 'w-10', en: ['r', 'R'], uk: ['к', 'К'] },
+        { code: 'KeyT', finger: 'li', w: 'w-10', en: ['t', 'T'], uk: ['е', 'Е'] },
+        { code: 'KeyY', finger: 'ri', w: 'w-10', en: ['y', 'Y'], uk: ['н', 'Н'] },
+        { code: 'KeyU', finger: 'ri', w: 'w-10', en: ['u', 'U'], uk: ['г', 'Г'] },
+        { code: 'KeyI', finger: 'rm', w: 'w-10', en: ['i', 'I'], uk: ['ш', 'Ш'] },
+        { code: 'KeyO', finger: 'rr', w: 'w-10', en: ['o', 'O'], uk: ['щ', 'Щ'] },
+        { code: 'KeyP', finger: 'rp', w: 'w-10', en: ['p', 'P'], uk: ['з', 'З'] },
+        { code: 'BracketLeft', finger: 'rp', w: 'w-10', en: ['[', '{'], uk: ['х', 'Х'] },
+        { code: 'BracketRight', finger: 'rp', w: 'w-10', en: [']', '}'], uk: ['ї', 'Ї'] },
+        { code: 'Backslash', finger: 'rp', w: 'w-16', en: ['\\', '|'], uk: ['ґ', 'Ґ'] }
+      ],
+      [
+        { code: 'CapsLock', finger: 'lp', w: 'w-16', label: 'Caps', isMod: true },
+        { code: 'KeyA', finger: 'lp', w: 'w-10', en: ['a', 'A'], uk: ['ф', 'Ф'] },
+        { code: 'KeyS', finger: 'lr', w: 'w-10', en: ['s', 'S'], uk: ['і', 'І'] },
+        { code: 'KeyD', finger: 'lm', w: 'w-10', en: ['d', 'D'], uk: ['в', 'В'] },
+        { code: 'KeyF', finger: 'li', w: 'w-10', en: ['f', 'F'], uk: ['а', 'А'], bump: true },
+        { code: 'KeyG', finger: 'li', w: 'w-10', en: ['g', 'G'], uk: ['п', 'П'] },
+        { code: 'KeyH', finger: 'ri', w: 'w-10', en: ['h', 'H'], uk: ['р', 'Р'] },
+        { code: 'KeyJ', finger: 'ri', w: 'w-10', en: ['j', 'J'], uk: ['о', 'О'], bump: true },
+        { code: 'KeyK', finger: 'rm', w: 'w-10', en: ['k', 'K'], uk: ['л', 'Л'] },
+        { code: 'KeyL', finger: 'rr', w: 'w-10', en: ['l', 'L'], uk: ['д', 'Д'] },
+        { code: 'Semicolon', finger: 'rp', w: 'w-10', en: [';', ':'], uk: ['ж', 'Ж'] },
+        { code: 'Quote', finger: 'rp', w: 'w-10', en: ["'", '"'], uk: ['є', 'Є'] },
+        { code: 'Enter', finger: 'rp', w: 'w-20', label: 'Enter ↵', isMod: true }
+      ],
+      [
+        { code: 'ShiftLeft', finger: 'lp', w: 'w-24', label: '⇧ Shift', isMod: true },
+        { code: 'KeyZ', finger: 'lp', w: 'w-10', en: ['z', 'Z'], uk: ['я', 'Я'] },
+        { code: 'KeyX', finger: 'lr', w: 'w-10', en: ['x', 'X'], uk: ['ч', 'Ч'] },
+        { code: 'KeyC', finger: 'lm', w: 'w-10', en: ['c', 'C'], uk: ['с', 'С'] },
+        { code: 'KeyV', finger: 'li', w: 'w-10', en: ['v', 'V'], uk: ['м', 'М'] },
+        { code: 'KeyB', finger: 'li', w: 'w-10', en: ['b', 'B'], uk: ['и', 'И'] },
+        { code: 'KeyN', finger: 'ri', w: 'w-10', en: ['n', 'N'], uk: ['т', 'Т'] },
+        { code: 'KeyM', finger: 'ri', w: 'w-10', en: ['m', 'M'], uk: ['ь', 'Ь'] },
+        { code: 'Comma', finger: 'rm', w: 'w-10', en: [',', '<'], uk: ['б', 'Б'] },
+        { code: 'Period', finger: 'rr', w: 'w-10', en: ['.', '>'], uk: ['ю', 'Ю'] },
+        { code: 'Slash', finger: 'rp', w: 'w-10', en: ['/', '?'], uk: ['.', ','] },
+        { code: 'ShiftRight', finger: 'rp', w: 'w-24', label: 'Shift ⇧', isMod: true }
+      ],
+      [
+        { code: 'Space', finger: 'th', w: 'w-80 sm:w-96', en: [' ', ' '], uk: [' ', ' '], label: 'SPACE (MISSILE SALVO)' }
+      ]
+    ];
+
+    const CODE_TO_KEYDEF = {};
+    KEYBOARD_ROWS.forEach(row => row.forEach(k => { CODE_TO_KEYDEF[k.code] = k; }));
+
+    /********************************************************************
+     * 2. FINGER METADATA & ARTICULATED KEYBOARD HANDS OVERLAY
+     ********************************************************************/
+    const FINGER_COLORS = {
+      lp: '#ec4899', lr: '#f97316', lm: '#eab308', li: '#10b981', th: '#6366f1',
+      ri: '#06b6d4', rm: '#3b82f6', rr: '#8b5cf6', rp: '#d946ef'
+    };
+    const FINGER_NAMES = {
+      lp: 'Left Pinky', lr: 'Left Ring', lm: 'Left Middle', li: 'Left Index',
+      th: 'Thumb', ri: 'Right Index', rm: 'Right Middle',
+      rr: 'Right Ring', rp: 'Right Pinky'
+    };
+    const FINGER_SHORT = {
+      lp: 'L-PINKY', lr: 'L-RING', lm: 'L-MID', li: 'L-INDEX', th: 'THUMB',
+      ri: 'R-INDEX', rm: 'R-MID', rr: 'R-RING', rp: 'R-PINKY'
+    };
+
+    // Home-row anchor keys for all 10 digits on the physical keyboard
+    const HOME_FINGER_ANCHORS = {
+      lp: { code: 'KeyA', hand: 'left', knuckleDx: -56, knuckleDy: 78, width: 22 },
+      lr: { code: 'KeyS', hand: 'left', knuckleDx: -22, knuckleDy: 72, width: 24 },
+      lm: { code: 'KeyD', hand: 'left', knuckleDx: 8,   knuckleDy: 70, width: 25 },
+      li: { code: 'KeyF', hand: 'left', knuckleDx: 38,  knuckleDy: 74, width: 25 },
+      lth: { code: 'Space', offsetX: -55, hand: 'left', knuckleDx: 66, knuckleDy: 56, width: 28 },
+      rth: { code: 'Space', offsetX: 55,  hand: 'right', knuckleDx: -66, knuckleDy: 56, width: 28 },
+      ri: { code: 'KeyJ', hand: 'right', knuckleDx: -38, knuckleDy: 74, width: 25 },
+      rm: { code: 'KeyK', hand: 'right', knuckleDx: -8,  knuckleDy: 70, width: 25 },
+      rr: { code: 'KeyL', hand: 'right', knuckleDx: 22,  knuckleDy: 72, width: 24 },
+      rp: { code: 'Semicolon', hand: 'right', knuckleDx: 56, knuckleDy: 78, width: 22 }
+    };
+
+    function getKeyCenterRelativeToWrapper(code, offsetX = 0) {
+      const wrapper = document.getElementById('keyboardStageWrapper');
+      const keyEl = document.getElementById(`key-${code}`);
+      if (!wrapper || !keyEl) return null;
+      const wRect = wrapper.getBoundingClientRect();
+      const kRect = keyEl.getBoundingClientRect();
+      return {
+        x: (kRect.left - wRect.left) + wrapper.scrollLeft + kRect.width / 2 + offsetX,
+        y: (kRect.top - wRect.top) + kRect.height / 2
+      };
+    }
+
+    // Draw articulated translucent Cat Paws (like the reference image) or Cyber Hands directly over the keyboard
+    function renderKeyboardHandsOverlay(activeMap = {}) {
+      const svg = document.getElementById('keyboardHandsOverlaySvg');
+      const wrapper = document.getElementById('keyboardStageWrapper');
+      if (!svg || !wrapper) return;
+
+      if (state.handsOverlayMode === 'off') {
+        svg.innerHTML = '';
+        return;
+      }
+
+      const w = wrapper.scrollWidth || wrapper.clientWidth || 800;
+      const h = wrapper.clientHeight || 250;
+      svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+
+      const isPaws = state.handsOverlayMode === 'paws';
+      const baseFill = isPaws ? 'rgba(234, 138, 46, 0.36)' : 'rgba(30, 41, 59, 0.42)';
+      const baseStroke = isPaws ? 'rgba(120, 53, 15, 0.7)' : 'rgba(100, 116, 139, 0.6)';
+
+      // Compute palm centers from F and J home keys
+      const fPos = getKeyCenterRelativeToWrapper('KeyF') || { x: w * 0.36, y: h * 0.55 };
+      const jPos = getKeyCenterRelativeToWrapper('KeyJ') || { x: w * 0.60, y: h * 0.55 };
+
+      const leftPalm = { x: fPos.x - 42, y: fPos.y + 105 };
+      const rightPalm = { x: jPos.x + 42, y: jPos.y + 105 };
+
+      let html = `
+        <defs>
+          <filter id="fingerGlow" x="-30%" y="-30%" width="160%" height="160%">
+            <feGaussianBlur stdDeviation="4" result="blur" />
+            <feComposite in="SourceGraphic" in2="blur" operator="over" />
+          </filter>
+        </defs>
+      `;
+
+      // Draw Left & Right Palms at bottom of keyboard
+      [
+        { palm: leftPalm, side: 'left' },
+        { palm: rightPalm, side: 'right' }
+      ].forEach(({ palm }) => {
+        html += `
+          <g>
+            <ellipse cx="${palm.x}" cy="${palm.y + 18}" rx="74" ry="44" fill="${baseFill}" stroke="${baseStroke}" stroke-width="2.5" />
+            ${isPaws ? `
+              <!-- Tabby spots & stripes on the back of the paw -->
+              <ellipse cx="${palm.x - 24}" cy="${palm.y + 15}" rx="7" ry="5" fill="rgba(180, 83, 9, 0.42)" />
+              <ellipse cx="${palm.x + 2}" cy="${palm.y + 10}" rx="8" ry="5" fill="rgba(180, 83, 9, 0.42)" />
+              <ellipse cx="${palm.x + 26}" cy="${palm.y + 16}" rx="7" ry="5" fill="rgba(180, 83, 9, 0.42)" />
+              <path d="M ${palm.x - 45} ${palm.y + 34} Q ${palm.x} ${palm.y + 24} ${palm.x + 45} ${palm.y + 34}" stroke="rgba(180, 83, 9, 0.45)" stroke-width="5" stroke-linecap="round" fill="none" />
+            ` : ''}
+          </g>
+        `;
+      });
+
+      // Draw each of the 10 fingers reaching from palm knuckle to either its home key OR active target keycap
+      Object.entries(HOME_FINGER_ANCHORS).forEach(([fingerId, cfg]) => {
+        const palm = cfg.hand === 'left' ? leftPalm : rightPalm;
+        const knuckleX = palm.x + cfg.knuckleDx;
+        const knuckleY = palm.y - 16;
+
+        const homePos = getKeyCenterRelativeToWrapper(cfg.code, cfg.offsetX || 0) || { x: knuckleX, y: knuckleY - 60 };
+        const overrideTarget = activeMap[fingerId];
+
+        // If this finger is actively pressing a key, reach directly to that key's center; otherwise rest gently near home key
+        const tipX = overrideTarget ? overrideTarget.x : homePos.x;
+        const tipY = overrideTarget ? overrideTarget.y + 4 : homePos.y + 8;
+        const isActive = Boolean(overrideTarget);
+        const colorKey = fingerId === 'lth' || fingerId === 'rth' ? 'th' : fingerId;
+        const accentColor = FINGER_COLORS[colorKey];
+
+        // Control point for a natural slight finger curve
+        const midX = (knuckleX + tipX) / 2 + (cfg.hand === 'left' ? -4 : 4);
+        const midY = (knuckleY + tipY) / 2;
+
+        const strokeW = cfg.width;
+        const fingerFill = isActive
+          ? (isPaws ? 'rgba(251, 146, 60, 0.62)' : 'rgba(56, 189, 248, 0.45)')
+          : baseFill;
+        const outlineColor = isActive ? accentColor : baseStroke;
+
+        html += `
+          <g ${isActive ? 'filter="url(#fingerGlow)"' : ''}>
+            <!-- Outer Finger / Paw Digit Contour -->
+            <path d="M ${knuckleX} ${knuckleY} Q ${midX} ${midY} ${tipX} ${tipY}"
+                  stroke="${outlineColor}"
+                  stroke-width="${strokeW + 4}"
+                  stroke-linecap="round"
+                  fill="none" />
+            <!-- Inner Translucent Fill -->
+            <path d="M ${knuckleX} ${knuckleY} Q ${midX} ${midY} ${tipX} ${tipY}"
+                  stroke="${fingerFill}"
+                  stroke-width="${strokeW}"
+                  stroke-linecap="round"
+                  fill="none" />
+            ${isPaws ? `
+              <!-- Tabby tiger stripes along the finger -->
+              <circle cx="${(knuckleX + midX) / 2}" cy="${(knuckleY + midY) / 2}" r="${strokeW * 0.28}" fill="rgba(180, 83, 9, 0.38)" />
+              <circle cx="${(midX + tipX) / 2}" cy="${(midY + tipY) / 2}" r="${strokeW * 0.25}" fill="rgba(180, 83, 9, 0.38)" />
+            ` : ''}
+            <!-- Finger Tip Pad / Target Ring -->
+            <circle cx="${tipX}" cy="${tipY}" r="${isActive ? 11 : 7}"
+                    fill="${isActive ? accentColor + '66' : 'rgba(255,255,255,0.12)'}"
+                    stroke="${isActive ? '#ffffff' : outlineColor}"
+                    stroke-width="${isActive ? 2.5 : 1}" />
+          </g>
+        `;
+      });
+
+      svg.innerHTML = html;
+    }
+
+    /********************************************************************
+     * 3. CLUSTER-BASED CURRICULUM (12 PROGRESSIVE LEVELS EN & UA)
+     ********************************************************************/
+    function L(lang, id, label, short, title, display, tip, mechanic, boss, prompts) {
+      return {
+        id, short, title, display, tip, mechanic, bossName: boss,
+        category: (lang === 'uk' ? 'Сектор ' : 'Sector ') + id + ' • ' + label,
+        prompts: prompts.map(p => typeof p === 'string' ? { text: p, lang } : p)
+      };
+    }
+
+    const CURRICULUM = {
+      en: [
+        L('en', 1, 'Index Cluster', 'F J R U', 'Core Index Cluster: F, J, R, U', 'keys',
+          'Anchor index fingers on F and J bumps, reaching up to R and U. Completing each cluster fires a homing missile salvo!',
+          'Each key fires plasma; [Space] launches a Word Salvo!', 'Scout Drones',
+          ['fur jar far', 'juf ruf fur', 'far jar fur ruf', 'jur far fur jar']),
+        L('en', 2, 'Vowel Cluster', 'E I D K', 'Middle Fingers & Vowels: D, K, E, I', 'keys',
+          'Add your middle fingers (D and K) and reach up for vowels E and I to form real high-speed words.',
+          'Build rhythm across 4-letter clusters!', 'Interceptor Wing',
+          ['fire ride kid', 'red deerire', 'dire fire ride', 'kierired kid fire']),
+        L('en', 3, 'Ring Flow', 'S L W O', 'Outer Ring Cluster: S, L, W, O', 'keys',
+          'Ring fingers control S/W on the left and L/O on the right. Flow smoothly from outside in.',
+          'Steady cadence spins the vinyl synth up to 33 RPM!', 'Corvette Fleet',
+          ['slow word rose', 'fold low sour', 'world sword lord', 'flow slow rose fold']),
+        L('en', 4, 'Home & Pinky', 'A ; P Q', 'Outer Edges & Pinky Power: A, ;, P, Q', 'keys',
+          'Strengthen your pinkies with A, ;, P, and Q integrated into crisp word patterns.',
+          'Full home & top row clusters online!', 'Shield Cruiser',
+          ['spark quad flask', 'dark park lark;', 'plaza spark flask;', 'equal spark dark;']),
+        L('en', 5, 'Center Stretch', 'G H T Y', 'Central Index Stretch: G, H, T, Y', 'text',
+          'Reach inward with your index fingers for G, H, T, and Y, then snap right back to F and J.',
+          'Transitioning to full squadron text radar!', 'Heavy Frigate',
+          ['light right sight', 'truth thirty flight', 'bright night might', 'they fight the sky']),
+        L('en', 6, 'Bottom Sweep', 'C V M N', 'Bottom Row Sweeps: C, V, M, N', 'text',
+          'Curl your index and middle fingers down to C, V, M, and N without moving your palms.',
+          'Every completed word triggers a lock-on missile!', 'Ion Destroyer',
+          ['music storm clever', 'vector momentaisen', 'silver cavernorman', 'seven comets gleam']),
+        L('en', 7, 'Full Alphabet', 'B X Z', 'Full Lowercase Mastery: B, X, Z', 'text',
+          'All 26 lowercase letters unlocked! Keep your wrists floating and fingers curved.',
+          'Maintain your combo multiplier for bonus score!', 'Nebula Carrier',
+          ['breeze galaxy zenith', 'matrix puzzle blaze', 'frozen quartz vortex', 'pixel cyber horizon']),
+        L('en', 8, 'Ion Bridges', "' -", "Apostrophes & Hyphens (' and -)", 'text',
+          "Tap the quote key (') with your right pinky and hyphen (-) on the top row to fire piercing Ion Beams.",
+          "Typing ' or - fires a Twin Ion Beam through enemy shields!", 'Shield Dreadnought',
+          ["don't can't it's we're",
+           "it's a well-known starfighter",
+           "we're locked-on and won't miss",
+           "state-of-the-art plasma cannons"]),
+        L('en', 9, 'EMP & Supernova', ', .', 'Comma EMP & Period Supernovas (, and .)', 'text',
+          'Commas (,) unleash an EMP shockwave; periods (.) fire the Supernova Orbital Finisher!',
+          'Use [,] for EMP pushback and [.] for Supernova blasts!', 'Orbital Bastion',
+          ['Lock targets, charge cannons, fire.',
+           'Engines roar, shields glow, stars blur.',
+           'Stay calm, hold cadence, clear the sector.',
+           'One final shot, and the sky is ours.']),
+        L('en', 10, 'Shift Overdrive', 'Shift ! ?', 'Capital Shift & Exclamation Barrage', 'text',
+          'Hold the opposite-hand Shift key for capitals, !, and ? to shatter heavy boss armor.',
+          'Opposite-hand Shift unlocks high-voltage ordnance!', 'Star Dreadnought',
+          ['Alert! Enemy armada detected ahead!',
+           'Can you hear the vinyl synth spinning?',
+           'Charge the core! Fire all batteries now!',
+           'Victory! The outer rim is secure.']),
+        L('en', 11, 'Dialogue Shields', '" "', 'Tactical Comms & Quotation Shields', 'text',
+          'Use Shift + Quote (") to deploy reflective energy shields around squadron transmissions.',
+          'Quotation marks & punctuation deal massive boss damage!', 'Omega Titan',
+          ['"All wings, report in!" called the captain.',
+           '"Targets locked, standing by!" replied Kursor.',
+           '"Hold formation - don\'t break the rhythm!"',
+           '"Fire at will!" echoed across the nebula.']),
+        L('en', 12, 'Polyglot Boss', 'EN ⇄ UA', 'Galactic Mothership: Bilingual Relay', 'text',
+          'Alternating English and Ukrainian transmissions! With Auto-Map ON, your physical keys adapt automatically.',
+          'Final Boss! Switch seamlessly between QWERTY and ЙЦУКЕН!', 'Polyglot Mothership',
+          [{ text: 'Starfighter squadron, lock onto the core!', lang: 'en' },
+           { text: 'Зоряний флот, тримай ритм та бий влучно!', lang: 'uk' },
+           { text: "Don't lose your tempo, fire the supernova!", lang: 'en' },
+           { text: "Пам'ятай про кожну кому і крапку!", lang: 'uk' }])
+      ],
+
+      uk: [
+        L('uk', 1, 'Ядро вказівних', 'А О К Г', 'Кластер вказівних: А, О, К, Г', 'keys',
+          'Тримай вказівні пальці на виступах А та О, тягнись вгору до К та Г. Кожне слово запускає ракетний залп!',
+          'Кожна літера стріляє плазмою; [Пробіл] — ракетний залп!', 'Дрони-розвідники',
+          ['око гора кора', 'рак гра око', 'гора кора кроки', 'око гра гора']),
+        L('uk', 2, 'Голосні та рух', 'У І В Л', 'Середні пальці та голосні: В, Л, У, І', 'keys',
+          'Додай середні пальці (В та Л) і голосні У, І для плавних справжніх слів.',
+          'Тримай рівний темп, щоб розігнати вінілову платівку!', 'Перехоплювачі',
+          ['вода коло рука', 'віра лівий дар', 'рука вода коло', 'кіло воля ріка']),
+        L('uk', 3, 'Кільцевий ритм', 'І Д Ц Щ', 'Підмізинні пальці: І, Д, Ц, Щ', 'keys',
+          'Підмізинні пальці контролюють І/Ц ліворуч та Д/Щ праворуч.',
+          'Плавні комбінації прискорюють музику до 33 об/хв!', 'Корвети флоту',
+          ['діло слово колос', 'воля доля рада', 'чудо крило схід', 'слово діло воля']),
+        L('uk', 4, 'Сила мізинців', 'Ф Ж Є З', 'Крайні клавіші: Ф, Ж, Є, З', 'keys',
+          'Зміцнюємо мізинці: Ф ліворуч та Ж, Є, З праворуч у реальних словах.',
+          'Весь базовий ряд заряджено на повну потужність!', 'Щитовий Крейсер',
+          ['фаза живий казка', 'запах сфера жарт', 'зефір фреза казка', 'живий запах фаза']),
+        L('uk', 5, 'Центральний ривок', 'П Р Е Н', 'Розтяжка вказівних: П, Р, Е, Н', 'text',
+          'Вказівні пальці тягнуться всередину до П, Р, Е, Н і миттєво повертаються на А та О.',
+          'Переходимо на повний текстовий радар ескадрильї!', 'Важкий Фрегат',
+          ['небо берег перо', 'тепло зерно герой', 'нерв терен поріг', 'перед нами чисте небо']),
+        L('uk', 6, 'Нижній ряд', 'С М И Т', 'Нижній ряд: С, М, И, Т', 'text',
+          'Спускай пальці на нижній ряд для С, М, И, Т, не зміщуючи долоні.',
+          'Кожне завершене слово наводить самонавідні ракети!', 'Іонний Есмінець',
+          ['місто синій світло', 'море ритм міст', 'символ космос старт', 'чисте небо і ясний світ']),
+        L('uk', 7, 'Повний алфавіт', 'Я Ч Б Ю Ь', 'Майстерність нижнього ряду: Я, Ч, Б, Ю, Ь', 'text',
+          'Усі основні літери відкрито! Тримай зап’ястя вільними, а пальці зігнутими.',
+          'Зберігай комбо для максимального рахунку!', 'Туманний Авіаносець',
+          ['земля хвиля буря', 'сяйво промінь знання', 'срібна зоря світить', 'швидкий корабель летить']),
+        L('uk', 8, 'Іонні Мости', "' -", "Апостроф ( ' ) та дефіс ( - )", 'text',
+          "Український апостроф (') — на верхній лівій клавіші [` / ~] під лівим мізинцем!",
+          "Апостроф (') і дефіс (-) пробивають щити Подвійним Іонним Променем!", 'Броньований Дредноут',
+          ["п'ять м'яч пам'ять ім'я",
+           "по-перше, зв'язок працює чітко",
+           "кам'яний астероїд з'явився з-за хмар",
+           "солов'їний сигнал летить крізь зорі"]),
+        L('uk', 9, 'Імпульс та Наднова', ', .', 'Кома (Shift + /) та Крапка (/)', 'text',
+          'На ЙЦУКЕН крапка — це нижня права клавіша [/], а кома — це [Shift + /].',
+          'Кома [,] відкидає ворогів хвилею ЕМІ; крапка [.] б’є Надновою!', 'Орбітальний Бастіон',
+          ['Крок, приціл, постріл. Шлях вільний.',
+           'Тиша, спокій, ритм. Кожна кома дає заряд.',
+           'Зорі сяють, двигуни гудуть, флот летить.',
+           'Один точний залп, і перемога наша.']),
+        L('uk', 10, 'Форсаж Shift', 'Shift ! ?', 'Великі літери, знак оклику та питання', 'text',
+          'Затискай Shift протилежною рукою. Знак питання (?) на ЙЦУКЕН — це Shift + 7.',
+          'Потужні знаки ! та ? руйнують броню флагмана!', 'Зоряний Руйнівник',
+          ['Увага! На радарі ворожий крейсер!',
+           'Чуєш, як вініл набирає обертів?',
+           'Заряджай гармати! Повний вперед!',
+           'Перемога! Сектор повністю очищено.']),
+        L('uk', 11, 'Літери Ї Ґ Є', 'Ї Ґ Є "', 'Унікальні літери Ї, Ґ, Є та діалоги', 'text',
+          'Літера Ї — на клавіші `]`, Ґ — на `\\`, а Є — біля Enter.',
+          'Особливі символи активують захисне поле ескадрильї!', 'Титан Омега',
+          ["На ґанку фортеці засяяли сузір'я їжака!",
+           '"Тримати стрій!" - передав командир ланки.',
+           "Хіба це можливо? Пам'ять зберігає кожен код!",
+           '"Вогонь за командою!" - пролунало в ефірі.']),
+        L('uk', 12, 'Поліглот-Бос', 'UA ⇄ EN', 'Флагман Галактики: Двомовна Естафета', 'text',
+          'Чергування українських та англійських хвиль! З Auto-Map ON розкладка перемикається сама.',
+          'Фінальний Бос! Перемикайся між ЙЦУКЕН та QWERTY на льоту!', 'Поліглот-Флагман',
+          [{ text: 'Зоряний флот готовий до фінального бою!', lang: 'uk' },
+           { text: 'Starfighter squadron locked onto the mothership!', lang: 'en' },
+           { text: "Пам'ятай про апостроф, кому та фінальну крапку!", lang: 'uk' },
+           { text: 'Keep your vinyl spinning and claim the galaxy!', lang: 'en' }])
+      ]
+    };
+
+    /********************************************************************
+     * 4. GLOBAL STATE
+     ********************************************************************/
+    const state = {
+      trackLang: 'en',
+      currentLevelIdx: 0,
+      currentPromptIdx: 0,
+      charIndex: 0,
+      autoMapKeys: true,
+      zenMode: false,
+      soundEnabled: true,
+      vinylMusicEnabled: true,
+      handsOverlayMode: 'paws', // 'paws' | 'hands' | 'off'
+      showFingerZones: true,
+      startTime: null,
+      totalTyped: 0,
+      correctTyped: 0,
+      combo: 0,
+      maxCombo: 0,
+      xp: 0,
+      bossHp: 100
+    };
+
+    /********************************************************************
+     * 5. WEB AUDIO SFX + VINYL TURNTABLE TEMPO-WARPING MUSIC ENGINE
+     ********************************************************************/
+    let audioCtx = null;
+
+    // Vinyl Turntable state: pitch & speed scale together with typing cadence!
+    const vinylEngine = {
+      isRunning: false,
+      rate: 0.22,           // Current turntable speed (0.18 = ultra-slow drag, 1.0 = 33.3 RPM groove, 1.32 = 45 RPM overdrive)
+      targetRate: 0.22,
+      lastKeystrokeTime: 0,
+      stepIndex: 0,
+      nextNoteTime: 0,
+      discAngle: 0,
+      // Synthwave / Space-Funk bass + arpeggio sequence (in Hz at 1.0x normal speed)
+      bassLine: [110.0, 110.0, 130.81, 146.83, 164.81, 146.83, 130.81, 98.0],
+      arpLine:  [220.0, 261.63, 329.63, 392.0, 440.0, 392.0, 329.63, 293.66,
+                 261.63, 329.63, 392.0, 523.25, 493.88, 392.0, 329.63, 261.63]
+    };
+
+    function initAudio() {
+      if (!audioCtx) {
+        const C = window.AudioContext || window.webkitAudioContext;
+        if (C) audioCtx = new C();
+      }
+      if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+      if (audioCtx && !vinylEngine.isRunning) {
+        vinylEngine.isRunning = true;
+        vinylEngine.nextNoteTime = audioCtx.currentTime + 0.05;
+        requestAnimationFrame(updateVinylTurntableLoop);
+      }
+    }
+
+    function boostVinylOnKeystroke(isError = false) {
+      initAudio();
+      const now = performance.now();
+      const dt = now - vinylEngine.lastKeystrokeTime;
+      vinylEngine.lastKeystrokeTime = now;
+
+      if (isError) {
+        // Record scratch / drag down on typo
+        vinylEngine.targetRate = Math.max(0.20, vinylEngine.rate * 0.62);
+        vinylEngine.rate = vinylEngine.targetRate;
+        return;
+      }
+
+      // Compute instantaneous cadence from inter-key interval
+      if (dt > 0 && dt < 1800) {
+        const keysPerSec = 1000 / Math.max(95, dt);
+        // 4.5 keys/sec (~54 WPM) = 1.0x (33.3 RPM)
+        const desired = Math.min(1.35, Math.max(0.32, 0.25 + (keysPerSec / 4.5) * 0.78));
+        vinylEngine.targetRate = vinylEngine.targetRate * 0.45 + desired * 0.55;
+      } else {
+        vinylEngine.targetRate = Math.max(vinylEngine.targetRate, 0.55);
+      }
+      // Immediate nudge so the record feels responsive on the very first key
+      vinylEngine.rate = Math.min(1.35, vinylEngine.rate + 0.14);
+    }
+
+    function scheduleVinylStep(step, playTime, rate) {
+      if (!audioCtx || !state.vinylMusicEnabled || !state.soundEnabled) return;
+
+      // Pitch scales directly with turntable rate (with slight wow/flutter wobble when slow)
+      const wowFlutter = rate < 0.5 ? Math.sin(step * 1.7) * 0.035 : 0;
+      const pitchFactor = Math.max(0.18, rate + wowFlutter);
+      const stepDuration = Math.min(0.65, 0.14 / Math.max(0.20, rate));
+
+      // 1. Warm Analog Sub-Bass (every 2 steps)
+      if (step % 2 === 0) {
+        const bassFreq = vinylEngine.bassLine[(step / 2) % vinylEngine.bassLine.length] * pitchFactor;
+        const osc = audioCtx.createOscillator();
+        const filter = audioCtx.createBiquadFilter();
+        const gain = audioCtx.createGain();
+
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(bassFreq, playTime);
+
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(280 * pitchFactor + 90, playTime);
+
+        gain.gain.setValueAtTime(0.09, playTime);
+        gain.gain.exponentialRampToValueAtTime(0.001, playTime + stepDuration * 1.7);
+
+        osc.connect(filter);
+        filter.connect(gain);
+        gain.connect(audioCtx.destination);
+        osc.start(playTime);
+        osc.stop(playTime + stepDuration * 1.75);
+      }
+
+      // 2. Synthwave Lead Arpeggio
+      const arpFreq = vinylEngine.arpLine[step % vinylEngine.arpLine.length] * pitchFactor;
+      const arpOsc = audioCtx.createOscillator();
+      const arpGain = audioCtx.createGain();
+      arpOsc.type = 'triangle';
+      arpOsc.frequency.setValueAtTime(arpFreq, playTime);
+
+      const arpVol = 0.055 * Math.min(1.1, 0.45 + rate * 0.6);
+      arpGain.gain.setValueAtTime(arpVol, playTime);
+      arpGain.gain.exponentialRampToValueAtTime(0.001, playTime + stepDuration * 0.9);
+
+      arpOsc.connect(arpGain);
+      arpGain.connect(audioCtx.destination);
+      arpOsc.start(playTime);
+      arpOsc.stop(playTime + stepDuration * 0.95);
+
+      // 3. Soft Vinyl Kick / Hat Pulse
+      if (step % 4 === 0) {
+        const kickOsc = audioCtx.createOscillator();
+        const kickGain = audioCtx.createGain();
+        kickOsc.type = 'sine';
+        kickOsc.frequency.setValueAtTime(110 * pitchFactor, playTime);
+        kickOsc.frequency.exponentialRampToValueAtTime(28 * pitchFactor, playTime + 0.09);
+        kickGain.gain.setValueAtTime(0.11, playTime);
+        kickGain.gain.exponentialRampToValueAtTime(0.001, playTime + 0.1);
+        kickOsc.connect(kickGain);
+        kickGain.connect(audioCtx.destination);
+        kickOsc.start(playTime);
+        kickOsc.stop(playTime + 0.11);
+      }
+    }
+
+    function updateVinylTurntableLoop() {
+      const nowMs = performance.now();
+      const idleMs = nowMs - vinylEngine.lastKeystrokeTime;
+
+      // Gradually wind down the record when the user pauses typing
+      if (idleMs > 650) {
+        vinylEngine.targetRate = Math.max(0.20, vinylEngine.targetRate * 0.965);
+      }
+      vinylEngine.rate += (vinylEngine.targetRate - vinylEngine.rate) * 0.08;
+
+      // Spin visual vinyl disc icon & update RPM display
+      const rpm = (vinylEngine.rate * 33.3).toFixed(1);
+      const discEl = document.getElementById('vinylDiscIcon');
+      const rpmEl = document.getElementById('vinylRpmText');
+
+      if (state.vinylMusicEnabled && state.soundEnabled) {
+        vinylEngine.discAngle = (vinylEngine.discAngle + vinylEngine.rate * 5.5) % 360;
+        if (discEl) discEl.style.transform = `rotate(${vinylEngine.discAngle}deg)`;
+        if (rpmEl) {
+          let label = 'Slow Drag';
+          if (vinylEngine.rate > 1.12) label = 'Overdrive';
+          else if (vinylEngine.rate > 0.78) label = 'Groove';
+          else if (vinylEngine.rate > 0.42) label = 'Warmup';
+          rpmEl.textContent = `${rpm} RPM • ${label}`;
+        }
+      } else if (rpmEl) {
+        rpmEl.textContent = 'VINYL OFF';
+      }
+
+      // Schedule next synth notes according to current vinyl speed
+      if (audioCtx && audioCtx.state === 'running') {
+        const nowAudio = audioCtx.currentTime;
+        if (vinylEngine.nextNoteTime < nowAudio) {
+          vinylEngine.nextNoteTime = nowAudio + 0.02;
+        }
+        while (vinylEngine.nextNoteTime < nowAudio + 0.12) {
+          scheduleVinylStep(vinylEngine.stepIndex, vinylEngine.nextNoteTime, vinylEngine.rate);
+          // Step interval stretches when vinyl is slow and compresses when fast!
+          const stepInterval = 0.145 / Math.max(0.20, vinylEngine.rate);
+          vinylEngine.nextNoteTime += stepInterval;
+          vinylEngine.stepIndex = (vinylEngine.stepIndex + 1) % 16;
+        }
+      }
+
+      requestAnimationFrame(updateVinylTurntableLoop);
+    }
+
+    function tone(type, f0, f1, dur, vol, when) {
+      const now = audioCtx.currentTime + (when || 0);
+      const osc = audioCtx.createOscillator();
+      const gain = audioCtx.createGain();
+      osc.type = type;
+      osc.frequency.setValueAtTime(f0, now);
+      if (f1) osc.frequency.exponentialRampToValueAtTime(f1, now + dur);
+      gain.gain.setValueAtTime(vol, now);
+      gain.gain.exponentialRampToValueAtTime(0.001, now + dur);
+      osc.connect(gain); gain.connect(audioCtx.destination);
+      osc.start(now); osc.stop(now + dur + 0.02);
+    }
+
+    function playSound(type) {
+      if (!state.soundEnabled) return;
+      try {
+        initAudio();
+        if (!audioCtx) return;
+        if (type === 'key') {
+          // Crisp plasma laser + mechanical key thock
+          tone('triangle', 540 + Math.random() * 80, 140, 0.055, 0.12);
+        } else if (type === 'space') {
+          // Homing missile salvo launch
+          tone('sine', 220, 620, 0.14, 0.16);
+          tone('triangle', 330, 880, 0.16, 0.10, 0.04);
+        } else if (type === 'comma') {
+          // EMP shockwave pulse
+          tone('sine', 680, 180, 0.18, 0.16);
+        } else if (type === 'bridge') {
+          // Twin Ion Beam lock
+          tone('square', 520, 780, 0.12, 0.09);
+        } else if (type === 'finisher') {
+          // Supernova orbital blast chord
+          [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => tone('triangle', f, f * 0.5, 0.26, 0.13, i * 0.025));
+        } else if (type === 'error') {
+          // Turntable scratch / shield jam
+          tone('sawtooth', 135, 72, 0.15, 0.15);
+        }
+      } catch (e) { /* ignore */ }
+    }
+
+    /********************************************************************
+     * 6. HELPERS
+     ********************************************************************/
+    function getActiveLevel() { return CURRICULUM[state.trackLang][state.currentLevelIdx]; }
+    function getActivePromptObj() { return getActiveLevel().prompts[state.currentPromptIdx]; }
+    function getActiveSentenceLang() {
+      const p = getActivePromptObj();
+      return p ? p.lang : state.trackLang;
+    }
+
+    function normalizeChar(ch) {
+      if (!ch) return '';
+      if (ch === '’' || ch === 'ʼ' || ch === '`' || ch === '´') return "'";
+      if (ch === '—' || ch === '–') return '-';
+      if (ch === '«' || ch === '»' || ch === '“' || ch === '”') return '"';
+      return ch;
+    }
+
+    function findRequiredKeyForChar(targetChar, lang) {
+      const normTarget = normalizeChar(targetChar);
+      for (const row of KEYBOARD_ROWS) {
+        for (const keyDef of row) {
+          if (keyDef.isMod) continue;
+          const mapping = keyDef[lang];
+          if (!mapping) continue;
+          if (normalizeChar(mapping[0]) === normTarget) return { code: keyDef.code, shift: false, keyDef };
+          if (normalizeChar(mapping[1]) === normTarget) {
+            const useRightShift = ['lp', 'lr', 'lm', 'li'].includes(keyDef.finger);
+            return { code: keyDef.code, shift: true, shiftCode: useRightShift ? 'ShiftRight' : 'ShiftLeft', keyDef };
+          }
+        }
+      }
+      return null;
+    }
+
+    function getLevelCodeSet() {
+      const lvl = getActiveLevel();
+      const set = new Set();
+      lvl.prompts.forEach(p => {
+        for (const ch of p.text) {
+          const r = findRequiredKeyForChar(ch, p.lang);
+          if (r) { set.add(r.code); if (r.shiftCode) set.add(r.shiftCode); }
+        }
+      });
+      return set;
+    }
+
+    /********************************************************************
+     * 7. RENDERING: TABS, PROMPT STAGE, KEYBOARD & HANDS OVERLAY
+     ********************************************************************/
+    function renderLevelTabs() {
+      const container = document.getElementById('levelTabsContainer');
+      container.innerHTML = '';
+      CURRICULUM[state.trackLang].forEach((lvl, idx) => {
+        const active = idx === state.currentLevelIdx;
+        const btn = document.createElement('button');
+        btn.className = active
+          ? 'px-2.5 py-1 rounded-lg text-xs font-bold bg-cyan-500 text-slate-950 shadow-sm transition flex items-center gap-1'
+          : 'px-2.5 py-1 rounded-lg text-xs font-medium bg-slate-800/70 text-slate-300 hover:bg-slate-800 hover:text-white transition flex items-center gap-1';
+        btn.innerHTML = `<span class="font-mono opacity-75">${lvl.id}</span><span>${lvl.short}</span>`;
+        btn.title = lvl.title;
+        btn.onclick = () => selectLevel(idx);
+        container.appendChild(btn);
+      });
+    }
+
+    function renderPromptStage() {
+      const lvl = getActiveLevel();
+      const promptObj = getActivePromptObj();
+      const lang = promptObj.lang;
+      const text = promptObj.text;
+
+      document.getElementById('levelCategoryBadge').textContent = lvl.category;
+      document.getElementById('levelTitleDisplay').textContent = lvl.title;
+      document.getElementById('mechanicCalloutText').textContent = lvl.mechanic;
+      document.getElementById('ergonomicTipText').textContent = lvl.tip;
+      document.getElementById('bossNameLabel').textContent = lvl.bossName;
+      document.getElementById('stageProgressBadge').textContent = `Wave ${state.currentPromptIdx + 1} / ${lvl.prompts.length}`;
+
+      const container = document.getElementById('promptTextContainer');
+      container.innerHTML = '';
+
+      if (lvl.display === 'keys') {
+        container.className = 'w-full flex flex-wrap items-center justify-center gap-2';
+        for (let i = 0; i < text.length; i++) {
+          const ch = text[i];
+          const req = findRequiredKeyForChar(ch, lang);
+          const f = req ? req.keyDef.finger : 'th';
+          const color = FINGER_COLORS[f];
+          const tile = document.createElement('div');
+          tile.className = 'tile flex flex-col items-center justify-center rounded-xl border-2 font-mono ' +
+            (ch === ' ' ? 'w-24 h-14' : 'w-12 h-14');
+          tile.style.borderColor = color;
+          tile.style.background = '#0f172a';
+          if (i < state.charIndex) {
+            tile.style.opacity = '0.35';
+            tile.style.background = color + '33';
+          } else if (i === state.charIndex) {
+            tile.style.transform = 'scale(1.14) translateY(-3px)';
+            tile.style.background = color + '55';
+            tile.style.boxShadow = `0 0 18px ${color}99, 0 4px 0 ${color}`;
+            tile.classList.add('target-char-active');
+          }
+          const main = ch === ' '
+            ? '<span class="text-xs font-bold tracking-widest text-slate-100">SALVO ␣</span>'
+            : `<span class="text-xl font-extrabold text-white">${ch}</span>`;
+          tile.innerHTML = main + `<span class="text-[8px] mt-0.5 font-semibold" style="color:${color}">${FINGER_SHORT[f]}</span>`;
+          container.appendChild(tile);
+        }
+      } else {
+        container.className = 'w-full flex flex-wrap items-center justify-center gap-y-2 font-mono text-2xl sm:text-3xl md:text-4xl';
+        for (let i = 0; i < text.length; i++) {
+          const ch = text[i];
+          const span = document.createElement('span');
+          span.className = 'inline-block px-[3px] rounded transition-all duration-75 ';
+          const shown = ch === ' ' ? '␣' : ch;
+          if (i < state.charIndex) {
+            span.className += 'text-emerald-400 font-semibold ' + (ch === ' ' ? 'opacity-45' : '');
+          } else if (i === state.charIndex) {
+            span.className += 'bg-cyan-500/25 text-white font-bold border-b-4 border-cyan-400 target-char-active';
+          } else {
+            span.className += ch === ' ' ? 'text-slate-600' : 'text-slate-300';
+          }
+          span.textContent = shown;
+          container.appendChild(span);
+        }
+      }
+
+      const pct = text.length > 0 ? Math.round((state.charIndex / text.length) * 100) : 0;
+      document.getElementById('zenProgressBar').style.width = `${pct}%`;
+
+      updateNextKeyHighlight();
+    }
+
+    function renderKeyboardHUD() {
+      const lvl = getActiveLevel();
+      const sentenceLang = getActiveSentenceLang();
+      const targetChar = getActivePromptObj().text[state.charIndex] || '';
+      const req = findRequiredKeyForChar(targetChar, sentenceLang);
+      const isShiftRequired = req ? req.shift : false;
+      const dimUnused = lvl.display === 'keys';
+      const levelCodes = dimUnused ? getLevelCodeSet() : null;
+
+      document.getElementById('activeKeyboardLabel').innerHTML = sentenceLang === 'uk'
+        ? '<i class="fa-solid fa-laptop-code"></i> <span>Українська (ЙЦУКЕН) Physical Map</span>'
+        : '<i class="fa-solid fa-laptop-code"></i> <span>English (QWERTY) Physical Map</span>';
+
+      const container = document.getElementById('keyboardContainer');
+      container.innerHTML = '';
+
+      KEYBOARD_ROWS.forEach(row => {
+        const rowDiv = document.createElement('div');
+        rowDiv.className = 'flex items-center justify-center gap-1.5 min-w-[680px]';
+
+        row.forEach(keyDef => {
+          const btn = document.createElement('div');
+          btn.id = `key-${keyDef.code}`;
+          btn.className = `keycap ${keyDef.w} h-11 rounded-lg bg-slate-800/95 border border-slate-700/90 flex flex-col items-center justify-center px-1.5 text-slate-200 font-mono select-none finger-${keyDef.finger}`;
+
+          if (req && req.code === keyDef.code) btn.classList.add('next-target');
+          if (req && req.shift && req.shiftCode === keyDef.code) btn.classList.add('shift-target');
+          if (dimUnused && !levelCodes.has(keyDef.code)) btn.classList.add('dimmed');
+
+          if (keyDef.isMod) {
+            btn.innerHTML = `<span class="text-[11px] font-semibold tracking-tight text-slate-300">${keyDef.label}</span>`;
+          } else if (keyDef.code === 'Space') {
+            btn.innerHTML = `<span class="text-[11px] font-bold tracking-widest text-slate-300">${keyDef.label}</span>`;
+          } else {
+            const primary = keyDef[sentenceLang][isShiftRequired ? 1 : 0];
+            const secondary = keyDef[sentenceLang][isShiftRequired ? 0 : 1];
+            const enGhost = sentenceLang === 'uk' ? keyDef.en[0].toUpperCase() : '';
+            btn.innerHTML = `
+              <div class="w-full flex items-center justify-between text-[9px] leading-none text-slate-400">
+                <span>${secondary}</span><span class="text-slate-500">${enGhost}</span>
+              </div>
+              <div class="text-sm font-bold leading-tight mt-0.5">${primary}</div>
+              ${keyDef.bump ? '<div class="w-3 h-[2px] bg-cyan-400/80 rounded-full mt-0.5"></div>' : ''}
+            `;
+          }
+          rowDiv.appendChild(btn);
+        });
+        container.appendChild(rowDiv);
+      });
+
+      // After DOM layout settles, position articulated hands/paws over the exact target keycap
+      requestAnimationFrame(() => {
+        const activeFingerPositions = {};
+        if (req) {
+          const f = req.keyDef.finger;
+          const pos = getKeyCenterRelativeToWrapper(req.code);
+          if (pos) {
+            if (f === 'th') {
+              activeFingerPositions['rth'] = { x: pos.x + 35, y: pos.y };
+            } else {
+              activeFingerPositions[f] = pos;
+            }
+          }
+          if (req.shift && req.shiftCode) {
+            const sf = req.shiftCode === 'ShiftRight' ? 'rp' : 'lp';
+            const sPos = getKeyCenterRelativeToWrapper(req.shiftCode);
+            if (sPos) activeFingerPositions[sf] = sPos;
+          }
+        }
+        renderKeyboardHandsOverlay(activeFingerPositions);
+      });
+    }
+
+    function updateNextKeyHighlight() {
+      const promptObj = getActivePromptObj();
+      if (!promptObj) return;
+      const targetChar = promptObj.text[state.charIndex];
+      const lang = promptObj.lang;
+      const req = findRequiredKeyForChar(targetChar, lang);
+
+      const bigEl = document.getElementById('nextKeyBig');
+      const fingerEl = document.getElementById('fingerGuideText');
+      const shiftEl = document.getElementById('shiftGuideText');
+
+      if (!targetChar) {
+        bigEl.textContent = '✓';
+        fingerEl.textContent = 'Wave Complete!';
+        shiftEl.classList.add('hidden');
+      } else if (req) {
+        const f = req.keyDef.finger;
+        bigEl.textContent = targetChar === ' ' ? 'SPACE ␣' : targetChar;
+        bigEl.style.color = FINGER_COLORS[f];
+        fingerEl.textContent = FINGER_NAMES[f];
+        if (req.shift) {
+          const sf = req.shiftCode === 'ShiftRight' ? 'rp' : 'lp';
+          shiftEl.textContent = `+ ${FINGER_NAMES[sf]} Shift`;
+          shiftEl.classList.remove('hidden');
+        } else {
+          shiftEl.classList.add('hidden');
+        }
+      } else {
+        bigEl.textContent = targetChar;
+        fingerEl.textContent = '';
+        shiftEl.classList.add('hidden');
+      }
+
+      renderKeyboardHUD();
+    }
+
+    /********************************************************************
+     * 8. KEYBOARD INPUT ENGINE (WITH SPACE/ENTER MODAL ADVANCE)
+     ********************************************************************/
+    window.addEventListener('keydown', (e) => {
+      const modal = document.getElementById('levelCompleteModal');
+      if (!modal.classList.contains('hidden')) {
+        if (e.key === 'Enter' || e.code === 'Space') {
+          e.preventDefault();
+          advanceToNextLevel();
+        }
+        return;
+      }
+      if (e.key === 'Tab') { e.preventDefault(); restartCurrentPrompt(); return; }
+      if (e.key === 'Escape') { e.preventDefault(); resetTelemetry(); restartCurrentPrompt(); return; }
+
+      const keyEl = document.getElementById(`key-${e.code}`);
+      if (keyEl) keyEl.classList.add('pressed');
+
+      if (['ShiftLeft', 'ShiftRight', 'ControlLeft', 'ControlRight', 'AltLeft', 'AltRight', 'MetaLeft', 'MetaRight', 'CapsLock'].includes(e.code)) return;
+      if (['Space', 'Slash', 'Backquote', 'Quote'].includes(e.code)) e.preventDefault();
+
+      const promptObj = getActivePromptObj();
+      if (!promptObj) return;
+      const expectedChar = promptObj.text[state.charIndex];
+      if (!expectedChar) return;
+
+      const lang = promptObj.lang;
+      const keyDef = CODE_TO_KEYDEF[e.code];
+      let mappedChar = null;
+      if (state.autoMapKeys && keyDef && keyDef[lang]) mappedChar = keyDef[lang][e.shiftKey ? 1 : 0];
+
+      const normExpected = normalizeChar(expectedChar);
+      if (!state.startTime) state.startTime = performance.now();
+      state.totalTyped++;
+
+      const isCorrect = (state.autoMapKeys && normalizeChar(mappedChar) === normExpected) ||
+                        (normalizeChar(e.key) === normExpected);
+
+      if (isCorrect) handleCorrectKeystroke(expectedChar);
+      else handleWrongKeystroke(e.code);
+      updateTelemetryUI();
+    });
+
+    window.addEventListener('keyup', (e) => {
+      const keyEl = document.getElementById(`key-${e.code}`);
+      if (keyEl) keyEl.classList.remove('pressed', 'wrong-press');
+    });
+
+    function handleCorrectKeystroke(typedChar) {
+      state.correctTyped++;
+      state.charIndex++;
+      state.combo++;
+      if (state.combo > state.maxCombo) state.maxCombo = state.combo;
+      state.xp += 10 + Math.floor(state.combo * 1.5);
+
+      // Spin up the Vinyl Turntable synth on every accurate keystroke!
+      boostVinylOnKeystroke(false);
+
+      const norm = normalizeChar(typedChar);
+      if (norm === ' ') {
+        playSound('space');
+        triggerArmadaWeapon('salvo', typedChar);
+      } else if (norm === ',') {
+        playSound('comma');
+        triggerArmadaWeapon('emp', typedChar);
+      } else if (norm === "'" || norm === '-') {
+        playSound('bridge');
+        triggerArmadaWeapon('ion', typedChar);
+      } else if (norm === '.' || norm === '!' || norm === '?' || norm === '"') {
+        playSound('finisher');
+        triggerArmadaWeapon('supernova', typedChar);
+      } else {
+        playSound('key');
+        triggerArmadaWeapon('plasma', typedChar);
+      }
+
+      const promptText = getActivePromptObj().text;
+      const totalChars = getActiveLevel().prompts.reduce((a, p) => a + p.text.length, 0);
+      state.bossHp = Math.max(0, state.bossHp - 100 / Math.max(1, totalChars));
+      document.getElementById('bossHpBar').style.width = `${state.bossHp}%`;
+
+      if (state.charIndex >= promptText.length) {
+        triggerArmadaWeapon('salvo', '★');
+        const lvl = getActiveLevel();
+        if (state.currentPromptIdx + 1 < lvl.prompts.length) {
+          state.currentPromptIdx++;
+          state.charIndex = 0;
+          spawnArmadaWaveForPrompt();
+          renderPromptStage();
+        } else {
+          state.bossHp = 0;
+          document.getElementById('bossHpBar').style.width = '0%';
+          openLevelCompleteModal();
+        }
+      } else {
+        renderPromptStage();
+      }
+    }
+
+    function handleWrongKeystroke(code) {
+      state.combo = 0;
+      boostVinylOnKeystroke(true);
+      playSound('error');
+      triggerArmadaWeapon('jam');
+
+      const keyEl = document.getElementById(`key-${code}`);
+      if (keyEl) {
+        keyEl.classList.add('wrong-press');
+        setTimeout(() => keyEl.classList.remove('wrong-press'), 240);
+      }
+      const card = document.getElementById('typingStageCard');
+      card.classList.remove('shake-error');
+      void card.offsetWidth;
+      card.classList.add('shake-error');
+    }
+
+    function updateTelemetryUI() {
+      let wpm = 0;
+      if (state.startTime && state.correctTyped > 0) {
+        const mins = Math.max(0.02, (performance.now() - state.startTime) / 60000);
+        wpm = Math.round((state.correctTyped / 5) / mins);
+      }
+      const acc = state.totalTyped > 0 ? Math.max(0, Math.round((state.correctTyped / state.totalTyped) * 100)) : 100;
+      document.getElementById('statWpm').textContent = wpm;
+      document.getElementById('statAcc').textContent = `${acc}%`;
+      document.getElementById('statCombo').textContent = `${state.combo}x`;
+      document.getElementById('statXp').textContent = state.xp;
+    }
+
+    function resetTelemetry() {
+      state.startTime = null; state.totalTyped = 0; state.correctTyped = 0;
+      state.combo = 0; state.maxCombo = 0;
+      updateTelemetryUI();
+    }
+
+    /********************************************************************
+     * 9. SPACE INVADERS "WORD ARMADA" COMBAT ARENA ENGINE
+     ********************************************************************/
+    const armada = {
+      canvas: null,
+      ctx: null,
+      width: 900,
+      height: 150,
+      tick: 0,
+      shipY: 75,
+      targetY: 75,
+      recoil: 0,
+      jamTimer: 0,
+      empWaveRadius: 0,
+      ionBeamTimer: 0,
+      supernovaTimer: 0,
+      stars: [],
+      invaders: [],
+      lasers: [],
+      missiles: [],
+      particles: [],
+      floatingTexts: []
+    };
+
+    function initArmadaCanvas() {
+      armada.canvas = document.getElementById('armadaCanvas');
+      armada.ctx = armada.canvas.getContext('2d');
+      resizeArmadaCanvas();
+      window.addEventListener('resize', () => {
+        resizeArmadaCanvas();
+        renderKeyboardHUD();
+      });
+
+      for (let i = 0; i < 48; i++) {
+        armada.stars.push({
+          x: Math.random() * 1200,
+          y: Math.random() * 160,
+          size: Math.random() * 2 + 0.5,
+          speed: Math.random() * 1.4 + 0.3
+        });
+      }
+
+      spawnArmadaWaveForPrompt();
+      requestAnimationFrame(animateArmadaLoop);
+    }
+
+    function resizeArmadaCanvas() {
+      if (!armada.canvas) return;
+      const rect = armada.canvas.parentElement.getBoundingClientRect();
+      armada.width = Math.max(320, rect.width);
+      armada.height = Math.max(120, rect.height);
+      armada.canvas.width = armada.width;
+      armada.canvas.height = armada.height;
+    }
+
+    // Spawn an invader ship for each word/cluster in the active prompt!
+    function spawnArmadaWaveForPrompt() {
+      armada.invaders = [];
+      const promptObj = getActivePromptObj();
+      if (!promptObj) return;
+      const words = promptObj.text.split(' ').filter(Boolean);
+      const count = Math.max(3, words.length);
+
+      for (let i = 0; i < count; i++) {
+        const wordLabel = words[i % words.length] || 'CORE';
+        const row = i % 3;
+        const col = Math.floor(i / 3);
+        const isBoss = i === count - 1 && getActiveLevel().id >= 8;
+        armada.invaders.push({
+          x: Math.min(armada.width - 90, 290 + col * 135 + (row % 2) * 30),
+          y: 38 + row * 34,
+          baseY: 38 + row * 34,
+          word: wordLabel,
+          hp: Math.max(2, wordLabel.length),
+          maxHp: Math.max(2, wordLabel.length),
+          type: isBoss ? 'mothership' : (row === 0 ? 'cruiser' : (row === 1 ? 'interceptor' : 'scout')),
+          hitFlash: 0,
+          phase: Math.random() * Math.PI * 2
+        });
+      }
+    }
+
+    function setStatus(text, cls) {
+      const el = document.getElementById('companionActionText');
+      if (!el) return;
+      el.textContent = text;
+      el.className = 'text-xs font-mono font-semibold ' + cls;
+    }
+
+    function getLeadInvader() {
+      if (armada.invaders.length === 0) spawnArmadaWaveForPrompt();
+      // Target the leftmost living invader
+      return armada.invaders.reduce((best, inv) => (!best || inv.x < best.x ? inv : best), null);
+    }
+
+    function triggerArmadaWeapon(weaponType, charLabel = '') {
+      const target = getLeadInvader();
+      const shipX = 78;
+      if (target) armada.targetY = target.y;
+
+      if (weaponType === 'plasma') {
+        armada.recoil = 6;
+        const ty = target ? target.y : armada.shipY;
+        const tx = target ? target.x : armada.width - 100;
+        armada.lasers.push({
+          x: shipX + 22,
+          y: armada.shipY - 5,
+          tx, ty,
+          vx: 19,
+          color: '#22d3ee',
+          targetRef: target
+        });
+        armada.lasers.push({
+          x: shipX + 22,
+          y: armada.shipY + 5,
+          tx, ty,
+          vx: 19,
+          color: '#38bdf8',
+          targetRef: target
+        });
+        setStatus(`PLASMA CANNON [${charLabel.toUpperCase()}] — LOCKED ON`, 'text-cyan-300');
+      } else if (weaponType === 'salvo') {
+        // Word completed! Launch homing missiles that obliterate the lead invader
+        armada.recoil = 10;
+        for (let m = 0; m < 3; m++) {
+          armada.missiles.push({
+            x: shipX + 10,
+            y: armada.shipY + (m - 1) * 12,
+            vx: 9 + m * 1.5,
+            vy: (m - 1) * 2.4,
+            targetRef: target,
+            color: '#fbbf24'
+          });
+        }
+        setStatus('WORD COMBO! HOMING MISSILE SALVO LAUNCHED!', 'text-amber-300');
+        spawnFloatingText('SALVO COMBO!', shipX + 55, armada.shipY - 22, '#fbbf24');
+      } else if (weaponType === 'emp') {
+        armada.empWaveRadius = 10;
+        armada.invaders.forEach(inv => {
+          inv.x = Math.min(armada.width - 70, inv.x + 55);
+          inv.hitFlash = 10;
+        });
+        setStatus('COMMA EMP SHOCKWAVE [,] — FLEET PUSHED BACK!', 'text-emerald-400');
+        spawnFloatingText('EMP SHOCKWAVE!', 160, armada.height / 2, '#34d399');
+      } else if (weaponType === 'ion') {
+        armada.ionBeamTimer = 18;
+        if (target) {
+          target.hp = Math.max(1, target.hp - 2);
+          target.hitFlash = 12;
+          spawnExplosion(target.x, target.y, '#f59e0b', 16);
+        }
+        setStatus("TWIN ION BEAM [' / -] — SHIELDS PIERCED!", 'text-amber-400');
+        spawnFloatingText('ION PIERCE!', 165, armada.shipY - 18, '#f59e0b');
+      } else if (weaponType === 'supernova') {
+        armada.supernovaTimer = 24;
+        if (target) {
+          spawnExplosion(target.x, target.y, '#fb7185', 28);
+          spawnFloatingText('+250 SUPERNOVA!', target.x - 20, target.y - 16, '#fb7185');
+          const idx = armada.invaders.indexOf(target);
+          if (idx !== -1) armada.invaders.splice(idx, 1);
+        }
+        setStatus('SUPERNOVA ORBITAL BLAST [. ! ?] — TARGET VAPORIZED!', 'text-rose-400');
+      } else if (weaponType === 'jam') {
+        armada.jamTimer = 16;
+        armada.invaders.forEach(inv => { inv.x = Math.max(165, inv.x - 12); });
+        setStatus('TURRET JAM — CHECK HIGHLIGHTED FINGER & KEY!', 'text-rose-400');
+        spawnFloatingText('SHIELD SPARK!', shipX + 20, armada.shipY - 20, '#f43f5e');
+      }
+    }
+
+    function spawnExplosion(x, y, color, count) {
+      for (let i = 0; i < count; i++) {
+        const angle = Math.random() * Math.PI * 2;
+        const spd = Math.random() * 5.5 + 1.2;
+        armada.particles.push({
+          x, y,
+          vx: Math.cos(angle) * spd,
+          vy: Math.sin(angle) * spd,
+          life: 1,
+          color
+        });
+      }
+    }
+
+    function spawnFloatingText(text, x, y, color) {
+      armada.floatingTexts.push({ text, x, y, life: 1, color });
+    }
+
+    function drawStarfighter(ctx, x, y, recoil, jammed) {
+      ctx.save();
+      ctx.translate(x - recoil, y);
+
+      // Thruster plasma flame
+      const flameLen = 14 + Math.random() * 12 + vinylEngine.rate * 10;
+      const grad = ctx.createLinearGradient(-18 - flameLen, 0, -14, 0);
+      grad.addColorStop(0, 'rgba(6, 182, 212, 0)');
+      grad.addColorStop(0.5, '#06b6d4');
+      grad.addColorStop(1, '#ffffff');
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.moveTo(-16, -6);
+      ctx.lineTo(-18 - flameLen, 0);
+      ctx.lineTo(-16, 6);
+      ctx.closePath();
+      ctx.fill();
+
+      // Swept Galaga/Starfighter wings
+      ctx.fillStyle = jammed ? '#f43f5e' : '#0284c7';
+      ctx.beginPath();
+      ctx.moveTo(-14, -20);
+      ctx.lineTo(14, -7);
+      ctx.lineTo(14, 7);
+      ctx.lineTo(-14, 20);
+      ctx.lineTo(-6, 0);
+      ctx.closePath();
+      ctx.fill();
+
+      // Main fuselage
+      ctx.fillStyle = jammed ? '#fda4af' : '#e0f2fe';
+      ctx.beginPath();
+      ctx.moveTo(-16, -8);
+      ctx.lineTo(26, 0);
+      ctx.lineTo(-16, 8);
+      ctx.closePath();
+      ctx.fill();
+
+      // Canopy visor
+      ctx.fillStyle = '#22d3ee';
+      ctx.beginPath();
+      ctx.ellipse(2, 0, 7, 3.5, 0, 0, Math.PI * 2);
+      ctx.fill();
+
+      // Twin wingtip plasma cannons
+      ctx.fillStyle = '#38bdf8';
+      ctx.fillRect(6, -15, 12, 3);
+      ctx.fillRect(6, 12, 12, 3);
+
+      ctx.restore();
+    }
+
+    function drawInvaderShip(ctx, inv, tick) {
+      ctx.save();
+      ctx.translate(inv.x, inv.y);
+
+      const flash = inv.hitFlash > 0;
+      const bodyColor = flash
+        ? '#ffffff'
+        : (inv.type === 'mothership' ? '#f43f5e' : (inv.type === 'cruiser' ? '#a855f7' : (inv.type === 'interceptor' ? '#f59e0b' : '#10b981')));
+
+      // Classic Space Invader / Alien Galaga silhouette
+      ctx.fillStyle = bodyColor;
+      ctx.beginPath();
+      ctx.moveTo(-16, 0);
+      ctx.lineTo(-6, -11);
+      ctx.lineTo(10, -13);
+      ctx.lineTo(18, -5);
+      ctx.lineTo(18, 5);
+      ctx.lineTo(10, 13);
+      ctx.lineTo(-6, 11);
+      ctx.closePath();
+      ctx.fill();
+
+      // Glowing alien core eyes
+      ctx.fillStyle = '#090d16';
+      ctx.fillRect(-5, -5, 5, 4);
+      ctx.fillRect(-5, 1, 5, 4);
+
+      // Wing pulse fins
+      const wingFlap = Math.sin(tick * 0.12 + inv.phase) * 3;
+      ctx.strokeStyle = bodyColor;
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(4, -11);
+      ctx.lineTo(14, -17 + wingFlap);
+      ctx.moveTo(4, 11);
+      ctx.lineTo(14, 17 - wingFlap);
+      ctx.stroke();
+
+      // Word Tag & Micro HP Bar above invader
+      ctx.font = 'bold 10px "JetBrains Mono", monospace';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#e2e8f0';
+      ctx.fillText(inv.word.slice(0, 8), 2, -19);
+
+      const hpW = 28;
+      const hpPct = Math.max(0, inv.hp / inv.maxHp);
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+      ctx.fillRect(-hpW / 2, 16, hpW, 3.5);
+      ctx.fillStyle = bodyColor;
+      ctx.fillRect(-hpW / 2, 16, hpW * hpPct, 3.5);
+
+      ctx.restore();
+    }
+
+    function animateArmadaLoop() {
+      if (!state.zenMode && armada.ctx) {
+        const ctx = armada.ctx, w = armada.width, h = armada.height;
+        armada.tick++;
+
+        // Smoothly steer starfighter vertically to align with the targeted invader
+        armada.shipY += (armada.targetY - armada.shipY) * 0.16;
+        armada.shipY = Math.max(32, Math.min(h - 26, armada.shipY));
+        if (armada.recoil > 0) armada.recoil *= 0.78;
+        if (armada.jamTimer > 0) armada.jamTimer--;
+
+        // Deep space background gradient
+        const bg = ctx.createLinearGradient(0, 0, w, h);
+        bg.addColorStop(0, '#040711');
+        bg.addColorStop(0.5, '#091024');
+        bg.addColorStop(1, '#0f172a');
+        ctx.fillStyle = bg;
+        ctx.fillRect(0, 0, w, h);
+
+        // Parallax starfield speed scales with Vinyl Turntable tempo!
+        const starSpeedMult = 0.5 + vinylEngine.rate * 1.8;
+        ctx.fillStyle = '#94a3b8';
+        armada.stars.forEach(st => {
+          st.x -= st.speed * starSpeedMult;
+          if (st.x < 0) { st.x = w; st.y = Math.random() * h; }
+          ctx.fillRect(st.x, st.y, st.size, st.size);
+        });
+
+        // Subtle tactical radar grid
+        ctx.strokeStyle = 'rgba(34, 211, 238, 0.05)';
+        ctx.lineWidth = 1;
+        for (let x = 140; x < w; x += 90) {
+          ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
+        }
+
+        // EMP Shockwave ring (Comma mechanic)
+        if (armada.empWaveRadius > 0) {
+          armada.empWaveRadius += 22;
+          ctx.strokeStyle = `rgba(52, 211, 153, ${Math.max(0, 1 - armada.empWaveRadius / w)})`;
+          ctx.lineWidth = 4;
+          ctx.beginPath();
+          ctx.arc(85, armada.shipY, armada.empWaveRadius, -Math.PI / 2.2, Math.PI / 2.2);
+          ctx.stroke();
+          if (armada.empWaveRadius > w) armada.empWaveRadius = 0;
+        }
+
+        // Twin Ion Beam (Apostrophe / Hyphen mechanic)
+        if (armada.ionBeamTimer > 0) {
+          armada.ionBeamTimer--;
+          ctx.strokeStyle = 'rgba(251, 191, 36, 0.85)';
+          ctx.lineWidth = 5;
+          ctx.beginPath();
+          ctx.moveTo(98, armada.shipY);
+          ctx.lineTo(w, armada.shipY);
+          ctx.stroke();
+        }
+
+        // Supernova Orbital Beam (Period / ! / ? Finisher mechanic)
+        if (armada.supernovaTimer > 0) {
+          armada.supernovaTimer--;
+          const grad = ctx.createLinearGradient(95, 0, w, 0);
+          grad.addColorStop(0, 'rgba(244, 63, 94, 0.9)');
+          grad.addColorStop(0.5, 'rgba(251, 191, 36, 0.85)');
+          grad.addColorStop(1, 'rgba(244, 63, 94, 0)');
+          ctx.fillStyle = grad;
+          ctx.fillRect(98, armada.shipY - 12, w - 98, 24);
+        }
+
+        // Update & draw Invader Armada
+        armada.invaders.forEach(inv => {
+          inv.x -= 0.14; // Slow menacing advance
+          if (inv.x < 155) inv.x = w - 60;
+          inv.y = inv.baseY + Math.sin(armada.tick * 0.05 + inv.phase) * 6;
+          if (inv.hitFlash > 0) inv.hitFlash--;
+          drawInvaderShip(ctx, inv, armada.tick);
+        });
+
+        // Update & draw Per-Key Plasma Lasers
+        for (let i = armada.lasers.length - 1; i >= 0; i--) {
+          const l = armada.lasers[i];
+          l.x += l.vx;
+          if (l.targetRef) {
+            l.y += (l.targetRef.y - l.y) * 0.22;
+          }
+          ctx.fillStyle = l.color;
+          ctx.fillRect(l.x, l.y - 1.5, 16, 3);
+
+          const hitTarget = l.targetRef;
+          if (hitTarget && l.x >= hitTarget.x - 14) {
+            hitTarget.hp -= 0.5;
+            hitTarget.hitFlash = 5;
+            hitTarget.x = Math.min(w - 60, hitTarget.x + 4);
+            spawnExplosion(hitTarget.x - 8, l.y, '#22d3ee', 5);
+            if (hitTarget.hp <= 0) {
+              spawnExplosion(hitTarget.x, hitTarget.y, '#34d399', 20);
+              spawnFloatingText('+100 KILL', hitTarget.x, hitTarget.y - 10, '#34d399');
+              const idx = armada.invaders.indexOf(hitTarget);
+              if (idx !== -1) armada.invaders.splice(idx, 1);
+            }
+            armada.lasers.splice(i, 1);
+            continue;
+          }
+          if (l.x > w + 20) armada.lasers.splice(i, 1);
+        }
+
+        // Update & draw Word-Completion Homing Missiles
+        for (let i = armada.missiles.length - 1; i >= 0; i--) {
+          const m = armada.missiles[i];
+          const t = m.targetRef || getLeadInvader();
+          m.x += m.vx;
+          if (t) {
+            m.y += (t.y - m.y) * 0.18;
+          } else {
+            m.y += m.vy;
+          }
+
+          ctx.fillStyle = m.color;
+          ctx.beginPath();
+          ctx.arc(m.x, m.y, 4.5, 0, Math.PI * 2);
+          ctx.fill();
+
+          // Smoke trail particle
+          armada.particles.push({
+            x: m.x - 5, y: m.y,
+            vx: -1.5, vy: (Math.random() - 0.5) * 0.8,
+            life: 0.45, color: '#fde68a'
+          });
+
+          if (t && m.x >= t.x - 14) {
+            spawnExplosion(t.x, t.y, '#fbbf24', 22);
+            const idx = armada.invaders.indexOf(t);
+            if (idx !== -1) armada.invaders.splice(idx, 1);
+            armada.missiles.splice(i, 1);
+            continue;
+          }
+          if (m.x > w + 30) armada.missiles.splice(i, 1);
+        }
+
+        // Draw Player Starfighter
+        drawStarfighter(ctx, 78, armada.shipY, armada.recoil, armada.jamTimer > 0);
+
+        // Draw explosion particles
+        for (let i = armada.particles.length - 1; i >= 0; i--) {
+          const pt = armada.particles[i];
+          pt.x += pt.vx; pt.y += pt.vy; pt.life -= 0.04;
+          if (pt.life <= 0) { armada.particles.splice(i, 1); continue; }
+          ctx.globalAlpha = pt.life;
+          ctx.fillStyle = pt.color;
+          ctx.fillRect(pt.x, pt.y, 3, 3);
+          ctx.globalAlpha = 1;
+        }
+
+        // Draw floating combat score callouts
+        for (let i = armada.floatingTexts.length - 1; i >= 0; i--) {
+          const ft = armada.floatingTexts[i];
+          ft.y -= 0.75; ft.life -= 0.025;
+          if (ft.life <= 0) { armada.floatingTexts.splice(i, 1); continue; }
+          ctx.globalAlpha = ft.life;
+          ctx.font = 'bold 11px "JetBrains Mono", monospace';
+          ctx.fillStyle = ft.color;
+          ctx.fillText(ft.text, ft.x, ft.y);
+          ctx.globalAlpha = 1;
+        }
+      }
+      requestAnimationFrame(animateArmadaLoop);
+    }
+
+    /********************************************************************
+     * 10. NAVIGATION & UI TOGGLES
+     ********************************************************************/
+    function resetLevelProgress() {
+      state.currentPromptIdx = 0;
+      state.charIndex = 0;
+      state.bossHp = 100;
+      document.getElementById('bossHpBar').style.width = '100%';
+      spawnArmadaWaveForPrompt();
+    }
+
+    function setLanguageTrack(lang) {
+      state.trackLang = lang;
+      state.currentLevelIdx = 0;
+      resetLevelProgress();
+      const en = document.getElementById('btnLangEN'), ua = document.getElementById('btnLangUA');
+      const on = 'px-2.5 py-1 text-xs font-semibold rounded-md transition-all bg-cyan-500 text-slate-950 shadow';
+      const off = 'px-2.5 py-1 text-xs font-semibold rounded-md transition-all text-slate-300 hover:text-white';
+      en.className = lang === 'en' ? on : off;
+      ua.className = lang === 'uk' ? on : off;
+      renderLevelTabs();
+      renderPromptStage();
+    }
+
+    function selectLevel(idx) {
+      state.currentLevelIdx = idx;
+      resetLevelProgress();
+      renderLevelTabs();
+      renderPromptStage();
+    }
+
+    function restartCurrentPrompt() {
+      state.charIndex = 0;
+      spawnArmadaWaveForPrompt();
+      renderPromptStage();
+    }
+
+    function toggleAutoMap() {
+      state.autoMapKeys = !state.autoMapKeys;
+      const st = document.getElementById('autoMapStatus'), btn = document.getElementById('btnAutoMap');
+      if (state.autoMapKeys) {
+        st.textContent = 'ON';
+        btn.className = 'px-2.5 py-1.5 rounded-lg text-xs font-medium border border-emerald-500/40 bg-emerald-500/10 text-emerald-300 hover:bg-emerald-500/20 transition flex items-center gap-1.5';
+      } else {
+        st.textContent = 'OFF (OS)';
+        btn.className = 'px-2.5 py-1.5 rounded-lg text-xs font-medium border border-slate-700 bg-slate-800 text-slate-400 hover:text-white transition flex items-center gap-1.5';
+      }
+    }
+
+    function toggleVinylMusic() {
+      initAudio();
+      state.vinylMusicEnabled = !state.vinylMusicEnabled;
+      const btn = document.getElementById('btnVinylMusic');
+      if (state.vinylMusicEnabled) {
+        btn.className = 'px-2.5 py-1.5 rounded-lg text-xs font-medium border border-amber-500/40 bg-amber-500/10 text-amber-300 hover:bg-amber-500/20 transition flex items-center gap-2';
+      } else {
+        btn.className = 'px-2.5 py-1.5 rounded-lg text-xs font-medium border border-slate-700 bg-slate-800 text-slate-400 hover:text-white transition flex items-center gap-2';
+      }
+    }
+
+    function cycleHandsOverlayMode() {
+      const order = ['paws', 'hands', 'off'];
+      const next = order[(order.indexOf(state.handsOverlayMode) + 1) % order.length];
+      state.handsOverlayMode = next;
+      const label = document.getElementById('handsOverlayStateText');
+      if (next === 'paws') label.textContent = 'CAT PAWS';
+      else if (next === 'hands') label.textContent = 'CYBER HANDS';
+      else label.textContent = 'OFF';
+      renderKeyboardHUD();
+    }
+
+    function toggleZenMode() {
+      state.zenMode = !state.zenMode;
+      const strip = document.getElementById('actionStripContainer'), zen = document.getElementById('zenStripContainer');
+      if (state.zenMode) {
+        strip.classList.add('hidden'); zen.classList.remove('hidden'); zen.classList.add('flex');
+        document.getElementById('zenLabel').textContent = 'Zen Mode';
+        document.getElementById('zenIcon').className = 'fa-solid fa-spa';
+      } else {
+        strip.classList.remove('hidden'); zen.classList.add('hidden'); zen.classList.remove('flex');
+        document.getElementById('zenLabel').textContent = 'Armada Mode';
+        document.getElementById('zenIcon').className = 'fa-solid fa-user-astronaut';
+        resizeArmadaCanvas();
+      }
+    }
+
+    function toggleSound() {
+      state.soundEnabled = !state.soundEnabled;
+      document.getElementById('soundIcon').className = state.soundEnabled ? 'fa-solid fa-volume-high text-cyan-400' : 'fa-solid fa-volume-xmark text-slate-500';
+      document.getElementById('soundStatus').textContent = state.soundEnabled ? 'SFX ON' : 'MUTED';
+    }
+
+    function toggleFingerZones() {
+      state.showFingerZones = !state.showFingerZones;
+      const kb = document.getElementById('keyboardContainer'), t = document.getElementById('fingerZoneStateText');
+      kb.classList.toggle('show-fingers', state.showFingerZones);
+      t.textContent = state.showFingerZones ? 'ON' : 'OFF';
+      t.className = state.showFingerZones ? 'text-cyan-400' : 'text-slate-500';
+    }
+
+    function openLevelCompleteModal() {
+      document.getElementById('modalLevelTitle').textContent = getActiveLevel().title;
+      document.getElementById('modalWpm').textContent = document.getElementById('statWpm').textContent;
+      document.getElementById('modalAcc').textContent = document.getElementById('statAcc').textContent;
+      document.getElementById('modalCombo').textContent = `${state.maxCombo}x`;
+      const modal = document.getElementById('levelCompleteModal');
+      modal.classList.remove('hidden'); modal.classList.add('flex');
+    }
+
+    function closeModal() {
+      const modal = document.getElementById('levelCompleteModal');
+      modal.classList.add('hidden'); modal.classList.remove('flex');
+    }
+
+    function replayCurrentLevel() { closeModal(); selectLevel(state.currentLevelIdx); }
+
+    function advanceToNextLevel() {
+      closeModal();
+      selectLevel((state.currentLevelIdx + 1) % CURRICULUM[state.trackLang].length);
+    }
+
+    window.onload = function () {
+      renderLevelTabs();
+      renderPromptStage();
+      initArmadaCanvas();
+    };
+  </script>
+</body>
+</html>
