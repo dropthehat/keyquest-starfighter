@@ -189,7 +189,7 @@ kbd { font-family: var(--f-mono); border: 1px solid var(--seam); border-bottom-w
 .key.on::before { background: var(--fc); box-shadow: 0 0 6px var(--fc), 0 0 2px var(--fc); }
 .key.target { color: #ffd27a; text-shadow: 0 0 10px rgba(255,190,90,.95); z-index: 1;
   background: linear-gradient(180deg, #5b4a2b 0%, #43361f 60%, #33291a 100%);
-  box-shadow: 0 4px 0 #0a0c0f, 0 0 0 2px var(--fc), 0 0 24px color-mix(in srgb, var(--fc) 60%, transparent), inset 0 1px 0 rgba(255,255,255,.2); }
+  box-shadow: 0 0 0 2px var(--fc), 0 0 24px color-mix(in srgb, var(--fc) 60%, transparent), 0 5px 0 1px #0a0c0f, inset 0 1px 0 rgba(255,255,255,.2); }
 .key.pressed { transform: translateY(3px); box-shadow: 0 1px 0 #0a0c0f, inset 0 1px 0 rgba(255,255,255,.08), inset 0 -1px 0 rgba(0,0,0,.35); }
 .key.wrong { background: linear-gradient(180deg, #6a2424, #451818); color: #fff; box-shadow: 0 2px 0 #0a0c0f, 0 0 0 2px var(--alert); }
 .key.bump::after { content: ""; position: absolute; bottom: 7px; width: 12px; height: 2px; border-radius: 1px; background: currentColor; opacity: .6; }
@@ -264,6 +264,16 @@ kbd { font-family: var(--f-mono); border: 1px solid var(--seam); border-bottom-w
 .cine-skip { position: absolute; z-index: 2; top: 60px; right: max(16px, env(safe-area-inset-right, 0px)); }
 
 [hidden] { display: none !important; }
+/* broadcast interference */
+.screen::before { content: ""; position: absolute; inset: 0; z-index: 1; background-size: 180px 180px; pointer-events: none; opacity: 0; transition: opacity .3s;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='180' height='180'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 1  0 0 0 0 1  0 0 0 0 1  0 0 0 1.4 -.2'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+  animation: grain .22s steps(4) infinite; mix-blend-mode: screen; }
+.comms.enemy .screen::before { opacity: .12; }
+.comms.enemy.loud .screen::before { opacity: .26; }
+.comms.enemy.talking .crt-text { animation: jitter .18s steps(2) infinite, tear 2.6s steps(1) infinite; }
+@keyframes grain { 0% { background-position: 0 0; } 25% { background-position: -47px 31px; } 50% { background-position: 63px -52px; } 75% { background-position: -29px 71px; } 100% { background-position: 88px 9px; } }
+@keyframes tear { 0%, 88%, 100% { clip-path: none; } 90% { clip-path: inset(0 0 55% 0); transform: translateX(6px); } 93% { clip-path: inset(40% 0 0 0); transform: translateX(-5px); } }
+@media (prefers-reduced-motion: reduce) { .screen::before, .comms.enemy.talking .crt-text { animation: none; } }
 /* Combat 2.0 terminal */
 .heat { height: 4px; background: #151d25; border-radius: 2px; overflow: hidden; }
 .heat i { display: block; height: 100%; background: linear-gradient(90deg, var(--live), #d6ffe6); transition: width .15s; }
@@ -709,6 +719,14 @@ function initMusic() {
   const len = Math.floor(AC.sampleRate * 0.4), b = AC.createBuffer(1, len, AC.sampleRate), d = b.getChannelData(0);
   for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
   MUS.noise = b; MUS.cNext = MUS.tNext = AC.currentTime + 0.15; MUS.on = true;
+  // radio static bed for enemy broadcasts
+  const sl = AC.sampleRate * 2, sb = AC.createBuffer(1, sl, AC.sampleRate), sd = sb.getChannelData(0);
+  for (let i = 0; i < sl; i++) sd[i] = (Math.random() * 2 - 1) * (0.6 + 0.4 * Math.sin(i / 900));
+  const src = AC.createBufferSource(); src.buffer = sb; src.loop = true;
+  const bp = AC.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = 2200; bp.Q.value = 0.6;
+  MUS.gStatic = AC.createGain(); MUS.gStatic.gain.value = 0;
+  src.connect(bp); bp.connect(MUS.gStatic); MUS.gStatic.connect(master); src.start();
+  MUS.staticBp = bp;
 }
 function vox(dest, type, f, t0, dur, vol, att = 0.01, cutoff = 0, detune = 0) {
   const o = AC.createOscillator(), g = AC.createGain();
@@ -765,9 +783,22 @@ function musicMood() {
   if (hostile()) { MUS.intensity = 0.45; return { calm: 0, tense: 0.85 }; }
   return { calm: 1, tense: 0 };
 }
+function staticLevel() {
+  if (S.phase === 'intro' || S.phase === 'card') return 0;
+  if (S.phase === 'decrypt' && S.dec) return 0.03 + 0.06 * (1 - S.dec.ki / Math.max(1, S.dec.keys.length));
+  if (S.speaker === 'vex' || S.speaker === 'unknown') return S.speaking ? 0.035 : 0.01;
+  return 0;
+}
 function updateMusic() {
   if (!MUS.on) return;
   const at = AC.currentTime, m = musicMood();
+  const st = S.sound ? staticLevel() : 0;
+  MUS.gStatic.gain.setTargetAtTime(st, at, 0.08);
+  if (st > 0) {
+    MUS.staticBp.frequency.setTargetAtTime(1600 + Math.random() * 1800, at, 0.05);
+    if (Math.random() < 0.07) noiseHit(master, at + Math.random() * 0.05, 0.015 + Math.random() * 0.04, st * 2.2, 2500);
+    if (Math.random() < 0.012) vox(master, 'square', 60 + Math.random() * 40, at, 0.12, st * 0.6, 0.005, 900);
+  }
   MUS.gCalm.gain.setTargetAtTime(m.calm, at, 0.9);
   MUS.gTense.gain.setTargetAtTime(m.tense, at, m.tense > 0 ? 0.4 : 0.9);
   const e = 60 / 66 / 2, sx = 60 / 120 / 4, ahead = at + 0.2;
@@ -847,9 +878,16 @@ function finishTyping() {
   S.shown = S.full; S.speaking = false; renderCrtText();
   if (S.typeCb) { const cb = S.typeCb; S.typeCb = null; cb(); }
 }
+function squelch() {
+  if (!AC || !S.sound || !MUS.noise) return;
+  const t = AC.currentTime;
+  noiseHit(master, t, 0.09, 0.09, 1200);
+  blip('sine', 1150, 900, 0.06, 0.03);
+}
 function sayLine(item) {
   const who = typeof item === 'string' ? 'ora' : item.who;
   const text = typeof item === 'string' ? item : item.text;
+  if (who !== 'ora') squelch();
   S.speaker = who;
   typeText(fmt(text), true);
 }
@@ -889,6 +927,8 @@ function renderCrtText() {
     el.innerHTML = `<span class="who">${who}&gt;</span>` + typedHtml(S.full, S.shown.length, showCaret);
   }
   $('#comms').classList.toggle('enemy', hostile());
+  $('#comms').classList.toggle('talking', hostile() && (S.speaking || S.phase === 'decrypt'));
+  $('#comms').classList.toggle('loud', S.phase === 'decrypt' && !!S.dec && S.dec.ki / Math.max(1, S.dec.keys.length) < 0.5);
   $('#crtName').textContent = S.speaker === 'vex' ? t('vexName') : (hostile() ? t('unknown') : t('oraName'));
   $('#crtChan').textContent = hostile() ? 'CH ??' : 'CH 01';
 }
@@ -1231,6 +1271,12 @@ function drawComms(ctx, now) {
   } else {
     vtext(ctx, '?', cx, cy, 64, 'center', G(0.5 + 0.5 * Math.random()));
   }
+  // interference: speckle and horizontal tears, heavier while still encrypted
+  const noiseK = decrypting ? 1 - prog * 0.8 : (S.speaking ? 0.35 : 0.12);
+  ctx.save(); ctx.shadowBlur = 0;
+  for (let i = 0; i < 90 * noiseK; i++) { ctx.fillStyle = G(Math.random() * 0.5); ctx.fillRect(Math.random() * W, Math.random() * H, 2, 2); }
+  if (Math.random() < 0.25 * noiseK) { const ty = Math.random() * H; ctx.fillStyle = G(0.12 + Math.random() * 0.15); ctx.fillRect(0, ty, W, 2 + Math.random() * 6); }
+  ctx.restore();
   // oscilloscope
   const oy = H * 0.72, amp = 16, noiseAmt = decrypting ? 1 - prog : (S.speaking ? 0.15 : 0.05);
   ctx.strokeStyle = G(.95); ctx.lineWidth = 1.6;
@@ -1759,7 +1805,7 @@ function startDecrypt() {
   const total = (chars * 1150 + keys.length * 1500 + 6000) * factor;
   S.dec = { segs, keys, ki: 0, ch: 0, total, left: total };
   S.speaker = 'unknown'; S.phase = 'decrypt'; S.msg = '';
-  sfx.glitch();
+  sfx.glitch(); squelch();
   renderAll();
 }
 function decryptDone() {
@@ -1797,7 +1843,7 @@ const TAUNT = {
         missile: 'Ракета! Набери її код, щоб збити.', over: 'Гармату перезаряджено! Наступне влучання вразить ще одну ціль.' }
 };
 const tw = (k) => TAUNT[S.lang][k];
-function taunt(text) { S.speaker = 'vex'; typeText(fmt(text), false); }
+function taunt(text) { squelch(); S.speaker = 'vex'; typeText(fmt(text), false); }
 
 /* ---------- Mistakes memory + repair bay ---------- */
 function noteMiss(word, ch) {
