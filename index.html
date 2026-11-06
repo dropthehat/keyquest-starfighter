@@ -43,6 +43,18 @@
       50% { box-shadow: 0 0 14px 3px rgba(34, 211, 238, 0.5); }
     }
     .target-char-active { animation: pulseTarget 1.4s infinite; }
+    @keyframes ringPulse {
+      0%, 100% { opacity: 0.55; }
+      50% { opacity: 1; }
+    }
+    .paw-ring { animation: ringPulse 0.9s ease-in-out infinite; }
+    .hand-glide { transition: transform 0.11s cubic-bezier(0.22, 1, 0.36, 1); }
+    .finger-reach { transition: transform 0.11s cubic-bezier(0.22, 1, 0.36, 1); }
+    @keyframes countdownPop {
+      0% { transform: scale(1.35); opacity: 0.3; }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    .countdown-pop { animation: countdownPop 0.25s ease-out both; }
 
     .keycap {
       position: relative;
@@ -98,7 +110,7 @@
   <!-- ================= TOP HEADER BAR ================= -->
   <header class="w-full bg-slate-950/90 backdrop-blur-md border-b border-slate-800/80 px-4 py-2 sticky top-0 z-30">
     <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-2.5">
-      
+
       <!-- Brand Logo -->
       <div class="flex items-center gap-3">
         <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-cyan-400 via-blue-500 to-indigo-600 flex items-center justify-center shadow-lg shadow-cyan-500/20">
@@ -196,10 +208,16 @@
     </div>
 
     <!-- ZONE 1: SPACE INVADERS "WORD ARMADA" COMBAT ARENA -->
-    <section id="actionStripContainer" class="relative w-full h-36 sm:h-40 rounded-2xl overflow-hidden border border-slate-800 bg-slate-950 shadow-inner">
+    <section id="actionStripContainer" class="relative w-full h-36 sm:h-40 rounded-2xl overflow-hidden border border-slate-800 bg-slate-950 shadow-inner transition-shadow duration-200">
       <canvas id="armadaCanvas" class="w-full h-full block"></canvas>
       <div class="absolute top-2.5 left-3 right-3 flex items-center justify-between pointer-events-none">
         <div class="flex items-center gap-2 bg-slate-950/85 backdrop-blur-sm border border-slate-800/80 px-3 py-1 rounded-full">
+          <!-- Shield pips (3 hex shields) -->
+          <div id="shieldHud" class="flex items-center gap-0.5 pr-2 mr-0.5 border-r border-slate-700">
+            <span class="shield-pip text-sm text-cyan-300 drop-shadow-[0_0_6px_rgba(34,211,238,0.9)]">⬢</span>
+            <span class="shield-pip text-sm text-cyan-300 drop-shadow-[0_0_6px_rgba(34,211,238,0.9)]">⬢</span>
+            <span class="shield-pip text-sm text-cyan-300 drop-shadow-[0_0_6px_rgba(34,211,238,0.9)]">⬢</span>
+          </div>
           <span class="w-2 h-2 rounded-full bg-cyan-400 animate-ping"></span>
           <span id="companionActionText" class="text-xs font-mono font-semibold text-cyan-300">STARFIGHTER LOCKED ON — TYPE TO FIRE PLASMA</span>
         </div>
@@ -222,6 +240,13 @@
 
     <!-- ZONE 2: TYPING STAGE -->
     <section id="typingStageCard" class="relative w-full bg-gradient-to-b from-slate-900/95 to-slate-950/95 border border-slate-800/90 rounded-2xl p-4 sm:p-5 shadow-2xl flex flex-col gap-3">
+
+      <!-- 3-2-1-ENGAGE Countdown Overlay (input locked while visible) -->
+      <div id="countdownOverlay" class="absolute inset-0 z-20 flex-col items-center justify-center bg-slate-950/85 backdrop-blur-sm rounded-2xl transition-opacity duration-200" style="display: flex;">
+        <div class="text-xs font-mono uppercase tracking-widest text-cyan-400 mb-1">Place fingers on home row bumps (F &amp; J / А &amp; О)</div>
+        <div id="countdownNumber" class="font-mono text-6xl font-extrabold text-white drop-shadow-[0_0_25px_rgba(34,211,238,0.8)]">3</div>
+      </div>
+
       <div class="flex flex-wrap items-center justify-between gap-2 border-b border-slate-800/80 pb-2.5">
         <div>
           <span id="levelCategoryBadge" class="text-[11px] font-mono uppercase tracking-wider text-cyan-400 font-semibold block">Level 1</span>
@@ -281,10 +306,10 @@
             <span class="flex items-center gap-1"><i class="w-2 h-2 rounded-full bg-fuchsia-500 inline-block"></i>R-Pinky</span>
           </div>
 
-          <!-- Hands Overlay Style Switcher (Cat Paws / Cyber Hands / Off) -->
+          <!-- Hands Overlay Style Switcher (Cat Paws / Cyber Gloves / Off) -->
           <button id="btnHandsMode" onclick="cycleHandsOverlayMode()" class="px-2.5 py-1 rounded-md text-[11px] font-mono bg-amber-500/15 text-amber-300 border border-amber-500/40 hover:bg-amber-500/25 transition flex items-center gap-1.5">
             <i class="fa-solid fa-paw"></i>
-            <span>Hands Overlay: <strong id="handsOverlayStateText">CAT PAWS</strong></span>
+            <span>Hands: <strong id="handsOverlayStateText">CAT PAWS 🐾</strong></span>
           </button>
 
           <button id="btnFingerZones" onclick="toggleFingerZones()" class="px-2.5 py-1 rounded-md text-[11px] font-mono bg-slate-800 text-slate-200 border border-slate-700 hover:border-slate-600 transition">
@@ -296,38 +321,43 @@
       <!-- Keyboard + Overlaid Hands Wrapper -->
       <div id="keyboardStageWrapper" class="relative w-full max-w-5xl mx-auto overflow-x-auto pb-2">
         <div id="keyboardContainer" class="show-fingers w-full flex flex-col gap-1.5 select-none min-w-[680px]"></div>
-        <!-- Direct SVG Overlay for Articulated Paws / Hands over the physical keys -->
-        <svg id="keyboardHandsOverlaySvg" class="pointer-events-none absolute inset-0 w-full h-full z-20 overflow-visible"></svg>
+        <!-- Fixed-proportion illustrated hands / paws overlay -->
+        <svg id="keyboardHandsOverlaySvg" class="pointer-events-none absolute inset-0 w-full h-full z-20 overflow-visible transition-opacity duration-200" style="opacity: 0.78;"></svg>
       </div>
     </section>
 
   </main>
 
-  <!-- ================= LEVEL COMPLETE MODAL ================= -->
+  <!-- ================= UNIFIED VICTORY / DEFEAT MODAL ================= -->
   <div id="levelCompleteModal" class="fixed inset-0 z-50 hidden items-center justify-center bg-slate-950/85 backdrop-blur-md p-4">
     <div class="bg-slate-900 border border-slate-700 rounded-2xl max-w-md w-full p-6 shadow-2xl">
       <div class="flex items-center justify-between mb-4">
         <div class="flex items-center gap-2.5">
-          <div class="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 text-xl"><i class="fa-solid fa-trophy"></i></div>
+          <div id="modalBadgeIcon" class="w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 text-xl">
+            <i id="modalBadgeGlyph" class="fa-solid fa-trophy"></i>
+          </div>
           <div>
-            <span class="text-xs font-mono uppercase text-emerald-400 font-semibold">Sector Cleared!</span>
+            <span id="modalBadgeLabel" class="text-xs font-mono uppercase text-emerald-400 font-semibold">Sector Cleared!</span>
             <h3 id="modalLevelTitle" class="text-lg font-bold text-white"></h3>
           </div>
         </div>
-        <button onclick="closeModal()" class="text-slate-400 hover:text-white"><i class="fa-solid fa-xmark text-lg"></i></button>
+        <button onclick="replayCurrentLevel()" class="text-slate-400 hover:text-white" title="Replay sector"><i class="fa-solid fa-xmark text-lg"></i></button>
       </div>
+
+      <div id="modalStars" class="text-center text-2xl tracking-[0.3em] text-amber-300 mb-1"></div>
+
       <div class="grid grid-cols-3 gap-3 my-5">
         <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 text-center"><div class="text-[11px] font-mono uppercase text-slate-400">Speed</div><div id="modalWpm" class="text-2xl font-mono font-extrabold text-cyan-400 mt-0.5">0</div><div class="text-[10px] text-slate-500">WPM</div></div>
         <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 text-center"><div class="text-[11px] font-mono uppercase text-slate-400">Accuracy</div><div id="modalAcc" class="text-2xl font-mono font-extrabold text-emerald-400 mt-0.5">0%</div><div class="text-[10px] text-slate-500">Precision</div></div>
         <div class="bg-slate-950 border border-slate-800 rounded-xl p-3 text-center"><div class="text-[11px] font-mono uppercase text-slate-400">Max Combo</div><div id="modalCombo" class="text-2xl font-mono font-extrabold text-amber-400 mt-0.5">0x</div><div class="text-[10px] text-slate-500">Streak</div></div>
       </div>
-      <p id="modalFeedbackText" class="text-xs text-slate-300 bg-slate-950/60 border border-slate-800 rounded-lg p-3 mb-5 leading-relaxed">
-        Enemy armada neutralized! Press <kbd class="px-1.5 py-0.5 bg-slate-800 text-cyan-300 rounded font-mono">Space</kbd> or <kbd class="px-1.5 py-0.5 bg-slate-800 text-cyan-300 rounded font-mono">Enter</kbd> to launch the next sector.
-      </p>
+
+      <p id="modalFeedbackText" class="text-xs text-slate-300 bg-slate-950/60 border border-slate-800 rounded-lg p-3 mb-5 leading-relaxed"></p>
+
       <div class="flex items-center justify-end gap-2.5">
-        <button onclick="replayCurrentLevel()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 transition"><i class="fa-solid fa-rotate-left mr-1"></i> Replay</button>
-        <button onclick="advanceToNextLevel()" class="px-5 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 shadow-lg shadow-cyan-500/20 transition">
-          Next Level [Space / Enter] <i class="fa-solid fa-arrow-right ml-1"></i>
+        <button id="modalSecondaryBtn" onclick="replayCurrentLevel()" class="px-4 py-2 rounded-xl text-xs font-semibold bg-slate-800 hover:bg-slate-700 text-slate-200 transition"><i class="fa-solid fa-rotate-left mr-1"></i> Replay</button>
+        <button id="modalPrimaryBtn" onclick="modalPrimaryAction()" class="px-5 py-2 rounded-xl text-xs font-bold bg-gradient-to-r from-cyan-400 to-blue-500 hover:from-cyan-300 hover:to-blue-400 text-slate-950 shadow-lg shadow-cyan-500/20 transition">
+          Next Level [Space / Enter]
         </button>
       </div>
     </div>
@@ -408,7 +438,7 @@
     KEYBOARD_ROWS.forEach(row => row.forEach(k => { CODE_TO_KEYDEF[k.code] = k; }));
 
     /********************************************************************
-     * 2. FINGER METADATA & ARTICULATED KEYBOARD HANDS OVERLAY
+     * 2. FINGER METADATA & FIXED-PROPORTION HANDS / PAWS OVERLAY
      ********************************************************************/
     const FINGER_COLORS = {
       lp: '#ec4899', lr: '#f97316', lm: '#eab308', li: '#10b981', th: '#6366f1',
@@ -424,18 +454,19 @@
       ri: 'R-INDEX', rm: 'R-MID', rr: 'R-RING', rp: 'R-PINKY'
     };
 
-    // Home-row anchor keys for all 10 digits on the physical keyboard
-    const HOME_FINGER_ANCHORS = {
-      lp: { code: 'KeyA', hand: 'left', knuckleDx: -56, knuckleDy: 78, width: 22 },
-      lr: { code: 'KeyS', hand: 'left', knuckleDx: -22, knuckleDy: 72, width: 24 },
-      lm: { code: 'KeyD', hand: 'left', knuckleDx: 8,   knuckleDy: 70, width: 25 },
-      li: { code: 'KeyF', hand: 'left', knuckleDx: 38,  knuckleDy: 74, width: 25 },
-      lth: { code: 'Space', offsetX: -55, hand: 'left', knuckleDx: 66, knuckleDy: 56, width: 28 },
-      rth: { code: 'Space', offsetX: 55,  hand: 'right', knuckleDx: -66, knuckleDy: 56, width: 28 },
-      ri: { code: 'KeyJ', hand: 'right', knuckleDx: -38, knuckleDy: 74, width: 25 },
-      rm: { code: 'KeyK', hand: 'right', knuckleDx: -8,  knuckleDy: 70, width: 25 },
-      rr: { code: 'KeyL', hand: 'right', knuckleDx: 22,  knuckleDy: 72, width: 24 },
-      rp: { code: 'Semicolon', hand: 'right', knuckleDx: 56, knuckleDy: 78, width: 22 }
+    // Each finger: its home anchor key, which hand it belongs to, and where its knuckle sits
+    // relative to the palm centre (fixed proportions — the hand never stretches).
+    const HAND_DEFS = {
+      lp:  { anchor: 'KeyA', hand: 'left',  knuckle: [-52, -6],  w: 17 },
+      lr:  { anchor: 'KeyS', hand: 'left',  knuckle: [-22, -28], w: 19 },
+      lm:  { anchor: 'KeyD', hand: 'left',  knuckle: [6, -32],   w: 21 },
+      li:  { anchor: 'KeyF', hand: 'left',  knuckle: [32, -24],  w: 20 },
+      lth: { anchor: 'Space', offsetX: -55, hand: 'left',  knuckle: [58, 8],  w: 22 },
+      ri:  { anchor: 'KeyJ', hand: 'right', knuckle: [-32, -24], w: 20 },
+      rm:  { anchor: 'KeyK', hand: 'right', knuckle: [-6, -32],  w: 21 },
+      rr:  { anchor: 'KeyL', hand: 'right', knuckle: [22, -28],  w: 19 },
+      rp:  { anchor: 'Semicolon', hand: 'right', knuckle: [52, -6], w: 17 },
+      rth: { anchor: 'Space', offsetX: 55, hand: 'right', knuckle: [-58, 8], w: 22 }
     };
 
     function getKeyCenterRelativeToWrapper(code, offsetX = 0) {
@@ -450,115 +481,175 @@
       };
     }
 
-    // Draw articulated translucent Cat Paws (like the reference image) or Cyber Hands directly over the keyboard
-    function renderKeyboardHandsOverlay(activeMap = {}) {
+    function getHandAnchor(def) {
+      return def.anchor === 'Space'
+        ? getKeyCenterRelativeToWrapper('Space', def.offsetX || 0)
+        : getKeyCenterRelativeToWrapper(def.anchor);
+    }
+
+    function palmMarkup(p, mode) {
+      const x = p.x, y = p.y;
+      const d = `M ${x - 52} ${y} C ${x - 56} ${y - 34} ${x - 22} ${y - 40} ${x} ${y - 36} ` +
+                `C ${x + 22} ${y - 40} ${x + 56} ${y - 34} ${x + 52} ${y} ` +
+                `C ${x + 56} ${y + 34} ${x + 26} ${y + 42} ${x} ${y + 40} ` +
+                `C ${x - 26} ${y + 42} ${x - 56} ${y + 34} ${x - 52} ${y} Z`;
+      if (mode === 'paws') {
+        return `
+          <path d="${d}" fill="rgba(249, 115, 22, 0.52)" stroke="#7c2d12" stroke-width="2.2" stroke-linejoin="round"/>
+          <circle cx="${x - 18}" cy="${y + 6}" r="6" fill="rgba(180, 83, 9, 0.42)"/>
+          <circle cx="${x + 6}" cy="${y + 2}" r="7" fill="rgba(180, 83, 9, 0.42)"/>
+          <circle cx="${x + 26}" cy="${y + 8}" r="5" fill="rgba(180, 83, 9, 0.42)"/>
+          <path d="M ${x - 30} ${y + 22} Q ${x} ${y + 14} ${x + 30} ${y + 22}" stroke="rgba(154, 52, 18, 0.45)" stroke-width="4" fill="none" stroke-linecap="round"/>`;
+      }
+      return `
+        <path d="${d}" fill="rgba(15, 23, 42, 0.45)" stroke="#38bdf8" stroke-width="1.8" stroke-linejoin="round"/>
+        <path d="M ${x - 30} ${y - 6} Q ${x} ${y - 12} ${x + 30} ${y - 6}" stroke="rgba(56, 189, 248, 0.35)" stroke-width="1" fill="none"/>`;
+    }
+
+    function fingerMarkup(home, base, def, id, mode) {
+      const isPaws = mode === 'paws';
+      const tip = { x: home.x, y: home.y + 4 };
+      const mx = (tip.x + base.x) / 2 + (def.hand === 'left' ? -4 : 4);
+      const my = (tip.y + base.y) / 2;
+      const d = `M ${base.x} ${base.y} Q ${mx} ${my} ${tip.x} ${tip.y}`;
+      const fill = isPaws ? 'rgba(249, 115, 22, 0.52)' : 'rgba(15, 23, 42, 0.45)';
+      const stroke = isPaws ? '#7c2d12' : '#38bdf8';
+      const sw = isPaws ? 2.2 : 1.8;
+      const colorKey = id.endsWith('th') ? 'th' : id;
+      let s = `<path d="${d}" stroke="${stroke}" stroke-width="${def.w + sw * 2}" stroke-linecap="round" fill="none"/>`;
+      s += `<path d="${d}" stroke="${fill}" stroke-width="${def.w}" stroke-linecap="round" fill="none"/>`;
+      if (isPaws) {
+        s += `<path d="${d}" stroke="rgba(154, 52, 18, 0.45)" stroke-width="3" stroke-dasharray="3 8" stroke-linecap="round" fill="none"/>`;
+        s += `<circle cx="${tip.x}" cy="${tip.y}" r="5" fill="#fb7185" opacity="0.85"/>`;
+      } else {
+        s += `<circle cx="${tip.x}" cy="${tip.y}" r="4" fill="${FINGER_COLORS[colorKey]}" opacity="0.9"/>`;
+      }
+      return s;
+    }
+
+    // Cached layout so the hand <g> elements persist and CSS transitions animate smoothly
+    let handsLayoutKey = '';
+
+    function buildHandsSkeleton(homes, palms, mode) {
+      let out = '';
+      ['left', 'right'].forEach(side => {
+        const palm = palms[side];
+        out += `<g id="hand-${side}" class="hand-glide" style="transform: translate(0px, 0px);">`;
+        out += palmMarkup(palm, mode);
+        Object.keys(HAND_DEFS).forEach(id => {
+          const def = HAND_DEFS[id];
+          if (def.hand !== side) return;
+          const base = { x: palm.x + def.knuckle[0], y: palm.y + def.knuckle[1] };
+          out += `<g id="finger-${id}" class="finger-reach" style="transform: translate(0px, 0px);">${fingerMarkup(homes[id], base, def, id, mode)}</g>`;
+        });
+        out += `</g>`;
+      });
+      out += `
+        <g id="ringTargetWrap" style="display:none;">
+          <circle id="ringTarget" class="paw-ring" r="13" fill="none" stroke="#22d3ee" stroke-width="2.5"/>
+        </g>
+        <g id="ringShiftWrap" style="display:none;">
+          <circle id="ringShift" class="paw-ring" r="10" fill="none" stroke="#f59e0b" stroke-width="2"/>
+        </g>`;
+      return out;
+    }
+
+    function applyHandsPose(active, homes) {
+      ['left', 'right'].forEach(side => {
+        let activeId = null;
+        Object.keys(HAND_DEFS).forEach(id => {
+          if (HAND_DEFS[id].hand === side && active[id]) activeId = id;
+        });
+
+        let hx = 0, hy = 0, dx = 0, dy = 0;
+        if (activeId) {
+          dx = active[activeId].x - homes[activeId].x;
+          dy = active[activeId].y - homes[activeId].y;
+          hx = dx * 0.65;   // whole-hand glide: 65%
+          hy = dy * 0.65;
+        }
+
+        const handEl = document.getElementById(`hand-${side}`);
+        if (handEl) handEl.style.transform = `translate(${hx}px, ${hy}px)`;
+
+        Object.keys(HAND_DEFS).forEach(id => {
+          if (HAND_DEFS[id].hand !== side) return;
+          const fEl = document.getElementById(`finger-${id}`);
+          if (!fEl) return;
+          if (id === activeId) {
+            // remaining 35%: only the active digit reaches the exact keycap
+            fEl.style.transform = `translate(${dx * 0.35}px, ${dy * 0.35}px)`;
+          } else {
+            fEl.style.transform = 'translate(0px, 0px)';
+          }
+        });
+      });
+    }
+
+    function renderKeyboardHandsOverlay(active = {}, rings = {}) {
       const svg = document.getElementById('keyboardHandsOverlaySvg');
       const wrapper = document.getElementById('keyboardStageWrapper');
       if (!svg || !wrapper) return;
 
       if (state.handsOverlayMode === 'off') {
         svg.innerHTML = '';
+        handsLayoutKey = '';
         return;
       }
 
       const w = wrapper.scrollWidth || wrapper.clientWidth || 800;
       const h = wrapper.clientHeight || 250;
       svg.setAttribute('viewBox', `0 0 ${w} ${h}`);
+      svg.style.width = `${w}px`;
+      svg.style.height = `${h}px`;
 
-      const isPaws = state.handsOverlayMode === 'paws';
-      const baseFill = isPaws ? 'rgba(234, 138, 46, 0.36)' : 'rgba(30, 41, 59, 0.42)';
-      const baseStroke = isPaws ? 'rgba(120, 53, 15, 0.7)' : 'rgba(100, 116, 139, 0.6)';
-
-      // Compute palm centers from F and J home keys
-      const fPos = getKeyCenterRelativeToWrapper('KeyF') || { x: w * 0.36, y: h * 0.55 };
-      const jPos = getKeyCenterRelativeToWrapper('KeyJ') || { x: w * 0.60, y: h * 0.55 };
-
-      const leftPalm = { x: fPos.x - 42, y: fPos.y + 105 };
-      const rightPalm = { x: jPos.x + 42, y: jPos.y + 105 };
-
-      let html = `
-        <defs>
-          <filter id="fingerGlow" x="-30%" y="-30%" width="160%" height="160%">
-            <feGaussianBlur stdDeviation="4" result="blur" />
-            <feComposite in="SourceGraphic" in2="blur" operator="over" />
-          </filter>
-        </defs>
-      `;
-
-      // Draw Left & Right Palms at bottom of keyboard
-      [
-        { palm: leftPalm, side: 'left' },
-        { palm: rightPalm, side: 'right' }
-      ].forEach(({ palm }) => {
-        html += `
-          <g>
-            <ellipse cx="${palm.x}" cy="${palm.y + 18}" rx="74" ry="44" fill="${baseFill}" stroke="${baseStroke}" stroke-width="2.5" />
-            ${isPaws ? `
-              <!-- Tabby spots & stripes on the back of the paw -->
-              <ellipse cx="${palm.x - 24}" cy="${palm.y + 15}" rx="7" ry="5" fill="rgba(180, 83, 9, 0.42)" />
-              <ellipse cx="${palm.x + 2}" cy="${palm.y + 10}" rx="8" ry="5" fill="rgba(180, 83, 9, 0.42)" />
-              <ellipse cx="${palm.x + 26}" cy="${palm.y + 16}" rx="7" ry="5" fill="rgba(180, 83, 9, 0.42)" />
-              <path d="M ${palm.x - 45} ${palm.y + 34} Q ${palm.x} ${palm.y + 24} ${palm.x + 45} ${palm.y + 34}" stroke="rgba(180, 83, 9, 0.45)" stroke-width="5" stroke-linecap="round" fill="none" />
-            ` : ''}
-          </g>
-        `;
+      // Home positions (key centres) for every finger
+      const homes = {};
+      Object.keys(HAND_DEFS).forEach(id => {
+        homes[id] = getHandAnchor(HAND_DEFS[id]) || { x: w * 0.5, y: h * 0.5 };
       });
 
-      // Draw each of the 10 fingers reaching from palm knuckle to either its home key OR active target keycap
-      Object.entries(HOME_FINGER_ANCHORS).forEach(([fingerId, cfg]) => {
-        const palm = cfg.hand === 'left' ? leftPalm : rightPalm;
-        const knuckleX = palm.x + cfg.knuckleDx;
-        const knuckleY = palm.y - 16;
+      // Palms sit below the home row, centred on D / K
+      const D = getKeyCenterRelativeToWrapper('KeyD');
+      const F = getKeyCenterRelativeToWrapper('KeyF');
+      const K = getKeyCenterRelativeToWrapper('KeyK');
+      const J = getKeyCenterRelativeToWrapper('KeyJ');
+      const palms = {
+        left: (D && F) ? { x: D.x - 14, y: F.y + 84 } : { x: w * 0.3, y: h * 0.8 },
+        right: (K && J) ? { x: K.x + 14, y: J.y + 84 } : { x: w * 0.7, y: h * 0.8 }
+      };
 
-        const homePos = getKeyCenterRelativeToWrapper(cfg.code, cfg.offsetX || 0) || { x: knuckleX, y: knuckleY - 60 };
-        const overrideTarget = activeMap[fingerId];
+      const layoutKey = [state.handsOverlayMode, w, h,
+        ...Object.keys(homes).map(id => `${Math.round(homes[id].x)},${Math.round(homes[id].y)}`),
+        Math.round(palms.left.x), Math.round(palms.left.y), Math.round(palms.right.x), Math.round(palms.right.y)
+      ].join('|');
 
-        // If this finger is actively pressing a key, reach directly to that key's center; otherwise rest gently near home key
-        const tipX = overrideTarget ? overrideTarget.x : homePos.x;
-        const tipY = overrideTarget ? overrideTarget.y + 4 : homePos.y + 8;
-        const isActive = Boolean(overrideTarget);
-        const colorKey = fingerId === 'lth' || fingerId === 'rth' ? 'th' : fingerId;
-        const accentColor = FINGER_COLORS[colorKey];
+      if (layoutKey !== handsLayoutKey) {
+        svg.innerHTML = buildHandsSkeleton(homes, palms, state.handsOverlayMode);
+        handsLayoutKey = layoutKey;
+      }
 
-        // Control point for a natural slight finger curve
-        const midX = (knuckleX + tipX) / 2 + (cfg.hand === 'left' ? -4 : 4);
-        const midY = (knuckleY + tipY) / 2;
+      applyHandsPose(active, homes);
 
-        const strokeW = cfg.width;
-        const fingerFill = isActive
-          ? (isPaws ? 'rgba(251, 146, 60, 0.62)' : 'rgba(56, 189, 248, 0.45)')
-          : baseFill;
-        const outlineColor = isActive ? accentColor : baseStroke;
-
-        html += `
-          <g ${isActive ? 'filter="url(#fingerGlow)"' : ''}>
-            <!-- Outer Finger / Paw Digit Contour -->
-            <path d="M ${knuckleX} ${knuckleY} Q ${midX} ${midY} ${tipX} ${tipY}"
-                  stroke="${outlineColor}"
-                  stroke-width="${strokeW + 4}"
-                  stroke-linecap="round"
-                  fill="none" />
-            <!-- Inner Translucent Fill -->
-            <path d="M ${knuckleX} ${knuckleY} Q ${midX} ${midY} ${tipX} ${tipY}"
-                  stroke="${fingerFill}"
-                  stroke-width="${strokeW}"
-                  stroke-linecap="round"
-                  fill="none" />
-            ${isPaws ? `
-              <!-- Tabby tiger stripes along the finger -->
-              <circle cx="${(knuckleX + midX) / 2}" cy="${(knuckleY + midY) / 2}" r="${strokeW * 0.28}" fill="rgba(180, 83, 9, 0.38)" />
-              <circle cx="${(midX + tipX) / 2}" cy="${(midY + tipY) / 2}" r="${strokeW * 0.25}" fill="rgba(180, 83, 9, 0.38)" />
-            ` : ''}
-            <!-- Finger Tip Pad / Target Ring -->
-            <circle cx="${tipX}" cy="${tipY}" r="${isActive ? 11 : 7}"
-                    fill="${isActive ? accentColor + '66' : 'rgba(255,255,255,0.12)'}"
-                    stroke="${isActive ? '#ffffff' : outlineColor}"
-                    stroke-width="${isActive ? 2.5 : 1}" />
-          </g>
-        `;
-      });
-
-      svg.innerHTML = html;
+      // Contact rings sit exactly on the target and shift keycaps
+      const rt = document.getElementById('ringTargetWrap');
+      const rs = document.getElementById('ringShiftWrap');
+      const circT = document.getElementById('ringTarget');
+      const circS = document.getElementById('ringShift');
+      if (rt && circT) {
+        if (rings.target) {
+          rt.style.display = '';
+          circT.setAttribute('cx', rings.target.x);
+          circT.setAttribute('cy', rings.target.y);
+        } else rt.style.display = 'none';
+      }
+      if (rs && circS) {
+        if (rings.shift) {
+          rs.style.display = '';
+          circS.setAttribute('cx', rings.shift.x);
+          circS.setAttribute('cy', rings.shift.y);
+        } else rs.style.display = 'none';
+      }
     }
 
     /********************************************************************
@@ -766,6 +857,7 @@
       currentLevelIdx: 0,
       currentPromptIdx: 0,
       charIndex: 0,
+      segIdx: 0,                 // index of the enemy ship / word currently being typed
       autoMapKeys: true,
       zenMode: false,
       soundEnabled: true,
@@ -778,7 +870,15 @@
       combo: 0,
       maxCombo: 0,
       xp: 0,
-      bossHp: 100
+      bossHp: 100,
+      // 3-2-1-ENGAGE + Shield / Win-Loss state
+      runState: 'countdown',     // 'countdown' | 'playing' | 'victory' | 'defeat'
+      countdownValue: 3,
+      countdownTimer: null,
+      shields: 3,
+      maxShields: 3,
+      consecutiveTypos: 0,
+      missedKeysMap: {}          // tracks { 'F': 2, 'J': 1 } for defeat feedback
     };
 
     /********************************************************************
@@ -963,6 +1063,25 @@
       osc.start(now); osc.stop(now + dur + 0.02);
     }
 
+    // Countdown beeps (3, 2, 1) and the ENGAGE chord
+    function playBeep(freq, dur = 0.08, vol = 0.14) {
+      if (!state.soundEnabled) return;
+      try {
+        initAudio();
+        if (!audioCtx) return;
+        tone('sine', freq, null, dur, vol);
+      } catch (e) { /* ignore */ }
+    }
+
+    function playChord(freqs, dur = 0.35, vol = 0.12) {
+      if (!state.soundEnabled) return;
+      try {
+        initAudio();
+        if (!audioCtx) return;
+        freqs.forEach(f => tone('triangle', f, null, dur, vol));
+      } catch (e) { /* ignore */ }
+    }
+
     function playSound(type) {
       if (!state.soundEnabled) return;
       try {
@@ -987,6 +1106,10 @@
         } else if (type === 'error') {
           // Turntable scratch / shield jam
           tone('sawtooth', 135, 72, 0.15, 0.15);
+        } else if (type === 'destroy') {
+          tone('sawtooth', 380, 60, 0.22, 0.10);
+        } else if (type === 'breach') {
+          tone('square', 220, 40, 0.35, 0.14);
         }
       } catch (e) { /* ignore */ }
     }
@@ -1036,6 +1159,23 @@
         }
       });
       return set;
+    }
+
+    // Splits a prompt into enemy "words": space-separated words, or 4-char chunks when there are no spaces
+    function computeSegments(text) {
+      const segs = [];
+      if (text.includes(' ')) {
+        const re = /\S+/g;
+        let m;
+        while ((m = re.exec(text))) {
+          segs.push({ start: m.index, end: m.index + m[0].length });
+        }
+      } else {
+        for (let i = 0; i < text.length; i += 4) {
+          segs.push({ start: i, end: Math.min(text.length, i + 4) });
+        }
+      }
+      return segs;
     }
 
     /********************************************************************
@@ -1179,26 +1319,28 @@
         container.appendChild(rowDiv);
       });
 
-      // After DOM layout settles, position articulated hands/paws over the exact target keycap
+      // After DOM layout settles, pose the hands over the exact target keycaps
       requestAnimationFrame(() => {
-        const activeFingerPositions = {};
+        const active = {};
+        const rings = { target: null, shift: null };
         if (req) {
           const f = req.keyDef.finger;
           const pos = getKeyCenterRelativeToWrapper(req.code);
           if (pos) {
-            if (f === 'th') {
-              activeFingerPositions['rth'] = { x: pos.x + 35, y: pos.y };
-            } else {
-              activeFingerPositions[f] = pos;
-            }
+            const id = f === 'th' ? 'rth' : f;
+            active[id] = pos;
+            rings.target = pos;
           }
           if (req.shift && req.shiftCode) {
             const sf = req.shiftCode === 'ShiftRight' ? 'rp' : 'lp';
             const sPos = getKeyCenterRelativeToWrapper(req.shiftCode);
-            if (sPos) activeFingerPositions[sf] = sPos;
+            if (sPos) {
+              active[sf] = sPos;
+              rings.shift = sPos;
+            }
           }
         }
-        renderKeyboardHandsOverlay(activeFingerPositions);
+        renderKeyboardHandsOverlay(active, rings);
       });
     }
 
@@ -1239,17 +1381,70 @@
     }
 
     /********************************************************************
-     * 8. KEYBOARD INPUT ENGINE (WITH SPACE/ENTER MODAL ADVANCE)
+     * 8. 3-2-1-ENGAGE COUNTDOWN + SHIELD HUD
+     ********************************************************************/
+    function updateShieldHud() {
+      document.querySelectorAll('#shieldHud .shield-pip').forEach((el, i) => {
+        const on = i < state.shields;
+        el.className = 'shield-pip text-sm transition ' +
+          (on ? 'text-cyan-300 drop-shadow-[0_0_6px_rgba(34,211,238,0.9)]' : 'text-slate-700');
+      });
+    }
+
+    function startLevelCountdown() {
+      clearTimeout(state.countdownTimer);
+      state.runState = 'countdown';
+      state.countdownValue = 3;
+      state.shields = state.maxShields;
+      state.consecutiveTypos = 0;
+      state.missedKeysMap = {};
+      updateShieldHud();
+
+      const overlay = document.getElementById('countdownOverlay');
+      const numEl = document.getElementById('countdownNumber');
+      const seq = ['3', '2', '1', 'ENGAGE!'];
+      let i = 0;
+      overlay.style.display = 'flex';
+
+      const finish = () => {
+        overlay.style.display = 'none';
+        state.runState = 'playing';
+        state.countdownTimer = null;
+      };
+
+      const show = () => {
+        state.countdownValue = seq[i];
+        numEl.textContent = seq[i];
+        numEl.classList.remove('countdown-pop');
+        void numEl.offsetWidth;
+        numEl.classList.add('countdown-pop');
+        if (i < 3) playBeep(440, 0.08, 0.14);
+        else playChord([880, 1108.73, 1318.51]);
+        i++;
+        state.countdownTimer = setTimeout(i < seq.length ? show : finish, 650);
+      };
+
+      show();
+    }
+
+    /********************************************************************
+     * 9. KEYBOARD INPUT ENGINE (WITH INPUT LOCK + MODAL SHORTCUTS)
      ********************************************************************/
     window.addEventListener('keydown', (e) => {
       const modal = document.getElementById('levelCompleteModal');
+
+      // Modal open: Space / Enter advance (victory) or retry (defeat); Tab retries
       if (!modal.classList.contains('hidden')) {
-        if (e.key === 'Enter' || e.code === 'Space') {
+        if (e.code === 'Space' || e.key === 'Enter') {
           e.preventDefault();
-          advanceToNextLevel();
+          if (state.runState === 'victory') advanceToNextLevel();
+          else replayCurrentLevel();
+          return;
         }
+        if (e.key === 'Tab') { e.preventDefault(); replayCurrentLevel(); return; }
         return;
       }
+
       if (e.key === 'Tab') { e.preventDefault(); restartCurrentPrompt(); return; }
       if (e.key === 'Escape') { e.preventDefault(); resetTelemetry(); restartCurrentPrompt(); return; }
 
@@ -1258,6 +1453,9 @@
 
       if (['ShiftLeft', 'ShiftRight', 'ControlLeft', 'ControlRight', 'AltLeft', 'AltRight', 'MetaLeft', 'MetaRight', 'CapsLock'].includes(e.code)) return;
       if (['Space', 'Slash', 'Backquote', 'Quote'].includes(e.code)) e.preventDefault();
+
+      // Input lock: ignore typing while counting down or after the sector has ended
+      if (state.runState !== 'playing') return;
 
       const promptObj = getActivePromptObj();
       if (!promptObj) return;
@@ -1277,7 +1475,7 @@
                         (normalizeChar(e.key) === normExpected);
 
       if (isCorrect) handleCorrectKeystroke(expectedChar);
-      else handleWrongKeystroke(e.code);
+      else handleWrongKeystroke(e.code, expectedChar);
       updateTelemetryUI();
     });
 
@@ -1287,9 +1485,11 @@
     });
 
     function handleCorrectKeystroke(typedChar) {
+      const pos = state.charIndex;
       state.correctTyped++;
       state.charIndex++;
       state.combo++;
+      state.consecutiveTypos = 0;
       if (state.combo > state.maxCombo) state.maxCombo = state.combo;
       state.xp += 10 + Math.floor(state.combo * 1.5);
 
@@ -1299,14 +1499,14 @@
       const norm = normalizeChar(typedChar);
       if (norm === ' ') {
         playSound('space');
-        triggerArmadaWeapon('salvo', typedChar);
+        triggerArmadaWeapon('space', ' ');
       } else if (norm === ',') {
         playSound('comma');
         triggerArmadaWeapon('emp', typedChar);
       } else if (norm === "'" || norm === '-') {
         playSound('bridge');
         triggerArmadaWeapon('ion', typedChar);
-      } else if (norm === '.' || norm === '!' || norm === '?' || norm === '"') {
+      } else if (norm === '.' || norm === '!' || norm === '?') {
         playSound('finisher');
         triggerArmadaWeapon('supernova', typedChar);
       } else {
@@ -1314,13 +1514,16 @@
         triggerArmadaWeapon('plasma', typedChar);
       }
 
+      // Word complete: typing the last letter of an enemy's word destroys that ship
+      const seg = armada.segments[state.segIdx];
+      if (seg && pos === seg.end - 1) completeSegment(state.segIdx);
+
       const promptText = getActivePromptObj().text;
       const totalChars = getActiveLevel().prompts.reduce((a, p) => a + p.text.length, 0);
       state.bossHp = Math.max(0, state.bossHp - 100 / Math.max(1, totalChars));
       document.getElementById('bossHpBar').style.width = `${state.bossHp}%`;
 
       if (state.charIndex >= promptText.length) {
-        triggerArmadaWeapon('salvo', '★');
         const lvl = getActiveLevel();
         if (state.currentPromptIdx + 1 < lvl.prompts.length) {
           state.currentPromptIdx++;
@@ -1330,15 +1533,21 @@
         } else {
           state.bossHp = 0;
           document.getElementById('bossHpBar').style.width = '0%';
-          openLevelCompleteModal();
+          openEndOfLevelModal(true);
         }
       } else {
         renderPromptStage();
       }
     }
 
-    function handleWrongKeystroke(code) {
+    function handleWrongKeystroke(code, expectedChar) {
       state.combo = 0;
+      state.consecutiveTypos++;
+
+      // Track which keys the player keeps missing (for defeat diagnostics)
+      const label = expectedChar === ' ' ? 'SPACE' : expectedChar.toUpperCase();
+      state.missedKeysMap[label] = (state.missedKeysMap[label] || 0) + 1;
+
       boostVinylOnKeystroke(true);
       playSound('error');
       triggerArmadaWeapon('jam');
@@ -1352,6 +1561,11 @@
       card.classList.remove('shake-error');
       void card.offsetWidth;
       card.classList.add('shake-error');
+
+      // 5 consecutive typos: the lead enemy fires a red counter-laser
+      if (state.consecutiveTypos >= 5) {
+        fireCounterLaser();
+      }
     }
 
     function updateTelemetryUI() {
@@ -1374,27 +1588,35 @@
     }
 
     /********************************************************************
-     * 9. SPACE INVADERS "WORD ARMADA" COMBAT ARENA ENGINE
+     * 10. DYNAMIC SPACE INVADERS "WORD ARMADA" COMBAT ARENA
      ********************************************************************/
+    const PLAYER_X = 95;          // Starfighter position
+    const DEFENSE_X = 145;        // Defense perimeter laser line
+
     const armada = {
       canvas: null,
       ctx: null,
       width: 900,
       height: 150,
       tick: 0,
-      shipY: 75,
-      targetY: 75,
-      recoil: 0,
-      jamTimer: 0,
-      empWaveRadius: 0,
-      ionBeamTimer: 0,
-      supernovaTimer: 0,
-      stars: [],
-      invaders: [],
+      playerY: 75,
+      playerTilt: 0,
+      stars: { l1: [], l2: [], l3: [] },   // 3-layer parallax
+      segments: [],
+      ships: [],
       lasers: [],
-      missiles: [],
+      counterLasers: [],
+      shockwaves: [],
       particles: [],
-      floatingTexts: []
+      floatingTexts: [],
+      empRing: null,
+      ionTimer: 0,
+      ionTarget: null,
+      supernovaTimer: 0,
+      jamTimer: 0,
+      breachFlash: 0,
+      shakeTimer: 0,
+      empTint: 0
     };
 
     function initArmadaCanvas() {
@@ -1406,14 +1628,11 @@
         renderKeyboardHUD();
       });
 
-      for (let i = 0; i < 48; i++) {
-        armada.stars.push({
-          x: Math.random() * 1200,
-          y: Math.random() * 160,
-          size: Math.random() * 2 + 0.5,
-          speed: Math.random() * 1.4 + 0.3
-        });
-      }
+      const rnd = (max) => Math.random() * max;
+      const W = () => armada.width, H = () => armada.height;
+      armada.stars.l1 = Array.from({ length: 30 }, () => ({ x: rnd(W()), y: rnd(H()), s: 0.5 + Math.random() * 0.6, sp: 0.8 + Math.random() * 0.4 }));
+      armada.stars.l2 = Array.from({ length: 20 }, () => ({ x: rnd(W()), y: rnd(H()), s: 1 + Math.random() * 1.2, sp: 0.9 + Math.random() * 0.4, cyan: Math.random() < 0.5 }));
+      armada.stars.l3 = Array.from({ length: 10 }, () => ({ x: rnd(W()), y: rnd(H()), s: 1.5, sp: 1.0 + Math.random() * 0.6 }));
 
       spawnArmadaWaveForPrompt();
       requestAnimationFrame(animateArmadaLoop);
@@ -1428,31 +1647,39 @@
       armada.canvas.height = armada.height;
     }
 
-    // Spawn an invader ship for each word/cluster in the active prompt!
+    // One enemy ship per word (or 4-char chunk), in a sine-wave formation
     function spawnArmadaWaveForPrompt() {
-      armada.invaders = [];
-      const promptObj = getActivePromptObj();
-      if (!promptObj) return;
-      const words = promptObj.text.split(' ').filter(Boolean);
-      const count = Math.max(3, words.length);
+      armada.ships = [];
+      armada.lasers = [];
+      armada.counterLasers = [];
+      armada.ionTimer = 0;
+      armada.ionTarget = null;
+      state.segIdx = 0;
 
-      for (let i = 0; i < count; i++) {
-        const wordLabel = words[i % words.length] || 'CORE';
-        const row = i % 3;
-        const col = Math.floor(i / 3);
-        const isBoss = i === count - 1 && getActiveLevel().id >= 13;
-        armada.invaders.push({
-          x: Math.min(armada.width - 90, 290 + col * 135 + (row % 2) * 30),
-          y: 38 + row * 34,
-          baseY: 38 + row * 34,
-          word: wordLabel,
-          hp: Math.max(2, wordLabel.length),
-          maxHp: Math.max(2, wordLabel.length),
-          type: isBoss ? 'mothership' : (row === 0 ? 'cruiser' : (row === 1 ? 'interceptor' : 'scout')),
+      const promptObj = getActivePromptObj();
+      if (!promptObj) { armada.segments = []; return; }
+      armada.segments = computeSegments(promptObj.text);
+      const total = Math.max(1, armada.segments.length);
+
+      armada.segments.forEach((seg, idx) => {
+        const word = promptObj.text.slice(seg.start, seg.end);
+        const len = Math.max(1, word.length);
+        armada.ships.push({
+          x: 340 + idx * 130,
+          y: 0,
+          baseY: 35 + (idx % 3) * 26,
+          phase: idx * 1.3,
+          wobbleAmp: 10 + (idx % 2) * 5,
+          hp: len,
+          maxHp: len,
           hitFlash: 0,
-          phase: Math.random() * Math.PI * 2
+          recoilVx: 0,
+          locked: 0,
+          segIdx: idx,
+          word,
+          type: idx === total - 1 ? 'cruiser' : (idx % 2 === 0 ? 'interceptor' : 'drone')
         });
-      }
+      });
     }
 
     function setStatus(text, cls) {
@@ -1462,85 +1689,14 @@
       el.className = 'text-xs font-mono font-semibold ' + cls;
     }
 
-    function getLeadInvader() {
-      if (armada.invaders.length === 0) spawnArmadaWaveForPrompt();
-      // Target the leftmost living invader
-      return armada.invaders.reduce((best, inv) => (!best || inv.x < best.x ? inv : best), null);
+    function getLeftmostShip() {
+      return armada.ships.reduce((best, s) => (!best || s.x < best.x ? s : best), null);
     }
 
-    function triggerArmadaWeapon(weaponType, charLabel = '') {
-      const target = getLeadInvader();
-      const shipX = 78;
-      if (target) armada.targetY = target.y;
-
-      if (weaponType === 'plasma') {
-        armada.recoil = 6;
-        const ty = target ? target.y : armada.shipY;
-        const tx = target ? target.x : armada.width - 100;
-        armada.lasers.push({
-          x: shipX + 22,
-          y: armada.shipY - 5,
-          tx, ty,
-          vx: 19,
-          color: '#22d3ee',
-          targetRef: target
-        });
-        armada.lasers.push({
-          x: shipX + 22,
-          y: armada.shipY + 5,
-          tx, ty,
-          vx: 19,
-          color: '#38bdf8',
-          targetRef: target
-        });
-        setStatus(`PLASMA CANNON [${charLabel.toUpperCase()}] — LOCKED ON`, 'text-cyan-300');
-      } else if (weaponType === 'salvo') {
-        // Word completed! Launch homing missiles that obliterate the lead invader
-        armada.recoil = 10;
-        for (let m = 0; m < 3; m++) {
-          armada.missiles.push({
-            x: shipX + 10,
-            y: armada.shipY + (m - 1) * 12,
-            vx: 9 + m * 1.5,
-            vy: (m - 1) * 2.4,
-            targetRef: target,
-            color: '#fbbf24'
-          });
-        }
-        setStatus('WORD COMBO! HOMING MISSILE SALVO LAUNCHED!', 'text-amber-300');
-        spawnFloatingText('SALVO COMBO!', shipX + 55, armada.shipY - 22, '#fbbf24');
-      } else if (weaponType === 'emp') {
-        armada.empWaveRadius = 10;
-        armada.invaders.forEach(inv => {
-          inv.x = Math.min(armada.width - 70, inv.x + 55);
-          inv.hitFlash = 10;
-        });
-        setStatus('COMMA EMP SHOCKWAVE [,] — FLEET PUSHED BACK!', 'text-emerald-400');
-        spawnFloatingText('EMP SHOCKWAVE!', 160, armada.height / 2, '#34d399');
-      } else if (weaponType === 'ion') {
-        armada.ionBeamTimer = 18;
-        if (target) {
-          target.hp = Math.max(1, target.hp - 2);
-          target.hitFlash = 12;
-          spawnExplosion(target.x, target.y, '#f59e0b', 16);
-        }
-        setStatus("TWIN ION BEAM [' / -] — SHIELDS PIERCED!", 'text-amber-400');
-        spawnFloatingText('ION PIERCE!', 165, armada.shipY - 18, '#f59e0b');
-      } else if (weaponType === 'supernova') {
-        armada.supernovaTimer = 24;
-        if (target) {
-          spawnExplosion(target.x, target.y, '#fb7185', 28);
-          spawnFloatingText('+250 SUPERNOVA!', target.x - 20, target.y - 16, '#fb7185');
-          const idx = armada.invaders.indexOf(target);
-          if (idx !== -1) armada.invaders.splice(idx, 1);
-        }
-        setStatus('SUPERNOVA ORBITAL BLAST [. ! ?] — TARGET VAPORIZED!', 'text-rose-400');
-      } else if (weaponType === 'jam') {
-        armada.jamTimer = 16;
-        armada.invaders.forEach(inv => { inv.x = Math.max(165, inv.x - 12); });
-        setStatus('TURRET JAM — CHECK HIGHLIGHTED FINGER & KEY!', 'text-rose-400');
-        spawnFloatingText('SHIELD SPARK!', shipX + 20, armada.shipY - 20, '#f43f5e');
-      }
+    // The lead ship is the one for the word currently being typed (falls back to the leftmost)
+    function getLeadShip() {
+      const cur = armada.ships.find(s => s.segIdx === state.segIdx);
+      return cur || getLeftmostShip();
     }
 
     function spawnExplosion(x, y, color, count) {
@@ -1561,9 +1717,176 @@
       armada.floatingTexts.push({ text, x, y, life: 1, color });
     }
 
-    function drawStarfighter(ctx, x, y, recoil, jammed) {
+    function destroyShipWithShockwave(ship) {
+      armada.ships = armada.ships.filter(s => s !== ship);
+      armada.shockwaves.push({ x: ship.x, y: ship.y, r: 4, alpha: 1 });
+      spawnExplosion(ship.x, ship.y, '#fbbf24', 18);
+      spawnFloatingText('+50 COMBO', ship.x - 14, ship.y - 22, '#fbbf24');
+      playSound('destroy');
+    }
+
+    function completeSegment(idx) {
+      const ship = armada.ships.find(s => s.segIdx === idx);
+      if (ship) destroyShipWithShockwave(ship);
+      state.segIdx = idx + 1;
+    }
+
+    // Standard plasma: twin bolts; only the first bolt deals damage
+    function fireWeaponsPlasma(label) {
+      const lead = getLeadShip();
+      armada.playerTilt = -0.10;
+      armada.lasers.push({ x: PLAYER_X + 22, y: armada.playerY - 5, vx: 22, color: '#22d3ee', target: lead, damage: true });
+      armada.lasers.push({ x: PLAYER_X + 22, y: armada.playerY + 5, vx: 22, color: '#38bdf8', target: lead, damage: false });
+      setStatus(`PLASMA [${(label || '').toUpperCase()}] — LOCKED ON`, 'text-cyan-300');
+    }
+
+    function triggerArmadaWeapon(weaponType, charLabel = '') {
+      const lead = getLeadShip();
+
+      if (weaponType === 'plasma') {
+        fireWeaponsPlasma(charLabel);
+      } else if (weaponType === 'space') {
+        armada.playerTilt = -0.18;
+        if (lead) spawnExplosion(lead.x - 10, lead.y, '#a5b4fc', 6);
+        setStatus('WORD SALVO — HOMING MISSILES AWAY!', 'text-indigo-300');
+      } else if (weaponType === 'emp') {
+        // Comma: EMP shockwave pushes every ship back +45px and tints the arena emerald
+        armada.ships.forEach(s => { s.x += 45; });
+        armada.empRing = { r: 10 };
+        armada.empTint = 10;
+        setStatus('COMMA EMP SHOCKWAVE [,] — ARMADA PUSHED BACK!', 'text-emerald-400');
+        spawnFloatingText('EMP PUSHBACK!', PLAYER_X + 60, armada.height / 2, '#34d399');
+      } else if (weaponType === 'ion') {
+        // Apostrophe / hyphen: golden grapple beam locks the lead ship in place for 90 frames
+        if (lead) {
+          lead.locked = 90;
+          armada.ionTarget = lead;
+          armada.ionTimer = 90;
+        }
+        setStatus("ION GRAPPLE [' / -] — LEAD SHIP LOCKED IN PLACE!", 'text-amber-400');
+        spawnFloatingText('ION LOCK!', PLAYER_X + 70, armada.playerY - 20, '#f59e0b');
+      } else if (weaponType === 'supernova') {
+        // . ! ? : orbital beam vaporises the remaining wave
+        armada.supernovaTimer = 24;
+        armada.ships.forEach(s => spawnExplosion(s.x, s.y, '#e879f9', 16));
+        armada.ships = [];
+        armada.ionTarget = null;
+        armada.ionTimer = 0;
+        setStatus('SUPERNOVA ORBITAL BLAST [. ! ?] — WAVE VAPORIZED!', 'text-rose-400');
+        spawnFloatingText('SUPERNOVA!', PLAYER_X + 70, armada.height / 2 - 10, '#e879f9');
+      } else if (weaponType === 'jam') {
+        armada.jamTimer = 16;
+        spawnExplosion(PLAYER_X + 20, armada.playerY, '#f43f5e', 6);
+        setStatus('TURRET JAM — CHECK HIGHLIGHTED FINGER & KEY!', 'text-rose-400');
+        spawnFloatingText('SHIELD SPARK!', PLAYER_X + 20, armada.playerY - 20, '#f43f5e');
+      }
+    }
+
+    function fireCounterLaser() {
+      const lead = getLeadShip();
+      state.consecutiveTypos = 0;
+      if (!lead) return;
+      armada.counterLasers.push({ x: lead.x - 10, y: lead.y, vx: -7 });
+      setStatus('5 TYPOS — ENEMY COUNTER-LASER INBOUND!', 'text-rose-400');
+    }
+
+    // Losing a shield; reaching 0 ends the sector in defeat
+    function loseShield(source) {
+      if (state.runState !== 'playing') return;
+      state.shields = Math.max(0, state.shields - 1);
+      updateShieldHud();
+      if (state.shields <= 0) {
+        openEndOfLevelModal(false);
+      }
+    }
+
+    function flashArenaBorder(color = '#f43f5e') {
+      const sec = document.getElementById('actionStripContainer');
+      if (!sec) return;
+      sec.style.boxShadow = `inset 0 0 0 2px ${color}, 0 0 24px ${color}`;
+      setTimeout(() => { sec.style.boxShadow = ''; }, 260);
+    }
+
+    function breachPerimeter(lead) {
+      armada.ships = armada.ships.filter(s => s !== lead);
+      spawnExplosion(DEFENSE_X, lead.y, '#f43f5e', 26);
+      armada.ships.forEach(s => { s.x += 110; });
+      armada.breachFlash = 20;
+      armada.shakeTimer = 18;
+      flashArenaBorder('#f43f5e');
+      playSound('breach');
+      spawnFloatingText('PERIMETER BREACH!', DEFENSE_X + 8, armada.height / 2, '#f43f5e');
+      loseShield('breach');
+    }
+
+    function updateShipMotion() {
+      const speed = 0.32 + state.currentLevelIdx * 0.03;
+      armada.ships.forEach(s => {
+        if (s.locked > 0) s.locked--;
+        else s.x -= speed;
+      });
+
+      const lead = getLeftmostShip();
+      if (lead && lead.x <= DEFENSE_X) breachPerimeter(lead);
+    }
+
+    function drawEnemyShip(ctx, s, tick) {
       ctx.save();
-      ctx.translate(x - recoil, y);
+      ctx.translate(s.x, s.y);
+      const scale = s.type === 'cruiser' ? 1.25 : 1;
+      ctx.scale(scale, scale);
+
+      const flash = s.hitFlash > 0;
+      const bodyColor = flash
+        ? '#ffffff'
+        : (s.type === 'cruiser' ? '#a855f7' : (s.type === 'interceptor' ? '#f59e0b' : '#10b981'));
+
+      ctx.fillStyle = bodyColor;
+      ctx.beginPath();
+      ctx.moveTo(-16, 0);
+      ctx.lineTo(-6, -11);
+      ctx.lineTo(10, -13);
+      ctx.lineTo(18, -5);
+      ctx.lineTo(18, 5);
+      ctx.lineTo(10, 13);
+      ctx.lineTo(-6, 11);
+      ctx.closePath();
+      ctx.fill();
+
+      ctx.fillStyle = '#090d16';
+      ctx.fillRect(-5, -5, 5, 4);
+      ctx.fillRect(-5, 1, 5, 4);
+
+      const wingFlap = Math.sin(tick * 0.12 + s.phase) * 3;
+      ctx.strokeStyle = bodyColor;
+      ctx.lineWidth = 2.5;
+      ctx.beginPath();
+      ctx.moveTo(4, -11);
+      ctx.lineTo(14, -17 + wingFlap);
+      ctx.moveTo(4, 11);
+      ctx.lineTo(14, 17 - wingFlap);
+      ctx.stroke();
+
+      ctx.scale(1 / scale, 1 / scale);
+      ctx.font = 'bold 10px "JetBrains Mono", monospace';
+      ctx.textAlign = 'center';
+      ctx.fillStyle = '#e2e8f0';
+      ctx.fillText(s.word.slice(0, 8), 2 * scale, -19 * scale);
+
+      const hpW = 28;
+      const hpPct = Math.max(0, s.hp / s.maxHp);
+      ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
+      ctx.fillRect(-hpW / 2, 19, hpW, 3.5);
+      ctx.fillStyle = bodyColor;
+      ctx.fillRect(-hpW / 2, 19, hpW * hpPct, 3.5);
+
+      ctx.restore();
+    }
+
+    function drawStarfighter(ctx, x, y, tilt, jammed) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(tilt);
 
       // Thruster plasma flame
       const flameLen = 14 + Math.random() * 12 + vinylEngine.rate * 10;
@@ -1579,7 +1902,7 @@
       ctx.closePath();
       ctx.fill();
 
-      // Swept Galaga/Starfighter wings
+      // Swept wings
       ctx.fillStyle = jammed ? '#f43f5e' : '#0284c7';
       ctx.beginPath();
       ctx.moveTo(-14, -20);
@@ -1590,7 +1913,7 @@
       ctx.closePath();
       ctx.fill();
 
-      // Main fuselage
+      // Fuselage
       ctx.fillStyle = jammed ? '#fda4af' : '#e0f2fe';
       ctx.beginPath();
       ctx.moveTo(-16, -8);
@@ -1599,13 +1922,13 @@
       ctx.closePath();
       ctx.fill();
 
-      // Canopy visor
+      // Canopy
       ctx.fillStyle = '#22d3ee';
       ctx.beginPath();
       ctx.ellipse(2, 0, 7, 3.5, 0, 0, Math.PI * 2);
       ctx.fill();
 
-      // Twin wingtip plasma cannons
+      // Twin wingtip cannons
       ctx.fillStyle = '#38bdf8';
       ctx.fillRect(6, -15, 12, 3);
       ctx.fillRect(6, 12, 12, 3);
@@ -1613,229 +1936,317 @@
       ctx.restore();
     }
 
-    function drawInvaderShip(ctx, inv, tick) {
+    function updateLasers(ctx) {
+      for (let i = armada.lasers.length - 1; i >= 0; i--) {
+        const l = armada.lasers[i];
+        const t = l.target;
+        if (!t || !armada.ships.includes(t)) {
+          armada.lasers.splice(i, 1);
+          continue;
+        }
+        l.x += l.vx;
+        l.y += (t.y - l.y) * 0.22;
+
+        ctx.fillStyle = l.color;
+        ctx.shadowColor = l.color;
+        ctx.shadowBlur = 8;
+        ctx.fillRect(l.x, l.y - 1.5, 16, 3);
+        ctx.shadowBlur = 0;
+
+        if (l.x >= t.x - 14) {
+          if (l.damage) {
+            t.hp = Math.max(0, t.hp - 1);
+            t.hitFlash = 5;
+            t.recoilVx = 4.5;   // knockback: the ship is shoved backward
+          }
+          spawnExplosion(t.x - 10, l.y, '#22d3ee', 6);
+          armada.lasers.splice(i, 1);
+        }
+      }
+    }
+
+    function updateCounterLasers(ctx) {
+      armada.counterLasers = armada.counterLasers.filter(cl => {
+        cl.x += cl.vx;
+        ctx.fillStyle = '#f43f5e';
+        ctx.shadowColor = '#f43f5e';
+        ctx.shadowBlur = 8;
+        ctx.fillRect(cl.x, cl.y - 1.5, 18, 3);
+        ctx.shadowBlur = 0;
+        if (cl.x <= PLAYER_X + 26) {
+          spawnExplosion(PLAYER_X + 26, armada.playerY, '#f43f5e', 14);
+          armada.shakeTimer = 12;
+          flashArenaBorder('#f43f5e');
+          loseShield('counter');
+          return false;
+        }
+        return true;
+      });
+    }
+
+    function drawStarLayer(ctx, list, factor, base, draw) {
+      list.forEach(st => {
+        st.x -= st.sp * factor * base;
+        if (st.x < -10) { st.x = armada.width + Math.random() * 40; st.y = Math.random() * armada.height; }
+        draw(st);
+      });
+    }
+
+    function drawArena() {
+      const ctx = armada.ctx;
+      const w = armada.width, h = armada.height;
+      const now = performance.now();
+      armada.tick++;
+
+      // Timers
+      armada.breachFlash = Math.max(0, armada.breachFlash - 1);
+      armada.shakeTimer = Math.max(0, armada.shakeTimer - 1);
+      armada.empTint = Math.max(0, armada.empTint - 1);
+      armada.jamTimer = Math.max(0, armada.jamTimer - 1);
+      armada.playerTilt *= 0.82;
+      armada.playerY = h * 0.5 + Math.sin(now * 0.005) * 6;
+
+      // Ships: movement only while the sector is live; wobble & recoil always run
+      if (state.runState === 'playing') updateShipMotion();
+      armada.ships.forEach(s => {
+        s.x += s.recoilVx;
+        s.recoilVx *= 0.82;
+        if (s.hitFlash > 0) s.hitFlash--;
+        s.y = s.baseY + Math.sin(now * 0.004 + s.phase) * s.wobbleAmp;
+      });
+
+      if (armada.ionTimer > 0) {
+        armada.ionTimer--;
+        if (armada.ionTimer === 0) armada.ionTarget = null;
+      }
+      if (armada.supernovaTimer > 0) armada.supernovaTimer--;
+
       ctx.save();
-      ctx.translate(inv.x, inv.y);
+      if (armada.shakeTimer > 0) ctx.translate((Math.random() - 0.5) * 7, (Math.random() - 0.5) * 5);
 
-      const flash = inv.hitFlash > 0;
-      const bodyColor = flash
-        ? '#ffffff'
-        : (inv.type === 'mothership' ? '#f43f5e' : (inv.type === 'cruiser' ? '#a855f7' : (inv.type === 'interceptor' ? '#f59e0b' : '#10b981')));
+      // Deep space background
+      const bg = ctx.createLinearGradient(0, 0, w, h);
+      bg.addColorStop(0, '#040711');
+      bg.addColorStop(0.5, '#091024');
+      bg.addColorStop(1, '#0f172a');
+      ctx.fillStyle = bg;
+      ctx.fillRect(-10, -10, w + 20, h + 20);
 
-      // Classic Space Invader / Alien Galaga silhouette
-      ctx.fillStyle = bodyColor;
+      // EMP emerald tint
+      if (armada.empTint > 0) {
+        ctx.fillStyle = `rgba(16, 185, 129, ${0.18 * armada.empTint / 10})`;
+        ctx.fillRect(-10, -10, w + 20, h + 20);
+      }
+
+      // 3-layer parallax starfield, speed scales with the vinyl RPM
+      const base = 0.5 + vinylEngine.rate * 1.6;
+      drawStarLayer(ctx, armada.stars.l1, 0.2, base, st => {
+        ctx.fillStyle = '#475569';
+        ctx.fillRect(st.x, st.y, st.s, st.s);
+      });
+      drawStarLayer(ctx, armada.stars.l2, 0.5, base, st => {
+        ctx.fillStyle = st.cyan ? '#67e8f9' : '#e2e8f0';
+        ctx.fillRect(st.x, st.y, st.s, st.s);
+      });
+      drawStarLayer(ctx, armada.stars.l3, 1.4, base, st => {
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.85)';
+        ctx.lineWidth = 1.5;
+        ctx.beginPath();
+        ctx.moveTo(st.x, st.y);
+        ctx.lineTo(st.x + st.sp * 4, st.y);
+        ctx.stroke();
+      });
+
+      // Defense perimeter line (cyan/amber, dashed); crimson on breach
+      ctx.save();
+      ctx.setLineDash([6, 6]);
+      ctx.strokeStyle = armada.breachFlash > 0 ? '#f43f5e' : 'rgba(34, 211, 238, 0.75)';
+      ctx.shadowColor = '#fbbf24';
+      ctx.shadowBlur = 8;
+      ctx.lineWidth = 2;
       ctx.beginPath();
-      ctx.moveTo(-16, 0);
-      ctx.lineTo(-6, -11);
-      ctx.lineTo(10, -13);
-      ctx.lineTo(18, -5);
-      ctx.lineTo(18, 5);
-      ctx.lineTo(10, 13);
-      ctx.lineTo(-6, 11);
-      ctx.closePath();
-      ctx.fill();
-
-      // Glowing alien core eyes
-      ctx.fillStyle = '#090d16';
-      ctx.fillRect(-5, -5, 5, 4);
-      ctx.fillRect(-5, 1, 5, 4);
-
-      // Wing pulse fins
-      const wingFlap = Math.sin(tick * 0.12 + inv.phase) * 3;
-      ctx.strokeStyle = bodyColor;
-      ctx.lineWidth = 2.5;
-      ctx.beginPath();
-      ctx.moveTo(4, -11);
-      ctx.lineTo(14, -17 + wingFlap);
-      ctx.moveTo(4, 11);
-      ctx.lineTo(14, 17 - wingFlap);
+      ctx.moveTo(DEFENSE_X, 0);
+      ctx.lineTo(DEFENSE_X, h);
       ctx.stroke();
+      ctx.restore();
 
-      // Word Tag & Micro HP Bar above invader
-      ctx.font = 'bold 10px "JetBrains Mono", monospace';
-      ctx.textAlign = 'center';
-      ctx.fillStyle = '#e2e8f0';
-      ctx.fillText(inv.word.slice(0, 8), 2, -19);
+      // Ion grapple beam (locks the lead ship)
+      if (armada.ionTimer > 0 && armada.ionTarget && armada.ships.includes(armada.ionTarget)) {
+        const t = armada.ionTarget;
+        ctx.save();
+        ctx.strokeStyle = '#fbbf24';
+        ctx.shadowColor = '#fbbf24';
+        ctx.shadowBlur = 10;
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(PLAYER_X + 24, armada.playerY);
+        ctx.lineTo(t.x - 8, t.y);
+        ctx.stroke();
+        ctx.restore();
+      }
 
-      const hpW = 28;
-      const hpPct = Math.max(0, inv.hp / inv.maxHp);
-      ctx.fillStyle = 'rgba(15, 23, 42, 0.85)';
-      ctx.fillRect(-hpW / 2, 16, hpW, 3.5);
-      ctx.fillStyle = bodyColor;
-      ctx.fillRect(-hpW / 2, 16, hpW * hpPct, 3.5);
+      // Supernova orbital beam (magenta-cyan)
+      if (armada.supernovaTimer > 0) {
+        const alpha = armada.supernovaTimer / 24;
+        const g = ctx.createLinearGradient(PLAYER_X + 24, 0, w, 0);
+        g.addColorStop(0, `rgba(232, 121, 249, ${0.95 * alpha})`);
+        g.addColorStop(0.5, `rgba(34, 211, 238, ${0.85 * alpha})`);
+        g.addColorStop(1, 'rgba(232, 121, 249, 0)');
+        ctx.fillStyle = g;
+        ctx.fillRect(PLAYER_X + 24, armada.playerY - 11, w - PLAYER_X, 22);
+      }
+
+      // EMP ring
+      if (armada.empRing) {
+        armada.empRing.r += 14;
+        const a = Math.max(0, 1 - armada.empRing.r / w);
+        ctx.strokeStyle = `rgba(52, 211, 153, ${a})`;
+        ctx.lineWidth = 4;
+        ctx.beginPath();
+        ctx.arc(PLAYER_X, armada.playerY, armada.empRing.r, -Math.PI / 2.2, Math.PI / 2.2);
+        ctx.stroke();
+        if (armada.empRing.r > w) armada.empRing = null;
+      }
+
+      // Enemy squadron
+      armada.ships.forEach(s => drawEnemyShip(ctx, s, armada.tick));
+
+      // Plasma bolts
+      updateLasers(ctx);
+
+      // Red counter-lasers
+      updateCounterLasers(ctx);
+
+      // Shockwave rings (word complete)
+      armada.shockwaves = armada.shockwaves.filter(sw => {
+        sw.r += 2.2;
+        sw.alpha = Math.max(0, 1 - (sw.r - 4) / 34);
+        if (sw.alpha <= 0) return false;
+        ctx.globalAlpha = sw.alpha;
+        ctx.strokeStyle = '#fbbf24';
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.arc(sw.x, sw.y, sw.r, 0, Math.PI * 2);
+        ctx.stroke();
+        ctx.globalAlpha = 1;
+        return true;
+      });
+
+      // Starfighter (bobbing, tilting when firing)
+      drawStarfighter(ctx, PLAYER_X, armada.playerY, armada.playerTilt, armada.jamTimer > 0);
+
+      // Particles
+      for (let i = armada.particles.length - 1; i >= 0; i--) {
+        const pt = armada.particles[i];
+        pt.x += pt.vx; pt.y += pt.vy; pt.life -= 0.04;
+        if (pt.life <= 0) { armada.particles.splice(i, 1); continue; }
+        ctx.globalAlpha = pt.life;
+        ctx.fillStyle = pt.color;
+        ctx.fillRect(pt.x, pt.y, 3, 3);
+        ctx.globalAlpha = 1;
+      }
+
+      // Floating callouts
+      for (let i = armada.floatingTexts.length - 1; i >= 0; i--) {
+        const ft = armada.floatingTexts[i];
+        ft.y -= 0.75; ft.life -= 0.025;
+        if (ft.life <= 0) { armada.floatingTexts.splice(i, 1); continue; }
+        ctx.globalAlpha = ft.life;
+        ctx.font = 'bold 11px "JetBrains Mono", monospace';
+        ctx.fillStyle = ft.color;
+        ctx.fillText(ft.text, ft.x, ft.y);
+        ctx.globalAlpha = 1;
+      }
 
       ctx.restore();
     }
 
     function animateArmadaLoop() {
-      if (!state.zenMode && armada.ctx) {
-        const ctx = armada.ctx, w = armada.width, h = armada.height;
-        armada.tick++;
-
-        // Smoothly steer starfighter vertically to align with the targeted invader
-        armada.shipY += (armada.targetY - armada.shipY) * 0.16;
-        armada.shipY = Math.max(32, Math.min(h - 26, armada.shipY));
-        if (armada.recoil > 0) armada.recoil *= 0.78;
-        if (armada.jamTimer > 0) armada.jamTimer--;
-
-        // Deep space background gradient
-        const bg = ctx.createLinearGradient(0, 0, w, h);
-        bg.addColorStop(0, '#040711');
-        bg.addColorStop(0.5, '#091024');
-        bg.addColorStop(1, '#0f172a');
-        ctx.fillStyle = bg;
-        ctx.fillRect(0, 0, w, h);
-
-        // Parallax starfield speed scales with Vinyl Turntable tempo!
-        const starSpeedMult = 0.5 + vinylEngine.rate * 1.8;
-        ctx.fillStyle = '#94a3b8';
-        armada.stars.forEach(st => {
-          st.x -= st.speed * starSpeedMult;
-          if (st.x < 0) { st.x = w; st.y = Math.random() * h; }
-          ctx.fillRect(st.x, st.y, st.size, st.size);
-        });
-
-        // Subtle tactical radar grid
-        ctx.strokeStyle = 'rgba(34, 211, 238, 0.05)';
-        ctx.lineWidth = 1;
-        for (let x = 140; x < w; x += 90) {
-          ctx.beginPath(); ctx.moveTo(x, 0); ctx.lineTo(x, h); ctx.stroke();
-        }
-
-        // EMP Shockwave ring (Comma mechanic)
-        if (armada.empWaveRadius > 0) {
-          armada.empWaveRadius += 22;
-          ctx.strokeStyle = `rgba(52, 211, 153, ${Math.max(0, 1 - armada.empWaveRadius / w)})`;
-          ctx.lineWidth = 4;
-          ctx.beginPath();
-          ctx.arc(85, armada.shipY, armada.empWaveRadius, -Math.PI / 2.2, Math.PI / 2.2);
-          ctx.stroke();
-          if (armada.empWaveRadius > w) armada.empWaveRadius = 0;
-        }
-
-        // Twin Ion Beam (Apostrophe / Hyphen mechanic)
-        if (armada.ionBeamTimer > 0) {
-          armada.ionBeamTimer--;
-          ctx.strokeStyle = 'rgba(251, 191, 36, 0.85)';
-          ctx.lineWidth = 5;
-          ctx.beginPath();
-          ctx.moveTo(98, armada.shipY);
-          ctx.lineTo(w, armada.shipY);
-          ctx.stroke();
-        }
-
-        // Supernova Orbital Beam (Period / ! / ? Finisher mechanic)
-        if (armada.supernovaTimer > 0) {
-          armada.supernovaTimer--;
-          const grad = ctx.createLinearGradient(95, 0, w, 0);
-          grad.addColorStop(0, 'rgba(244, 63, 94, 0.9)');
-          grad.addColorStop(0.5, 'rgba(251, 191, 36, 0.85)');
-          grad.addColorStop(1, 'rgba(244, 63, 94, 0)');
-          ctx.fillStyle = grad;
-          ctx.fillRect(98, armada.shipY - 12, w - 98, 24);
-        }
-
-        // Update & draw Invader Armada
-        armada.invaders.forEach(inv => {
-          inv.x -= 0.14; // Slow menacing advance
-          if (inv.x < 155) inv.x = w - 60;
-          inv.y = inv.baseY + Math.sin(armada.tick * 0.05 + inv.phase) * 6;
-          if (inv.hitFlash > 0) inv.hitFlash--;
-          drawInvaderShip(ctx, inv, armada.tick);
-        });
-
-        // Update & draw Per-Key Plasma Lasers
-        for (let i = armada.lasers.length - 1; i >= 0; i--) {
-          const l = armada.lasers[i];
-          l.x += l.vx;
-          if (l.targetRef) {
-            l.y += (l.targetRef.y - l.y) * 0.22;
-          }
-          ctx.fillStyle = l.color;
-          ctx.fillRect(l.x, l.y - 1.5, 16, 3);
-
-          const hitTarget = l.targetRef;
-          if (hitTarget && l.x >= hitTarget.x - 14) {
-            hitTarget.hp -= 0.5;
-            hitTarget.hitFlash = 5;
-            hitTarget.x = Math.min(w - 60, hitTarget.x + 4);
-            spawnExplosion(hitTarget.x - 8, l.y, '#22d3ee', 5);
-            if (hitTarget.hp <= 0) {
-              spawnExplosion(hitTarget.x, hitTarget.y, '#34d399', 20);
-              spawnFloatingText('+100 KILL', hitTarget.x, hitTarget.y - 10, '#34d399');
-              const idx = armada.invaders.indexOf(hitTarget);
-              if (idx !== -1) armada.invaders.splice(idx, 1);
-            }
-            armada.lasers.splice(i, 1);
-            continue;
-          }
-          if (l.x > w + 20) armada.lasers.splice(i, 1);
-        }
-
-        // Update & draw Word-Completion Homing Missiles
-        for (let i = armada.missiles.length - 1; i >= 0; i--) {
-          const m = armada.missiles[i];
-          const t = m.targetRef || getLeadInvader();
-          m.x += m.vx;
-          if (t) {
-            m.y += (t.y - m.y) * 0.18;
-          } else {
-            m.y += m.vy;
-          }
-
-          ctx.fillStyle = m.color;
-          ctx.beginPath();
-          ctx.arc(m.x, m.y, 4.5, 0, Math.PI * 2);
-          ctx.fill();
-
-          // Smoke trail particle
-          armada.particles.push({
-            x: m.x - 5, y: m.y,
-            vx: -1.5, vy: (Math.random() - 0.5) * 0.8,
-            life: 0.45, color: '#fde68a'
-          });
-
-          if (t && m.x >= t.x - 14) {
-            spawnExplosion(t.x, t.y, '#fbbf24', 22);
-            const idx = armada.invaders.indexOf(t);
-            if (idx !== -1) armada.invaders.splice(idx, 1);
-            armada.missiles.splice(i, 1);
-            continue;
-          }
-          if (m.x > w + 30) armada.missiles.splice(i, 1);
-        }
-
-        // Draw Player Starfighter
-        drawStarfighter(ctx, 78, armada.shipY, armada.recoil, armada.jamTimer > 0);
-
-        // Draw explosion particles
-        for (let i = armada.particles.length - 1; i >= 0; i--) {
-          const pt = armada.particles[i];
-          pt.x += pt.vx; pt.y += pt.vy; pt.life -= 0.04;
-          if (pt.life <= 0) { armada.particles.splice(i, 1); continue; }
-          ctx.globalAlpha = pt.life;
-          ctx.fillStyle = pt.color;
-          ctx.fillRect(pt.x, pt.y, 3, 3);
-          ctx.globalAlpha = 1;
-        }
-
-        // Draw floating combat score callouts
-        for (let i = armada.floatingTexts.length - 1; i >= 0; i--) {
-          const ft = armada.floatingTexts[i];
-          ft.y -= 0.75; ft.life -= 0.025;
-          if (ft.life <= 0) { armada.floatingTexts.splice(i, 1); continue; }
-          ctx.globalAlpha = ft.life;
-          ctx.font = 'bold 11px "JetBrains Mono", monospace';
-          ctx.fillStyle = ft.color;
-          ctx.fillText(ft.text, ft.x, ft.y);
-          ctx.globalAlpha = 1;
-        }
-      }
+      if (!state.zenMode && armada.ctx) drawArena();
       requestAnimationFrame(animateArmadaLoop);
     }
 
     /********************************************************************
-     * 10. NAVIGATION & UI TOGGLES
+     * 11. UNIFIED VICTORY / DEFEAT MODAL
+     ********************************************************************/
+    function buildPraise(acc, wpm, shieldsLeft) {
+      if (acc >= 98 && shieldsLeft === 3) return `Flawless precision! The Armada couldn't touch your perimeter. (${wpm} WPM)`;
+      if (acc >= 95) return `Clean sweep at ${wpm} WPM. Your rhythm held the line.`;
+      if (acc >= 85) return `Solid run at ${wpm} WPM. Tighten accuracy to earn the gold.`;
+      return `Sector secured at ${wpm} WPM, but the perimeter took hits. Slow down and let the groove find you.`;
+    }
+
+    function openEndOfLevelModal(isVictory) {
+      clearTimeout(state.countdownTimer);
+      state.countdownTimer = null;
+      state.runState = isVictory ? 'victory' : 'defeat';
+
+      const wpm = parseInt(document.getElementById('statWpm').textContent, 10) || 0;
+      const acc = parseInt(document.getElementById('statAcc').textContent, 10) || 0;
+
+      document.getElementById('modalLevelTitle').textContent = getActiveLevel().title;
+      document.getElementById('modalWpm').textContent = wpm;
+      document.getElementById('modalAcc').textContent = `${acc}%`;
+      document.getElementById('modalCombo').textContent = `${state.maxCombo}x`;
+
+      const icon = document.getElementById('modalBadgeIcon');
+      const glyph = document.getElementById('modalBadgeGlyph');
+      const label = document.getElementById('modalBadgeLabel');
+      const stars = document.getElementById('modalStars');
+      const feedback = document.getElementById('modalFeedbackText');
+      const primary = document.getElementById('modalPrimaryBtn');
+      const secondary = document.getElementById('modalSecondaryBtn');
+
+      if (isVictory) {
+        icon.className = 'w-10 h-10 rounded-xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 text-xl';
+        glyph.className = 'fa-solid fa-trophy';
+        label.className = 'text-xs font-mono uppercase text-emerald-400 font-semibold';
+        label.textContent = 'SECTOR CLEARED!';
+
+        let count = 1;
+        if (state.shields === 3 && acc >= 95) count = 3;
+        else if (acc >= 85) count = 2;
+        stars.style.display = '';
+        stars.textContent = [0, 1, 2].map(i => i < count ? '★' : '☆').join(' ');
+
+        feedback.textContent = buildPraise(acc, wpm, state.shields);
+        primary.textContent = 'Next Level ➔';
+        primary.dataset.action = 'next';
+        secondary.style.display = '';
+      } else {
+        icon.className = 'w-10 h-10 rounded-xl bg-rose-500/20 border border-rose-500/40 flex items-center justify-center text-rose-400 text-xl';
+        glyph.className = 'fa-solid fa-shield-virus';
+        label.className = 'text-xs font-mono uppercase text-rose-400 font-semibold';
+        label.textContent = 'PERIMETER BREACHED — HULL CRITICAL';
+
+        stars.style.display = 'none';
+        stars.textContent = '';
+
+        const top = Object.entries(state.missedKeysMap)
+          .sort((a, b) => b[1] - a[1])
+          .slice(0, 3)
+          .map(([k]) => `[ ${k} ]`);
+        feedback.textContent = top.length
+          ? `Watch out for keys: ${top.join(', ')}. Keep your wrists floating and let the vinyl slow down until your accuracy locks in.`
+          : 'The armada slipped through the perimeter. Keep your wrists floating and let the vinyl slow down until your accuracy locks in.';
+
+        primary.textContent = 'Retry Sector ↻';
+        primary.dataset.action = 'retry';
+        secondary.style.display = 'none';
+      }
+
+      const modal = document.getElementById('levelCompleteModal');
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function modalPrimaryAction() {
+      if (state.runState === 'victory') advanceToNextLevel();
+      else replayCurrentLevel();
+    }
+
+    /********************************************************************
+     * 12. NAVIGATION & UI TOGGLES
      ********************************************************************/
     function resetLevelProgress() {
       state.currentPromptIdx = 0;
@@ -1856,6 +2267,7 @@
       ua.className = lang === 'uk' ? on : off;
       renderLevelTabs();
       renderPromptStage();
+      startLevelCountdown();
     }
 
     function selectLevel(idx) {
@@ -1863,6 +2275,7 @@
       resetLevelProgress();
       renderLevelTabs();
       renderPromptStage();
+      startLevelCountdown();
     }
 
     function restartCurrentPrompt() {
@@ -1899,8 +2312,8 @@
       const next = order[(order.indexOf(state.handsOverlayMode) + 1) % order.length];
       state.handsOverlayMode = next;
       const label = document.getElementById('handsOverlayStateText');
-      if (next === 'paws') label.textContent = 'CAT PAWS';
-      else if (next === 'hands') label.textContent = 'CYBER HANDS';
+      if (next === 'paws') label.textContent = 'CAT PAWS 🐾';
+      else if (next === 'hands') label.textContent = 'CYBER GLOVES 🧤';
       else label.textContent = 'OFF';
       renderKeyboardHUD();
     }
@@ -1934,21 +2347,15 @@
       t.className = state.showFingerZones ? 'text-cyan-400' : 'text-slate-500';
     }
 
-    function openLevelCompleteModal() {
-      document.getElementById('modalLevelTitle').textContent = getActiveLevel().title;
-      document.getElementById('modalWpm').textContent = document.getElementById('statWpm').textContent;
-      document.getElementById('modalAcc').textContent = document.getElementById('statAcc').textContent;
-      document.getElementById('modalCombo').textContent = `${state.maxCombo}x`;
-      const modal = document.getElementById('levelCompleteModal');
-      modal.classList.remove('hidden'); modal.classList.add('flex');
-    }
-
     function closeModal() {
       const modal = document.getElementById('levelCompleteModal');
       modal.classList.add('hidden'); modal.classList.remove('flex');
     }
 
-    function replayCurrentLevel() { closeModal(); selectLevel(state.currentLevelIdx); }
+    function replayCurrentLevel() {
+      closeModal();
+      selectLevel(state.currentLevelIdx);
+    }
 
     function advanceToNextLevel() {
       closeModal();
@@ -1959,6 +2366,8 @@
       renderLevelTabs();
       renderPromptStage();
       initArmadaCanvas();
+      updateShieldHud();
+      startLevelCountdown();
     };
   </script>
 </body>
