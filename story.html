@@ -241,6 +241,35 @@ kbd { font-family: var(--f-mono); border: 1px solid var(--seam); border-bottom-w
   text-shadow: 0 0 10px rgba(255,255,255,.35); user-select: text; }
 .cine-hint { font-family: var(--f-display); font-size: 11px; letter-spacing: .2em; color: var(--muted); text-transform: uppercase; animation: blink 1.6s steps(1) infinite; }
 .cine-skip { position: absolute; z-index: 2; top: 60px; right: max(16px, env(safe-area-inset-right, 0px)); }
+
+/* Combat 2.0 terminal */
+.heat { height: 4px; background: #151d25; border-radius: 2px; overflow: hidden; }
+.heat i { display: block; height: 100%; background: linear-gradient(90deg, var(--live), #d6ffe6); transition: width .15s; }
+.heat.over i { background: #fff; box-shadow: 0 0 12px #fff; animation: blink .4s steps(1) infinite; }
+.term-line.unlocked .c:not(.cur) { opacity: .45; }
+/* Mission briefing card */
+.card { position: fixed; inset: 0; z-index: 40; background: rgba(2,5,8,.78); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); transition: opacity .35s ease; }
+.card.gone { opacity: 0; pointer-events: none; }
+.card-in { position: absolute; left: 0; right: 0; margin: 0 auto; top: clamp(50px, calc(50vh - 240px), 170px); width: min(92vw, 660px);
+  padding: 24px 28px 20px; border-radius: 14px; border: 1px solid rgba(96,255,150,.35); color: #7dffa8; font-family: var(--f-crt); overflow: hidden;
+  background: radial-gradient(ellipse at 50% 0%, #0c2616 0%, #040a06 75%);
+  box-shadow: 0 0 0 5px #0c1116, 0 0 0 6px #26313c, 0 30px 80px rgba(0,0,0,.6), inset 0 0 50px rgba(0,0,0,.7);
+  animation: cardIn .45s cubic-bezier(.2,.9,.3,1.2) both; display: grid; gap: 14px; }
+.card-in::after { content: ""; position: absolute; inset: 0; pointer-events: none; background: repeating-linear-gradient(to bottom, rgba(0,0,0,.22) 0 1px, transparent 1px 3px); }
+@keyframes cardIn { from { opacity: 0; transform: translateY(14px) scale(.97); } }
+.card-eyebrow { font-size: 20px; letter-spacing: .2em; opacity: .7; }
+.card-title { margin: -6px 0 0; font-family: var(--f-display); font-weight: 700; font-size: clamp(30px, 5vw, 48px); letter-spacing: .2em; color: #e6ffee; text-shadow: 0 0 18px rgba(96,255,150,.55); }
+.card-obj { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; font-size: 24px; line-height: 1.15; }
+.card-obj li::before { content: "▸ "; opacity: .7; }
+.card-obj li.h { font-size: 16px; letter-spacing: .2em; opacity: .6; text-transform: uppercase; }
+.card-obj li.h::before { content: ""; }
+.card-threat { display: flex; gap: 16px; align-items: center; border: 1px solid rgba(96,255,150,.3); border-radius: 8px; padding: 10px; background: rgba(3,16,7,.6); }
+.card-threat canvas { width: 180px; height: 92px; flex: none; }
+.card-threat b { display: block; font-weight: 400; font-size: 26px; color: #ffcf8a; letter-spacing: .06em; }
+.card-threat span { font-size: 21px; line-height: 1.1; }
+.card-keys { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: 18px; letter-spacing: .14em; text-transform: uppercase; opacity: .9; }
+.card-keys kbd { font-size: 16px; border-bottom-color: var(--fc); color: #fff; }
+@media (max-width: 520px) { .card-threat { flex-direction: column; align-items: flex-start; } }
 </style>
 </head>
 <body>
@@ -287,6 +316,17 @@ kbd { font-family: var(--f-mono); border: 1px solid var(--seam); border-bottom-w
   </section>
 </div>
 
+
+<div class="card" id="card" hidden>
+  <div class="card-in">
+    <div class="card-eyebrow" id="cardEyebrow"></div>
+    <h2 class="card-title" id="cardTitle"></h2>
+    <ul class="card-obj" id="cardObj"></ul>
+    <div class="card-threat" id="cardThreat"><canvas id="threatCv" width="360" height="184"></canvas><div><b id="threatName"></b><span id="threatDesc"></span></div></div>
+    <div class="card-keys" id="cardKeys"></div>
+    <div class="cine-hint" id="cardHint"></div>
+  </div>
+</div>
 <div class="cinema" id="cinema" hidden>
   <div class="bar"></div>
   <div class="stage">
@@ -344,7 +384,7 @@ const T = {
         space:'SPACE', sound:['SOUND ON','SOUND OFF'], systems:'Ship systems', sectors:'Sectors',
         decrypting:'DECRYPTING', key:'Key', signal:'Signal', signalLost:'Signal lost. He will repeat it. Try again.',
         decHint:'Type each cipher key before the signal fades.',
-        target:'TARGET LOCK', shields:'Shields', left:'left', incomingShips:'Ships inbound…', breach:'Hull breach! Shields are down. Regroup, and try again.',
+        target:'TARGET LOCK', selectTarget:'TYPE A FIRST LETTER TO LOCK', missileWord:'MISSILE!', alsoLock:'or', shields:'Shields', left:'left', incomingShips:'Ships inbound…', breach:'Hull breach! Shields are down. Regroup, and try again.',
         acts:['COLD BOOT','FIRST CONTACT'] },
   uk: { deck:'Пульт керування', tabHint:'Пробіл — далі · Tab — рядок заново', spaceKey:'Пробіл ␣',
         locate:'ЗНАЙДИ КЛАВІШУ', boot:'ПОСЛІДОВНІСТЬ ЗАПУСКУ', warm:'РОЗМИНКА', step:'Крок', next:'Далі',
@@ -356,7 +396,7 @@ const T = {
         space:'ПРОБІЛ', sound:['ЗВУК УВІМК','ЗВУК ВИМК'], systems:'Системи корабля', sectors:'Сектори',
         decrypting:'ДЕШИФРУВАННЯ', key:'Ключ', signal:'Сигнал', signalLost:'Сигнал втрачено. Він повторить. Спробуй ще.',
         decHint:'Набери кожен ключ, поки сигнал не зник.',
-        target:'ЦІЛЬ ЗАХОПЛЕНО', shields:'Щити', left:'лишилось', incomingShips:'Кораблі наближаються…', breach:'Пробоїна! Щити впали. Збираємось і пробуємо знову.',
+        target:'ЦІЛЬ ЗАХОПЛЕНО', selectTarget:'НАБЕРИ ПЕРШУ ЛІТЕРУ ЦІЛІ', missileWord:'РАКЕТА!', alsoLock:'або', shields:'Щити', left:'лишилось', incomingShips:'Кораблі наближаються…', breach:'Пробоїна! Щити впали. Збираємось і пробуємо знову.',
         acts:['ХОЛОДНИЙ СТАРТ','ПЕРШИЙ КОНТАКТ'] }
 };
 
@@ -527,7 +567,7 @@ const S = {
   dlg: [], dlgIdx: 0, dlgCb: null, full: '', shown: '', speaking: false, typer: null, blocking: false,
   dec: null, name: ''
 };
-const C = { ships: [], queue: [], last: 0, lasers: [], booms: [], shields: 3, typed: 0, total: 0 };
+const C = { ships: [], missiles: [], boss: null, queue: [], last: 0, lasers: [], booms: [], chains: [], lock: null, heat: 0, over: false, shields: 3, maxShields: 3, total: 0, said: {}, won: 0 };
 
 const $ = (s) => document.querySelector(s);
 const esc = (s) => String(s).replace(/[&<>"]/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;' }[c]));
@@ -570,7 +610,7 @@ function curLine() { return S.lines[S.lineIdx]; }
 function expectedChar() {
   if (S.phase === 'drill') { const l = curLine(); return l ? l.text[S.ch] : null; }
   if (S.phase === 'decrypt') { const k = S.dec.keys[S.dec.ki]; return k ? k.k[S.dec.ch] : null; }
-  if (S.phase === 'combat') { const s = C.ships[0]; return s ? s.word[C.typed] : null; }
+  if (S.phase === 'combat') { const e = alive(C.lock) ? C.lock : recommended(); return e ? e.word[e.typed] : null; }
   return null;
 }
 function expectedCode() { const ch = expectedChar(); return ch ? codeOf(ch) : null; }
@@ -620,6 +660,13 @@ const sfx = {
   laser: () => blip('square', 1300 + Math.random() * 200, 300, 0.07, 0.035),
   boom: () => { blip('sawtooth', 300, 40, 0.3, 0.08); blip('triangle', 120, 30, 0.35, 0.07); },
   breach: () => { blip('square', 200, 35, 0.5, 0.1); blip('sawtooth', 90, 30, 0.6, 0.08, 0.05); },
+  lock: () => { blip('square', 880, 1320, 0.05, 0.03); },
+  missile: () => { blip('sawtooth', 1400, 500, 0.5, 0.03); },
+  clang: () => { blip('square', 220, 160, 0.12, 0.07); blip('triangle', 1800, 900, 0.08, 0.04); },
+  chain: () => { for (let i = 0; i < 4; i++) blip('sawtooth', 2000 - i * 300, 400, 0.08, 0.04, i * 0.03); },
+  charge: () => { blip('triangle', 440, 1760, 0.35, 0.06); },
+  vent: () => { blip('sawtooth', 600, 80, 0.3, 0.05); },
+  card: () => { blip('triangle', 196, 392, 0.4, 0.05); blip('sine', 784, null, 0.5, 0.02, 0.15); },
   glitch: () => { for (let i = 0; i < 7; i++) blip('sawtooth', 70 + Math.random() * 700, 40, 0.09, 0.04, i * 0.06); }
 };
 /* ---------- Adaptive music ----------
@@ -681,8 +728,8 @@ function musicMood() {
   if (performance.now() < MUS.duckUntil) return { calm: 0, tense: 0 };
   if (S.phase === 'intro') return { calm: 0.7, tense: 0 };
   if (S.phase === 'combat') {
-    const lead = C.ships[0];
-    const close = lead ? Math.max(0, Math.min(1, 1 - (lead.x - perimeterX()) / (view.w * 0.8))) : 0;
+    const r = recommended();
+    const close = r ? Math.max(0, Math.min(1, 1 - danger(r) / 8)) : 0;
     MUS.intensity = 0.7 + 0.3 * close;
     return { calm: 0, tense: 1 };
   }
@@ -883,7 +930,7 @@ function drawFace(obj, now, mode, speaking, forcePowered) {
               an oscilloscope that cleans up as you decrypt.
      TARGET — combat: perspective grid, line-art raiders with word labels.
    ====================================================================== */
-const view = { cv: null, ctx: null, w: 0, h: 0, stars: [], pw: [0.02, 0, 0, 0, 0], shake: 0, pulses: [] };
+const view = { cv: null, ctx: null, w: 0, h: 0, stars: [], pw: [0.02, 0, 0, 0, 0], shake: 0, pulses: [], banner: null, flash: 0 };
 function initStars() { view.stars = Array.from({ length: 70 }, () => ({ x: Math.random() * view.w, y: Math.random() * view.h, z: 0.4 + Math.random() * 1.4 })); }
 const G = (a = 1) => `rgba(96,255,150,${a})`;
 const HOT = (a = 1) => `rgba(255,190,90,${a})`;
@@ -893,8 +940,8 @@ const cannon = () => ({ x: view.w * 0.5, y: view.h * 0.8 });
 const perimeterX = () => view.w * 0.13;
 const km = (n) => Math.round(n).toLocaleString('en-US').replace(/,/g, ' ') + ' km';
 const UIW = {
-  en: { status: 'STATUS', comms: 'COMMS', target: 'TARGET', nav: 'NAV', offline: 'OFFLINE', booting: 'BOOTING', low: 'LOW POWER', hull: 'HULL', crew: 'CREW', dist: 'DIST', spd: 'SPD', level: 'Level', freq: 'FREQ', sig: 'SIG', src: 'SRC', unknown: 'UNKNOWN', shields: 'SHIELDS', hostiles: 'HOSTILES', perimeter: 'PERIMETER', lock: 'LOCK', vex: 'VEX · RAIDER COMMAND', srcUnknown: 'SOURCE UNKNOWN', navOff: 'NAV OFFLINE' },
-  uk: { status: 'СТАТУС', comms: 'ЗВ\'ЯЗОК', target: 'ЦІЛЬ', nav: 'НАВ', offline: 'ВИМКНЕНО', booting: 'ЗАПУСК', low: 'МАЛО ЖИВЛЕННЯ', hull: 'КОРПУС', crew: 'ЕКІПАЖ', dist: 'ВІДСТ', spd: 'ШВИД', level: 'Рівень', freq: 'ЧАСТ', sig: 'СИГН', src: 'ДЖЕР', unknown: 'НЕВІДОМО', shields: 'ЩИТИ', hostiles: 'ВОРОГИ', perimeter: 'ПЕРИМЕТР', lock: 'ЦІЛЬ', vex: 'ВЕКС · РЕЙДЕРИ', srcUnknown: 'ДЖЕРЕЛО НЕВІДОМЕ', navOff: 'НАВ ВИМКНЕНО' }
+  en: { status: 'STATUS', comms: 'COMMS', target: 'TARGET', nav: 'NAV', offline: 'OFFLINE', booting: 'BOOTING', low: 'LOW POWER', hull: 'HULL', crew: 'CREW', dist: 'DIST', spd: 'SPD', level: 'Level', freq: 'FREQ', sig: 'SIG', src: 'SRC', unknown: 'UNKNOWN', shields: 'SHIELDS', hostiles: 'HOSTILES', perimeter: 'PERIMETER', lock: 'LOCK', vex: 'VEX · RAIDER COMMAND', heat: 'HEAT', overcharge: 'OVERCHARGE', flagship: 'FLAGSHIP', hullHit: 'HULL HIT', incoming: 'INCOMING', cleared: 'SECTOR CLEARED', sysOnline: 'SYSTEM ONLINE', phase2: 'PHASE 2', flagshipDown: 'FLAGSHIP DOWN', srcUnknown: 'SOURCE UNKNOWN', navOff: 'NAV OFFLINE' },
+  uk: { status: 'СТАТУС', comms: 'ЗВ\'ЯЗОК', target: 'ЦІЛЬ', nav: 'НАВ', offline: 'ВИМКНЕНО', booting: 'ЗАПУСК', low: 'МАЛО ЖИВЛЕННЯ', hull: 'КОРПУС', crew: 'ЕКІПАЖ', dist: 'ВІДСТ', spd: 'ШВИД', level: 'Рівень', freq: 'ЧАСТ', sig: 'СИГН', src: 'ДЖЕР', unknown: 'НЕВІДОМО', shields: 'ЩИТИ', hostiles: 'ВОРОГИ', perimeter: 'ПЕРИМЕТР', lock: 'ЦІЛЬ', vex: 'ВЕКС · РЕЙДЕРИ', heat: 'ЗАРЯД', overcharge: 'ПЕРЕЗАРЯД', flagship: 'ФЛАГМАН', hullHit: 'ВЛУЧАННЯ', incoming: 'РАКЕТА', cleared: 'СЕКТОР ЗАЧИЩЕНО', sysOnline: 'СИСТЕМА ПРАЦЮЄ', phase2: 'ФАЗА 2', flagshipDown: 'ФЛАГМАН ЗБИТО', srcUnknown: 'ДЖЕРЕЛО НЕВІДОМЕ', navOff: 'НАВ ВИМКНЕНО' }
 };
 const uw = (k) => UIW[S.lang][k];
 
@@ -1094,63 +1141,164 @@ function drawComms(ctx, now) {
 }
 
 /* ---------- TARGET ---------- */
-function drawRaider(ctx, s, now, isTarget) {
-  const x = s.x, y = s.y + Math.sin(now * 0.004 + s.phase) * 4;
-  ctx.save(); ctx.translate(x, y);
-  ctx.strokeStyle = s.hit > 0 ? '#ffffff' : HOT(); ctx.lineWidth = 2; ctx.lineJoin = 'round';
-  line(ctx, [[-18, 0], [4, -10], [16, -14], [10, 0], [16, 14], [4, 10], [-18, 0]]);
-  line(ctx, [[-4, -3], [3, 0], [-4, 3]]);
-  line(ctx, [[16, -5], [22 + Math.random() * 6, 0], [16, 5]]);
-  if (isTarget) {
-    ctx.strokeStyle = G(); ctx.lineWidth = 1.6; const r = 26;
-    [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([sx, sy]) => line(ctx, [[sx * r, sy * (r - 8)], [sx * r, sy * r], [sx * (r - 8), sy * r]]));
+function drawShipShape(ctx, type, x, y, sc, col, now) {
+  ctx.save(); ctx.translate(x, y); ctx.scale(sc, sc);
+  ctx.strokeStyle = col; ctx.lineWidth = 2 / sc; ctx.lineJoin = 'round';
+  if (type === 'scout') {
+    line(ctx, [[-22, 0], [8, -6], [18, -3], [12, 0], [18, 3], [8, 6], [-22, 0]]);
+    line(ctx, [[22, -2], [32, -2]]); line(ctx, [[22, 2], [30, 2]]);
+  } else if (type === 'cruiser') {
+    line(ctx, [[-24, -6], [-12, -16], [18, -16], [26, -6], [26, 6], [18, 16], [-12, 16], [-24, 6], [-24, -6]]);
+    line(ctx, [[-10, -16], [-10, 16]]); line(ctx, [[4, -16], [4, 16]]);
+    line(ctx, [[-18, -4], [-18, 4]]);
+    line(ctx, [[26, -4], [34 + (now ? Math.random() * 5 : 0), 0], [26, 4]]);
+  } else if (type === 'kamikaze') {
+    line(ctx, [[-20, 0], [0, -12], [16, 0], [0, 12], [-20, 0]]);
+    line(ctx, [[0, -12], [2, -20]]); line(ctx, [[0, 12], [2, 20]]); line(ctx, [[16, 0], [24, 0]]);
+    ctx.fillStyle = now && Math.floor(now / 160) % 2 ? 'rgba(255,90,82,.95)' : col;
+    ctx.beginPath(); ctx.arc(-2, 0, 3.4, 0, Math.PI * 2); ctx.fill();
+  } else {
+    line(ctx, [[-18, 0], [4, -10], [16, -14], [10, 0], [16, 14], [4, 10], [-18, 0]]);
+    line(ctx, [[-4, -3], [3, 0], [-4, 3]]);
+    line(ctx, [[16, -5], [22 + (now ? Math.random() * 6 : 0), 0], [16, 5]]);
   }
   ctx.restore();
-  ctx.font = `22px ${MONO}`; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
-  const typed = isTarget ? C.typed : 0, a = s.word.slice(0, typed), b = s.word.slice(typed);
-  const wa = ctx.measureText(a).width, wb = ctx.measureText(b).width;
-  const lx = x - (wa + wb) / 2, ly = y - 34;
-  ctx.fillStyle = BG; ctx.fillRect(lx - 6, ly - 12, wa + wb + 12, 24);
-  ctx.strokeStyle = isTarget ? G() : HOT(.6); ctx.lineWidth = 1; ctx.strokeRect(lx - 6, ly - 12, wa + wb + 12, 24);
+}
+function drawMissileShape(ctx, col) {
+  ctx.strokeStyle = col; ctx.lineWidth = 1.6;
+  line(ctx, [[-9, 0], [5, -4], [9, 0], [5, 4], [-9, 0]]);
+  line(ctx, [[5, -4], [8, -7]]); line(ctx, [[5, 4], [8, 7]]);
+}
+function drawBossShape(ctx, x, y, sc, col, now) {
+  ctx.save(); ctx.translate(x, y); ctx.scale(sc, sc);
+  ctx.strokeStyle = col; ctx.lineWidth = 2.2 / sc; ctx.lineJoin = 'round';
+  line(ctx, [[-62, 0], [-42, -14], [-12, -22], [36, -27], [60, -12], [60, 12], [36, 27], [-12, 22], [-42, 14], [-62, 0]]);
+  line(ctx, [[-12, -22], [-4, -34], [18, -34], [24, -26]]);
+  line(ctx, [[-42, -14], [-42, 14]]); line(ctx, [[14, -26], [14, 26]]);
+  ctx.lineWidth = 1 / sc; line(ctx, [[-56, 0], [52, 0]]);
+  ctx.lineWidth = 2 / sc;
+  [[-12, 1], [12, 1]].forEach(([ey]) => line(ctx, [[60, ey - 5], [70 + (now ? Math.random() * 10 : 4), ey], [60, ey + 5]]));
+  ctx.restore();
+}
+function wordLabel(ctx, e, x, y, now, small) {
+  const locked = C.lock === e;
+  ctx.font = `${small ? 18 : 22}px ${MONO}`; ctx.textBaseline = 'middle'; ctx.textAlign = 'left';
+  const a = e.word.slice(0, e.typed), b = e.word.slice(e.typed);
+  const wa = ctx.measureText(a).width, wb = ctx.measureText(b).width, pad = 6;
+  const lx = x - (wa + wb) / 2, ly = y;
+  ctx.shadowBlur = 0;
+  ctx.fillStyle = BG; ctx.fillRect(lx - pad, ly - 12, wa + wb + pad * 2, 24);
+  ctx.strokeStyle = locked ? G() : HOT(e.kind === 'missile' ? .9 : .55); ctx.lineWidth = locked ? 1.6 : 1;
+  ctx.strokeRect(lx - pad, ly - 12, wa + wb + pad * 2, 24);
   ctx.fillStyle = G(); ctx.fillText(a, lx, ly);
-  ctx.fillStyle = isTarget ? '#ffffff' : HOT(); ctx.fillText(b, lx + wa, ly);
+  ctx.fillStyle = locked ? '#ffffff' : HOT(); ctx.fillText(b, lx + wa, ly);
+  ctx.shadowBlur = 6;
+}
+function reticle(ctx, x, y, e, now) {
+  const k = Math.max(0, 1 - (now - (e.lockT || 0)) / 180);
+  const r = 24 + k * 30;
+  ctx.strokeStyle = G(); ctx.lineWidth = 1.6;
+  [[-1,-1],[1,-1],[-1,1],[1,1]].forEach(([sx, sy]) => line(ctx, [[x + sx * r, y + sy * (r - 8)], [x + sx * r, y + sy * r], [x + sx * (r - 8), y + sy * r]]));
 }
 function drawTarget(ctx, now) {
   const W = view.w, H = view.h, hz = H * 0.42, vx = W / 2;
-  // stars above the horizon
   view.stars.forEach(st => {
     st.x -= st.z * (0.4 + S.cadence * 1.5); if (st.x < 0) { st.x = W; st.y = Math.random() * hz; }
     if (st.y < hz) { ctx.fillStyle = G(0.25 + 0.3 * st.z / 1.8); ctx.fillRect(st.x, st.y, st.z, st.z); }
   });
-  // perspective grid
-  ctx.strokeStyle = G(.22); ctx.lineWidth = 1;
+  ctx.strokeStyle = G(.2); ctx.lineWidth = 1;
   line(ctx, [[30, hz], [W - 30, hz]]);
   for (let i = -10; i <= 10; i++) line(ctx, [[vx + i * 14, hz], [vx + i * W * 0.12, H - 40]]);
-  const off = (now * 0.0006) % 1;
+  const off = (now * (0.0005 + S.cadence * 0.0008)) % 1;
   for (let k = 0; k < 8; k++) { const t = (k + off) / 8, y = hz + (H - 40 - hz) * t * t; line(ctx, [[30, y], [W - 30, y]]); }
-  // perimeter
   ctx.strokeStyle = HOT(.75); ctx.lineWidth = 1.5;
   line(ctx, [[perimeterX(), 48], [perimeterX(), H - 40]], true);
   vtext(ctx, uw('perimeter'), perimeterX() + 6, 62, 16, 'left', HOT(.8));
-  // ships
-  C.ships.forEach((s, i) => drawRaider(ctx, s, now, i === 0));
-  // cannon turret
+
+  // flagship
+  if (C.boss) {
+    const b = C.boss, s = bossScale();
+    drawBossShape(ctx, b.x, b.y, s, b.phase === 2 && Math.floor(now / 300) % 2 ? HOT() : G(), now);
+    b.parts.forEach(p => {
+      const [px, py] = pos(p);
+      if (!p.alive) { ctx.strokeStyle = G(.4); ctx.lineWidth = 1.5; line(ctx, [[px - 5, py - 5], [px + 5, py + 5]]); line(ctx, [[px + 5, py - 5], [px - 5, py + 5]]); return; }
+      ctx.strokeStyle = p.hit > 0 ? '#fff' : HOT(); ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(px, py, 6 + Math.sin(now * 0.01) * 1.5, 0, Math.PI * 2); ctx.stroke();
+      if (C.lock === p) reticle(ctx, px, py, p, now);
+    });
+    b.parts.forEach(p => { if (p.alive) { const [px, py] = pos(p); wordLabel(ctx, p, px, py + (p.dy < 0 ? -24 : 24), now); } });
+  }
+  // raiders
+  C.ships.forEach(s => {
+    const y = s.y + Math.sin(now * 0.004 + s.phase) * 4;
+    const col = s.hit > 0 ? '#ffffff' : (s.type === 'kamikaze' && C.lock === s ? 'rgba(255,90,82,.95)' : HOT());
+    drawShipShape(ctx, s.type, s.x, y, 1, col, now);
+    if (s.type === 'cruiser') for (let i = 0; i < s.armor; i++) { ctx.fillStyle = HOT(); ctx.fillRect(s.x - 8 + i * 10, y + 20, 7, 3); }
+    if (C.lock === s) reticle(ctx, s.x, y, s, now);
+    wordLabel(ctx, s, s.x, y - 34, now);
+  });
+  // missiles with trails
+  C.missiles.forEach(m => {
+    const k = (now - m.t0) / m.dur;
+    for (let i = 1; i <= 6; i++) {
+      const kk = Math.max(0, k - i * 0.02);
+      const tx = m.sx + (m.tx - m.sx) * kk, ty = m.sy + (m.ty - m.sy) * kk - Math.sin(kk * Math.PI) * 40;
+      ctx.fillStyle = HOT(0.5 - i * 0.07); ctx.fillRect(tx - 1, ty - 1, 2, 2);
+    }
+    ctx.save(); ctx.translate(m.x, m.y); ctx.rotate(Math.atan2(m.ty - m.sy, m.tx - m.sx) + Math.PI);
+    drawMissileShape(ctx, m.hit > 0 ? '#fff' : HOT()); ctx.restore();
+    if (C.lock === m) reticle(ctx, m.x, m.y, m, now);
+    wordLabel(ctx, m, m.x, m.y - 24, now, true);
+  });
+  // cannon turret, glows with heat
   const cn = cannon();
-  ctx.strokeStyle = G(); ctx.lineWidth = 2;
+  ctx.strokeStyle = C.over ? '#ffffff' : G(); ctx.lineWidth = 2;
   line(ctx, [[cn.x - 30, cn.y + 14], [cn.x - 18, cn.y], [cn.x + 18, cn.y], [cn.x + 30, cn.y + 14]]);
   line(ctx, [[cn.x - 4, cn.y], [cn.x - 4, cn.y - 12]]); line(ctx, [[cn.x + 4, cn.y], [cn.x + 4, cn.y - 12]]);
-  // lasers + booms
-  C.lasers = C.lasers.filter(l => now - l.t < 140);
+  if (C.heat > 0.05) { ctx.fillStyle = C.over ? `rgba(255,255,255,${0.6 + 0.4 * Math.sin(now * 0.02)})` : G(0.25 + C.heat * 0.6); ctx.fillRect(cn.x - 14, cn.y + 4, 28 * C.heat, 4); }
+  // beams, chains, explosions
+  C.lasers = C.lasers.filter(l => now - l.t < 150);
   C.lasers.forEach(l => {
-    ctx.strokeStyle = G(1 - (now - l.t) / 140); ctx.lineWidth = 2.5;
+    const a = 1 - (now - l.t) / 150;
+    ctx.strokeStyle = C.over ? `rgba(255,255,255,${a})` : G(a); ctx.lineWidth = 2.5;
     line(ctx, [[cn.x + l.off * 0.5, cn.y - 12], [l.x, l.y]]);
+    ctx.fillStyle = G(a); ctx.beginPath(); ctx.arc(l.x, l.y, 4 * a + 1, 0, Math.PI * 2); ctx.fill();
   });
-  C.booms = C.booms.filter(b => now - b.t < 600);
+  C.chains = C.chains.filter(c => now - c.t < 320);
+  C.chains.forEach(c => {
+    ctx.strokeStyle = `rgba(255,255,255,${1 - (now - c.t) / 320})`; ctx.lineWidth = 2;
+    const pts = [[c.x1, c.y1]];
+    for (let i = 1; i < 8; i++) { const k = i / 8; pts.push([c.x1 + (c.x2 - c.x1) * k + (Math.random() - .5) * 18, c.y1 + (c.y2 - c.y1) * k + (Math.random() - .5) * 18]); }
+    pts.push([c.x2, c.y2]); line(ctx, pts);
+  });
+  C.booms = C.booms.filter(b => now - b.t < (b.big ? 800 : 500));
   C.booms.forEach(b => {
-    const k = (now - b.t) / 600; ctx.strokeStyle = b.bad ? HOT(1 - k) : G(1 - k); ctx.lineWidth = 2;
-    ctx.beginPath(); ctx.arc(b.x, b.y, 6 + k * 44, 0, Math.PI * 2); ctx.stroke();
-    for (let i = 0; i < 8; i++) { const an = i / 8 * Math.PI * 2 + b.r; line(ctx, [[b.x + Math.cos(an) * k * 20, b.y + Math.sin(an) * k * 20], [b.x + Math.cos(an) * k * 48, b.y + Math.sin(an) * k * 48]]); }
+    if (now < b.t) return;
+    const life = b.big ? 800 : 500, k = (now - b.t) / life;
+    ctx.strokeStyle = b.bad ? HOT(1 - k) : G(1 - k); ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.arc(b.x, b.y, 6 + k * (b.big ? 56 : 30), 0, Math.PI * 2); ctx.stroke();
+    const n = b.big ? 12 : 7;
+    for (let i = 0; i < n; i++) {
+      const an = i / n * Math.PI * 2 + b.r * 6, r1 = k * (b.big ? 24 : 14), r2 = k * (b.big ? 64 : 36);
+      line(ctx, [[b.x + Math.cos(an) * r1, b.y + Math.sin(an) * r1 + k * k * 20], [b.x + Math.cos(an) * r2, b.y + Math.sin(an) * r2 + k * k * 30]]);
+    }
+    if (k < 0.15) { ctx.fillStyle = `rgba(255,255,255,${0.8 - k * 5})`; ctx.beginPath(); ctx.arc(b.x, b.y, 18, 0, Math.PI * 2); ctx.fill(); }
   });
+}
+function drawBanner(ctx, now) {
+  const b = view.banner; if (!b) return;
+  const age = now - b.t, life = 1700;
+  if (age > life) { view.banner = null; return; }
+  const a = age < 150 ? age / 150 : (age > life - 400 ? (life - age) / 400 : 1);
+  const W = view.w, H = view.h, y = H * 0.4, sc = 1 + Math.max(0, 1 - age / 200) * 0.25;
+  ctx.save(); ctx.globalAlpha = a; ctx.translate(W / 2, y); ctx.scale(sc, sc);
+  ctx.font = `52px ${MONO}`; const w = ctx.measureText(b.text).width + 48;
+  ctx.fillStyle = 'rgba(2,8,4,.82)'; ctx.fillRect(-w / 2, -32, w, 64);
+  ctx.strokeStyle = b.hot ? HOT() : G(); ctx.lineWidth = 2; ctx.shadowColor = b.hot ? HOT(.8) : G(.8); ctx.shadowBlur = 12;
+  line(ctx, [[-w / 2, -18], [-w / 2, -32], [-w / 2 + 18, -32]]); line(ctx, [[w / 2 - 18, -32], [w / 2, -32], [w / 2, -18]]);
+  line(ctx, [[-w / 2, 18], [-w / 2, 32], [-w / 2 + 18, 32]]); line(ctx, [[w / 2 - 18, 32], [w / 2, 32], [w / 2, 18]]);
+  vtext(ctx, b.text, 0, 2, 52, 'center', b.hot ? HOT() : G());
+  ctx.restore();
 }
 
 /* ---------- frame ---------- */
@@ -1181,10 +1329,14 @@ function drawView(now, pw) {
     tabs(ctx, 'comms');
   } else {
     drawTarget(ctx, now);
-    const remaining = C.queue.length + C.ships.length;
-    header(ctx, uw('target'), [[uw('shields'), '■'.repeat(C.shields) + '□'.repeat(3 - C.shields), C.shields < 2], [uw('hostiles'), String(remaining)], [uw('spd'), `${Math.round(12 + S.cadence * 140)} km/s`]]);
+    const remaining = C.queue.length + C.ships.length + C.missiles.length;
+    const heat = C.over ? uw('overcharge') : '▮'.repeat(Math.round(C.heat * 6)) + '▯'.repeat(6 - Math.round(C.heat * 6));
+    const third = C.boss ? [uw('flagship'), `${C.boss.parts.filter(p => p.alive).length + (C.boss.phase === 1 ? 3 : 0)}/7`, true] : [uw('hostiles'), String(remaining), C.missiles.length > 0];
+    header(ctx, uw('target'), [[uw('shields'), '■'.repeat(Math.max(0, C.shields)) + '□'.repeat(Math.max(0, C.maxShields - C.shields)), C.shields < 2], [uw('heat'), heat, C.over], third]);
     tabs(ctx, 'target');
   }
+  drawBanner(ctx, now);
+  if (view.flash > 0) { ctx.fillStyle = `rgba(255,70,60,${view.flash * 0.35})`; ctx.fillRect(-10, -10, W + 20, H + 20); view.flash = Math.max(0, view.flash - 0.04); }
   ctx.shadowBlur = 0; ctx.globalAlpha = 1;
 
   // CRT scanlines, rolling bar and vignette
@@ -1316,15 +1468,16 @@ function renderTerminal() {
   }
 
   if (S.phase === 'combat') {
-    const lead = C.ships[0];
-    const remaining = C.queue.length + C.ships.length;
-    const pips = `<span class="pips">${'⬢'.repeat(C.shields)}<span class="off">${'⬡'.repeat(3 - C.shields)}</span></span>`;
-    const curCode = lead ? codeOf(lead.word[C.typed]) : null;
+    const locked = alive(C.lock) ? C.lock : null, rec = locked || recommended();
+    const pips = `<span class="pips">${'⬢'.repeat(Math.max(0, C.shields))}<span class="off">${'⬡'.repeat(Math.max(0, C.maxShields - C.shields))}</span></span>`;
+    const curCode = rec ? codeOf(rec.word[rec.typed]) : null;
     const curColor = curCode ? FINGER_COLOR[KEY[curCode].finger] : 'var(--live)';
+    const others = targets().filter(x => x !== rec).map(x => x.word[0].toUpperCase());
+    const kindLabel = locked ? t('target') : t('selectTarget');
     el.innerHTML = `
-      <div class="term-head"><span class="label kind">${esc(t('target'))}</span><span class="label">${esc(t('shields'))} ${pips} · ${remaining} ${esc(t('left'))}</span></div>
-      <div class="progress"><i style="width:${((1 - remaining / C.total) * 100).toFixed(1)}%"></i></div>
-      <div class="term-line" id="termLine" style="--cur:${curColor}"><span class="prompt">&gt;</span>${lead ? charsHtml(lead.word, C.typed) : `<span class="c">${esc(t('incomingShips'))}</span>`}</div>
+      <div class="term-head"><span class="label kind">${esc(kindLabel)}${rec && rec.kind === 'missile' ? ' · <span style="color:var(--alert)">' + esc(t('missileWord')) + '</span>' : ''}</span><span class="label">${esc(t('shields'))} ${pips}${others.length ? ' · ' + esc(t('alsoLock')) + ' ' + esc(others.join(' ')) : ''}</span></div>
+      <div class="heat ${C.over ? 'over' : ''}"><i style="width:${(C.heat * 100).toFixed(0)}%"></i></div>
+      <div class="term-line ${locked ? '' : 'unlocked'}" id="termLine" style="--cur:${curColor}"><span class="prompt">&gt;</span>${rec ? charsHtml(rec.word, rec.typed) : `<span class="c">${esc(t('incomingShips'))}</span>`}</div>
       ${footHtml()}`;
   }
 }
@@ -1385,7 +1538,6 @@ function buildLines(lv) {
   return out;
 }
 
-function resetCombat() { C.ships = []; C.queue = []; C.lasers = []; C.booms = []; C.typed = 0; C.shields = 3; }
 
 function startLevel(i) {
   clearInterval(S.typer);
@@ -1393,7 +1545,7 @@ function startLevel(i) {
   resetCombat();
   S.lines = buildLines(L()); S.lineIdx = 0; S.ch = 0; S.msg = '';
   S.correct = 0; S.total = 0; S.startT = null;
-  say(LT().intro, beginDrill);
+  showCard(i);
 }
 
 function beginDrill() {
@@ -1452,34 +1604,285 @@ function signalLost() {
   say([t('signalLost')], startDecrypt);
 }
 
-/* ---------- Combat ---------- */
+/* ---------- Combat 2.0 ----------
+   Targets: raiders (drone / scout / cruiser / kamikaze), missiles they fire at you,
+   and the weak points of Vex's flagship. Type any target's first letter to lock on,
+   then finish its word. Clean typing builds HEAT; a full bar overcharges the cannon
+   so your next kill chains to a second target. A typo vents the heat.            */
+const COMBAT = {
+  5: { fire: 11000, mspeed: 5600, mlen: 2, mix: { drone: .7, scout: .3 } },
+  6: { fire: 8500,  mspeed: 5000, mlen: 2, mix: { drone: .45, scout: .25, cruiser: .3 } },
+  7: { fire: 7000,  mspeed: 4600, mlen: 3, mix: { drone: .35, scout: .2, cruiser: .2, kamikaze: .25 } },
+  8: { fire: 6500,  mspeed: 4400, mlen: 3, mix: { scout: .5, kamikaze: .5 }, boss: true }
+};
+const SHIP_SPEED = { drone: 1, scout: 1.55, cruiser: 0.72, kamikaze: 1 };
+const TAUNT = {
+  en: { prevBad: 'You missed {miss} shots last time, {name}. Nervous?', prevGood: 'Clean shooting last time, {name}. Luck runs out.',
+        firstHit: 'Ha! Your shields are cracking, {name}.', bossStart: 'Face me, {name}. Hit my weak points, if you can.',
+        phase2: 'Enough! All power to the core!', lockTip: 'Type any raider\'s first letter to lock on, then finish its word.',
+        missile: 'Incoming missile! Type its code to shoot it down.', over: 'Cannon overcharged! Your next kill chains to a second target.' },
+  uk: { prevBad: 'Минулого разу ти схибив {miss} разів, {name}. Нервуєш?', prevGood: 'Чисто стріляв минулого разу, {name}. Удача закінчується.',
+        firstHit: 'Ха! Твої щити тріщать, {name}.', bossStart: 'Зустрінь мене, {name}. Влуч у мої слабкі місця, якщо зможеш.',
+        phase2: 'Досить! Уся енергія — в ядро!', lockTip: 'Набери першу літеру рейдера, щоб захопити ціль, потім допиши слово.',
+        missile: 'Ракета! Набери її код, щоб збити.', over: 'Гармату перезаряджено! Наступне влучання вразить ще одну ціль.' }
+};
+const tw = (k) => TAUNT[S.lang][k];
+function taunt(text) { S.speaker = 'vex'; typeText(fmt(text), false); }
+
+function resetCombat() {
+  Object.assign(C, { ships: [], missiles: [], boss: null, queue: [], lasers: [], booms: [], chains: [], lock: null, heat: 0, over: false,
+    shields: 3, maxShields: 3, total: 0, last: -1e9, said: {}, won: 0 });
+}
+const alive = (e) => e && (e.kind === 'part' ? e.alive && C.boss : e.kind === 'ship' ? C.ships.includes(e) : C.missiles.includes(e));
+function targets() { return [...C.missiles, ...C.ships, ...(C.boss ? C.boss.parts.filter(p => p.alive) : [])]; }
+function bossScale() { return Math.min(view.w, view.h) * 0.0062; }
+function pos(e) {
+  if (e.kind === 'part') { const b = C.boss, s = bossScale(); return [b.x + e.dx * s, b.y + e.dy * s]; }
+  return [e.x, e.y];
+}
+function danger(e) {
+  if (e.kind === 'missile') return (e.dur - (performance.now() - e.t0)) / 1000 * 0.5;
+  if (e.kind === 'ship') return (e.x - perimeterX()) / view.w * 10;
+  return 4 + (C.boss.x - perimeterX()) / view.w * 10;
+}
+function recommended() { const ts = targets(); return ts.length ? ts.sort((a, b) => danger(a) - danger(b))[0] : null; }
+function banner(text, hot) { view.banner = { text, t: performance.now(), hot: !!hot }; }
+
+function pickType(mix) {
+  let r = Math.random(); for (const k in mix) { r -= mix[k]; if (r <= 0) return k; } return 'drone';
+}
+function takeWord(pool, used) {
+  let idx = pool.findIndex(w => !used.has(w[0])); if (idx < 0) idx = 0;
+  return pool.splice(idx, 1)[0];
+}
+function spawnShip(now, mix) {
+  const W = view.w, H = view.h, lv = L(), cfg = COMBAT[S.lvl];
+  const used = new Set(targets().map(e => e.word[0]));
+  const word = takeWord(C.queue, used);
+  let type = pickType(mix || cfg.mix);
+  const rest = [];
+  if (type === 'cruiser') { if (C.queue.length) rest.push(C.queue.shift()); else type = 'drone'; }
+  C.ships.push({ kind: 'ship', type, word, rest, armor: 1 + rest.length, typed: 0, x: W + 40, y: H * (0.3 + Math.random() * 0.4),
+    vx: (W * 0.85) / lv.cross * SHIP_SPEED[type], hit: 0, phase: Math.random() * 6, fireAt: now + cfg.fire * (0.45 + Math.random() * 0.6) });
+}
+function missileCode(len) {
+  const letters = [...onlineKeys()].filter(c => c !== 'Space').map(c => charOf(c)).filter(ch => ch && /\p{L}/u.test(ch));
+  const used = new Set(targets().map(e => e.word[0]));
+  const firsts = letters.filter(l => !used.has(l));
+  const pick = (arr) => arr[(Math.random() * arr.length) | 0];
+  let w = pick(firsts.length ? firsts : letters);
+  for (let i = 1; i < len; i++) w += pick(letters);
+  return w;
+}
+function fireMissile(fx, fy, now) {
+  if (C.missiles.length >= 2) return;
+  const cn = cannon(), cfg = COMBAT[S.lvl];
+  C.missiles.push({ kind: 'missile', word: missileCode(cfg.mlen), typed: 0, sx: fx - 14, sy: fy, x: fx, y: fy, tx: cn.x, ty: cn.y - 14, t0: now, dur: cfg.mspeed, hit: 0 });
+  sfx.missile();
+  if (!C.said.missile) { C.said.missile = 1; banner(uw('incoming'), true); remark(tw('missile')); }
+  renderTerminal(); renderKeyboard();
+}
+
 function startCombat() {
   resetCombat();
-  C.queue = [...LT().wave]; C.total = C.queue.length; C.last = -1e9;
+  const lt = LT(), cfg = COMBAT[S.lvl];
   S.speaker = 'ora'; S.phase = 'combat'; S.msg = '';
+  if (cfg.boss) {
+    const W = view.w, H = view.h, now = performance.now();
+    C.boss = { x: W + 200, y: H * 0.5, vx: (W * 0.22) / 60000, phase: 1, entered: false, fireAt: now + 5000, escortAt: now + 7000,
+      parts: makeParts(lt.wave.slice(0, 4), 1) };
+    C.queue = lt.wave.slice(4, 7).concat(lt.wave.slice(4, 7));
+    C.p2 = lt.wave.slice(-3);
+    C.total = 7;
+    taunt(tw('bossStart'));
+  } else {
+    C.queue = [...lt.wave]; C.total = C.queue.length;
+    if (S.lvl === ACTS[1].from) remark(tw('lockTip'));
+    else if (S.prevAcc != null) taunt((S.prevAcc < 93 ? tw('prevBad') : tw('prevGood')).replace('{miss}', S.prevMiss));
+  }
   renderAll();
 }
+function makeParts(words, phase) {
+  const spots = phase === 1 ? [[-34, -15], [-34, 15], [10, -21], [10, 21]] : [[-46, 0], [2, -18], [2, 18]];
+  return words.map((w, i) => ({ kind: 'part', word: w, typed: 0, dx: spots[i][0], dy: spots[i][1], alive: true, hit: 0 }));
+}
+
+function loseShield(now, x, y) {
+  C.shields--;
+  C.booms.push({ x, y, t: now, r: Math.random(), bad: true, big: true });
+  view.shake = 380; view.flash = 1; sfx.breach(); flashPlate();
+  banner(uw('hullHit'), true);
+  if (!C.said.hit && S.lvl >= ACTS[1].from) { C.said.hit = 1; taunt(tw('firstHit')); }
+  if (C.shields <= 0) { defeatSting(); C.lock = null; S.phase = 'dialogue'; say([t('breach')], startCombat); return true; }
+  return false;
+}
+
 function combatTick(now, dt) {
-  const lv = L(), W = view.w, H = view.h;
-  if (C.queue.length && C.ships.length < 3 && now - C.last > lv.gap) {
-    C.last = now;
-    C.ships.push({ word: C.queue.shift(), x: W + 30, y: H * (0.3 + Math.random() * 0.42), vx: (W * 0.85) / lv.cross, hit: 0, phase: Math.random() * 6 });
-    renderTerminal(); renderKeyboard();
+  if (C.won) { if (now > C.won) { C.won = 0; completeLevel(); } return; }
+  const lv = L(), cfg = COMBAT[S.lvl], W = view.w;
+  // spawning
+  if (!C.boss) {
+    if (C.queue.length && C.ships.length < 3 && now - C.last > lv.gap) { C.last = now; spawnShip(now); renderTerminal(); renderKeyboard(); }
+  } else {
+    const b = C.boss;
+    if (!b.entered) { b.x -= (W * 0.5) / 4000 * dt; if (b.x <= W * 0.76) b.entered = true; }
+    else b.x -= b.vx * dt * (b.phase === 2 ? 1.6 : 1);
+    if (b.entered && now > b.fireAt) { fireMissile(b.x - 60 * bossScale(), b.y, now); b.fireAt = now + (b.phase === 2 ? 3000 : 4200); }
+    if (b.entered && now > b.escortAt && C.ships.length < 2 && C.queue.length) { spawnShip(now, cfg.mix); b.escortAt = now + 7500; renderTerminal(); }
+    if (b.x - 62 * bossScale() < perimeterX()) {
+      b.x += W * 0.22;
+      if (loseShield(now, perimeterX() + 10, b.y)) return;
+    }
   }
-  C.ships.forEach(s => { s.x -= s.vx * dt; if (s.hit > 0) s.hit -= dt; });
-  const lead = C.ships[0];
-  if (lead && lead.x < perimeterX()) {
-    C.ships.shift(); C.typed = 0; C.shields--;
-    C.booms.push({ x: lead.x, y: lead.y, t: now, r: Math.random(), bad: true });
-    view.shake = 350; sfx.breach(); flashPlate();
-    if (C.shields <= 0) { defeatSting(); S.phase = 'dialogue'; say([t('breach')], startCombat); return; }
-    renderTerminal(); renderKeyboard();
+  // ships
+  for (const s of [...C.ships]) {
+    const boost = s.type === 'kamikaze' && C.lock === s ? 2.3 : 1;
+    s.x -= s.vx * boost * dt; if (s.hit > 0) s.hit -= dt;
+    if (cfg.fire && now > s.fireAt && s.x < W * 0.9 && s.x > perimeterX() + 60) {
+      fireMissile(s.x, s.y, now); s.fireAt = now + cfg.fire * (0.7 + Math.random() * 0.6);
+    }
+    if (s.x < perimeterX()) {
+      C.ships = C.ships.filter(o => o !== s);
+      if (C.lock === s) C.lock = null;
+      if (loseShield(now, s.x, s.y)) return;
+      renderTerminal(); renderKeyboard();
+    }
   }
-  if (!C.queue.length && !C.ships.length && S.phase === 'combat') completeLevel();
+  // missiles
+  for (const m of [...C.missiles]) {
+    const k = (now - m.t0) / m.dur;
+    m.x = m.sx + (m.tx - m.sx) * k; m.y = m.sy + (m.ty - m.sy) * k - Math.sin(Math.min(1, k) * Math.PI) * 40;
+    if (m.hit > 0) m.hit -= dt;
+    if (k >= 1) {
+      C.missiles = C.missiles.filter(o => o !== m);
+      if (C.lock === m) C.lock = null;
+      if (loseShield(now, m.tx, m.ty)) return;
+      renderTerminal(); renderKeyboard();
+    }
+  }
+  if (C.boss) C.boss.parts.forEach(p => { if (p.hit > 0) p.hit -= dt; });
+  if (!C.boss && !C.queue.length && !C.ships.length && !C.missiles.length && S.phase === 'combat') {
+    banner(uw('cleared')); C.won = now + 900;
+  }
+}
+
+function combatKey(ch, now) {
+  let e = alive(C.lock) ? C.lock : null;
+  if (!e) {
+    const cands = targets().filter(x => x.word[0] === ch);
+    if (!cands.length) return false;
+    e = cands.sort((a, b) => danger(a) - danger(b))[0];
+    C.lock = e; e.lockT = now; sfx.lock();
+  } else if (e.word[e.typed] !== ch) return false;
+  e.typed++; e.hit = 90;
+  const [x, y] = pos(e);
+  C.lasers.push({ x, y, t: now, off: (e.typed % 2 ? -8 : 8) });
+  C.heat = Math.min(1, C.heat + 0.045);
+  if (C.heat >= 1 && !C.over) {
+    C.over = true; banner(uw('overcharge')); sfx.charge();
+    if (!C.said.over) { C.said.over = 1; remark(tw('over')); }
+  }
+  if (e.typed >= e.word.length) destroyTarget(e, now);
+  return true;
+}
+
+function destroyTarget(e, now) {
+  const [x, y] = pos(e);
+  C.lock = null;
+  if (e.kind === 'ship' && e.rest.length) {          // cruiser: armour plate falls off, next word
+    e.word = e.rest.shift(); e.typed = 0; e.armor--;
+    C.booms.push({ x, y, t: now, r: Math.random() }); sfx.clang();
+    return;
+  }
+  if (e.kind === 'ship') C.ships = C.ships.filter(o => o !== e);
+  if (e.kind === 'missile') C.missiles = C.missiles.filter(o => o !== e);
+  if (e.kind === 'part') e.alive = false;
+  C.booms.push({ x, y, t: now, r: Math.random(), big: e.kind !== 'missile' }); sfx.boom();
+  if (C.over) {
+    C.over = false; C.heat = 0;
+    const other = targets().filter(o => o.kind !== 'part').sort((a, b) => danger(a) - danger(b))[0];
+    if (other) {
+      const [ox, oy] = pos(other);
+      C.chains.push({ x1: x, y1: y, x2: ox, y2: oy, t: now }); sfx.chain();
+      if (other.kind === 'ship') C.ships = C.ships.filter(o => o !== other); else C.missiles = C.missiles.filter(o => o !== other);
+      C.booms.push({ x: ox, y: oy, t: now + 80, r: Math.random(), big: true });
+    }
+  }
+  if (e.kind === 'part') checkBoss(now);
+}
+function checkBoss(now) {
+  const b = C.boss; if (!b || b.parts.some(p => p.alive)) return;
+  if (b.phase === 1) {
+    b.phase = 2; b.parts = makeParts(C.p2, 2); b.fireAt = now + 1500;
+    banner(uw('phase2'), true); taunt(tw('phase2')); view.shake = 300; sfx.breach();
+  } else {
+    const s = bossScale();
+    for (let i = 0; i < 7; i++) C.booms.push({ x: b.x + (Math.random() - .5) * 90 * s, y: b.y + (Math.random() - .5) * 40 * s, t: now + i * 110, r: Math.random(), big: true });
+    [...C.ships, ...C.missiles].forEach(o => C.booms.push({ x: o.x, y: o.y, t: now + 200, r: Math.random() }));
+    C.ships = []; C.missiles = []; C.boss = null; C.queue = [];
+    view.shake = 700; sfx.boom(); setTimeout(() => sfx.boom(), 250);
+    banner(uw('flagshipDown')); C.won = now + 1800;
+  }
 }
 function flashPlate() {
   const v = $('.viewport'); v.style.boxShadow = '0 0 0 2px var(--alert), 0 0 30px rgba(255,90,82,.5)';
   setTimeout(() => { v.style.boxShadow = ''; }, 300);
+}
+
+/* ---------- Mission briefing card ---------- */
+const CARDW = {
+  en: { act: 'ACT', sector: 'SECTOR', system: 'SYSTEM', newKeys: 'New keys', begin: 'Space ␣ begin', obj: 'Objectives',
+        power: 'Bring the {sys} online', decrypt: 'Decrypt the transmission', destroy: 'Shoot down {n} raiders', boss: 'Destroy the flagship\'s weak points (2 phases)',
+        lock: 'Type a target\'s first letter to lock on',
+        threats: {
+          scout: ['SCOUTS + MISSILES', 'Scouts are fast. Raiders now fire missiles at you: type the code to intercept.'],
+          cruiser: ['CRUISER', 'Armoured. Takes two words to destroy.'],
+          kamikaze: ['KAMIKAZE', 'Speeds up the moment you lock on. Finish it fast.'],
+          boss: ['VEX\'S FLAGSHIP', 'Weak points, two phases, escorts and missile barrages.'] } },
+  uk: { act: 'ДІЯ', sector: 'СЕКТОР', system: 'СИСТЕМА', newKeys: 'Нові клавіші', begin: 'Пробіл ␣ почати', obj: 'Завдання',
+        power: 'Увімкни систему: {sys}', decrypt: 'Розшифруй передачу', destroy: 'Збий рейдерів: {n}', boss: 'Знищ слабкі місця флагмана (2 фази)',
+        lock: 'Набери першу літеру цілі, щоб її захопити',
+        threats: {
+          scout: ['РОЗВІДНИКИ + РАКЕТИ', 'Розвідники швидкі. Рейдери стріляють ракетами: набери код, щоб збити.'],
+          cruiser: ['КРЕЙСЕР', 'Броньований. Потрібно два слова.'],
+          kamikaze: ['КАМІКАДЗЕ', 'Прискорюється, щойно ти його захопиш. Добий швидко.'],
+          boss: ['ФЛАГМАН ВЕКСА', 'Слабкі місця, дві фази, супровід і ракетні залпи.'] } }
+};
+const THREAT_OF = { 5: 'scout', 6: 'cruiser', 7: 'kamikaze', 8: 'boss' };
+function showCard(i) {
+  clearInterval(S.typer);
+  S.phase = 'card';
+  const lv = LEVELS[i], lt = lv[S.lang], cw = CARDW[S.lang], enc = lv.type === 'encounter';
+  $('#cardEyebrow').textContent = enc ? `${cw.act} 2 · ${cw.sector} ${i - ACTS[1].from + 1}` : `${cw.act} 1 · ${cw.system} ${i + 1}`;
+  $('#cardTitle').textContent = lv.sys[S.lang].toUpperCase();
+  const obj = enc
+    ? [cw.decrypt, COMBAT[i].boss ? cw.boss : cw.destroy.replace('{n}', lt.wave.length)].concat(i === ACTS[1].from ? [cw.lock] : [])
+    : [cw.power.replace('{sys}', lv.sys[S.lang])];
+  $('#cardObj').innerHTML = `<li class="h">${esc(cw.obj)}</li>` + obj.map(o => `<li>${esc(o)}</li>`).join('');
+  $('#cardKeys').innerHTML = `<span>${esc(cw.newKeys)}</span>` + lv.newKeys.map(k => `<kbd style="--fc:${FINGER_COLOR[KEY[k].finger]}">${esc(keyLabel(k))}</kbd>`).join('');
+  const th = THREAT_OF[i], box = $('#cardThreat');
+  box.hidden = !th;
+  if (th) { $('#threatName').textContent = cw.threats[th][0]; $('#threatDesc').textContent = cw.threats[th][1]; requestAnimationFrame(() => drawThreat(th)); }
+  $('#cardHint').textContent = cw.begin;
+  const el = $('#card'); el.hidden = false; el.classList.remove('gone');
+  el.querySelector('.card-in').style.animation = 'none'; void el.offsetWidth; el.querySelector('.card-in').style.animation = '';
+  sfx.card();
+  renderAll();
+}
+function closeCard() {
+  const el = $('#card'); el.classList.add('gone');
+  setTimeout(() => { el.hidden = true; }, 350);
+  say(LT().intro, beginDrill);
+}
+function drawThreat(type) {
+  const cv = $('#threatCv'), ctx = cv.getContext('2d'), W = cv.width, H = cv.height;
+  ctx.clearRect(0, 0, W, H);
+  ctx.strokeStyle = G(); ctx.lineWidth = 2; ctx.lineJoin = 'round'; ctx.shadowColor = G(.8); ctx.shadowBlur = 6;
+  if (type === 'boss') { drawBossShape(ctx, W / 2 - 4, H / 2 + 4, 2.2, G(), null); }
+  else {
+    drawShipShape(ctx, type, W / 2 + (type === 'scout' ? 30 : 0), H / 2, 3.2, G(), performance.now());
+    if (type === 'scout') { ctx.save(); ctx.translate(W / 2 - 110, H / 2 + 40); ctx.scale(2.6, 2.6); drawMissileShape(ctx, G()); ctx.restore(); }
+  }
 }
 
 /* ---------- Level end / endings ---------- */
@@ -1490,6 +1893,8 @@ function completeLevel() {
   S.done[S.lang][S.lvl] = Math.max(S.done[S.lang][S.lvl], stars);
   save();
   S.levelDone = true;
+  S.prevAcc = acc; S.prevMiss = S.total - S.correct;
+  if (L().type !== 'encounter') banner(uw('sysOnline'));
   fanfare(L().type === 'encounter');
   const lt = LT();
   const lines = L().type === 'encounter' ? [{ who: 'vex', text: lt.retreat }, lt.outro] : [lt.outro];
@@ -1656,6 +2061,10 @@ window.addEventListener('keydown', (e) => {
     if (S.phase === 'drill') { S.ch = 0; S.msg = ''; renderTerminal(); renderKeyboard(); }
     return;
   }
+  if (S.phase === 'card') {
+    if (e.code === 'Space' || e.key === 'Enter') { e.preventDefault(); if (!e.repeat) closeCard(); }
+    return;
+  }
   if (S.phase === 'dialogue' || S.phase === 'complete' || S.phase === 'ending') {
     if (e.code === 'Space' || e.key === 'Enter') {
       e.preventDefault();
@@ -1669,9 +2078,31 @@ window.addEventListener('keydown', (e) => {
   if (MODS.includes(e.code) || e.repeat) return;
   if (KEY[e.code] || e.code === 'Space') e.preventDefault();
 
+  if (S.phase === 'combat') {
+    if (e.code === 'Space') return;   // habit-space between words is harmless in combat
+    const now = performance.now();
+    if (!S.startT) S.startT = now;
+    S.total++;
+    const chs = [charOf(e.code), (e.key || '').toLowerCase()].filter(Boolean);
+    const ok = chs.some(ch => combatKey(ch, now));
+    if (ok) {
+      S.correct++; S.msg = '';
+      const dt = now - S.lastKey; S.lastKey = now;
+      S.cadence = S.cadence * 0.65 + (dt < 1500 ? Math.min(1.6, (1000 / dt) / 4) : 0.15) * 0.35;
+      sfx.laser();
+    } else {
+      sfx.err(); S.cadence *= 0.5;
+      if (C.heat > 0.3) sfx.vent();
+      C.heat = 0; C.over = false;
+      S.msg = onlineKeys().has(e.code) || !KEY[e.code] ? t('wrongKey') : t('offKey');
+      if (kEl) { kEl.classList.add('wrong'); setTimeout(() => kEl.classList.remove('wrong'), 220); }
+    }
+    renderTerminal(); renderKeyboard(); renderStats();
+    if (!ok) shakeLine();
+    return;
+  }
   const expected = expectedChar();
   if (expected == null) return;
-  if (S.phase === 'combat' && e.code === 'Space') return;   // habit-space between words is harmless in combat
 
   const mapped = charOf(e.code);
   const ok = mapped === expected || (e.key && e.key.toLowerCase() === expected);
@@ -1703,16 +2134,6 @@ window.addEventListener('keydown', (e) => {
         if (d.ki >= d.keys.length) { decryptDone(); return; }
       }
       renderCrtText();
-    } else if (S.phase === 'combat') {
-      sfx.laser();
-      const s = C.ships[0];
-      C.typed++; s.hit = 90;
-      C.lasers.push({ x: s.x, y: s.y, t: now, off: (C.typed % 2 ? -8 : 8) });
-      if (C.typed >= s.word.length) {
-        C.ships.shift(); C.typed = 0;
-        C.booms.push({ x: s.x, y: s.y, t: now, r: Math.random() });
-        sfx.boom();
-      }
     }
   } else {
     sfx.err();
