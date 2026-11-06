@@ -199,6 +199,26 @@ kbd { font-family: var(--f-mono); border: 1px solid var(--seam); border-bottom-w
 .sig.low i { background: var(--alert); }
 .pips { color: var(--live); letter-spacing: .25em; font-size: 15px; }
 .pips .off { color: var(--dim); }
+
+/* Cinematic intro */
+.cinema { position: fixed; inset: 0; z-index: 50; background: #000; display: grid; grid-template-rows: 10vh 1fr 10vh; transition: opacity .9s ease; }
+.cinema.gone { opacity: 0; pointer-events: none; }
+.cinema .bar { background: #000; }
+.cinema .stage { position: relative; display: grid; place-items: center; overflow: hidden; background: radial-gradient(ellipse at 50% 50%, #07111b 0%, #000 72%); }
+.cinema #cineStars { position: absolute; inset: 0; width: 100%; height: 100%; }
+.cine-inner { position: relative; display: grid; justify-items: center; gap: 22px; max-width: 900px; text-align: center;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); }
+.cine-title { font-family: var(--f-display); font-size: clamp(20px, 3vw, 34px); letter-spacing: .12em; color: #cfdbe4; text-transform: uppercase; min-height: 2.6em; text-wrap: balance; }
+.cine-title.alert { color: var(--alert); text-shadow: 0 0 14px rgba(255,90,82,.5); }
+.cine-title.big { font-size: clamp(34px, 6vw, 64px); letter-spacing: .3em; }
+.cine-face { width: min(46vw, 300px); aspect-ratio: 20 / 16; display: none; }
+.cinema.ora .cine-face { display: block; }
+.cinema.ora .cine-title { font-family: var(--f-crt); text-transform: none; letter-spacing: .02em; color: var(--phos); text-shadow: 0 0 10px rgba(255,181,71,.6); font-size: clamp(26px, 3.2vw, 40px); }
+.cine-name { display: none; }
+.cinema.naming .cine-name { display: block; }
+.cine-name input { font-family: var(--f-mono); font-size: 26px; background: transparent; border: 0; border-bottom: 2px solid var(--phos); color: #fff; text-align: center; width: min(70vw, 360px); outline: none; padding: 4px 8px; user-select: text; }
+.cine-hint { font-family: var(--f-display); font-size: 11px; letter-spacing: .2em; color: var(--muted); text-transform: uppercase; animation: blink 1.6s steps(1) infinite; }
+.cine-skip { position: absolute; top: 14px; right: max(16px, env(safe-area-inset-right, 0px)); }
 </style>
 </head>
 <body>
@@ -210,6 +230,7 @@ kbd { font-family: var(--f-mono); border: 1px solid var(--seam); border-bottom-w
         <button id="langEN" class="on">EN · QWERTY</button>
         <button id="langUK">UA · ЙЦУКЕН</button>
       </div>
+      <button class="btn" id="introBtn">INTRO</button>
       <button class="btn" id="soundBtn">SOUND ON</button>
     </div>
     <div class="readout">
@@ -242,6 +263,21 @@ kbd { font-family: var(--f-mono); border: 1px solid var(--seam); border-bottom-w
     <div class="kb-scroll"><div class="kb" id="kb"></div></div>
     <div class="fingers" id="fingers"></div>
   </section>
+</div>
+
+<div class="cinema" id="cinema" hidden>
+  <div class="bar"></div>
+  <div class="stage">
+    <canvas id="cineStars"></canvas>
+    <button class="btn cine-skip" id="cineSkip">SKIP</button>
+    <div class="cine-inner">
+      <canvas class="cine-face" id="cineFace"></canvas>
+      <div class="cine-title" id="cineText"></div>
+      <div class="cine-name"><input id="nameInput" maxlength="16" autocomplete="off" spellcheck="false" aria-label="Your name"></div>
+      <div class="cine-hint" id="cineHint"></div>
+    </div>
+  </div>
+  <div class="bar"></div>
 </div>
 
 <script>
@@ -310,12 +346,12 @@ const ACTS = [{ from: 0, to: 4 }, { from: 5, to: 8 }];
 const LEVELS = [
   /* ---------------- ACT 1 · COLD BOOT ---------------- */
   { type:'boot', sys:{ en:'Reactor', uk:'Реактор' }, newKeys:['KeyF','KeyJ'], codeLabel:{ en:'IGNITION CODE', uk:'КОД ЗАПУСКУ' },
-    en:{ intro:['...power at 2%. Hello? Engineer, you are awake. Good.', 'I am ORA, this ship\'s computer. Most of me is offline.', 'The reactor needs an ignition code. Rest your index fingers on F and J. Feel the bumps?'],
+    en:{ intro:['Power at 2%, {name}. Most of me is still offline.', 'Let us start with the reactor. It needs an ignition code.', 'Rest your index fingers on F and J. Feel the little bumps? That is home.'],
          tip:'Keep both index fingers on the bumps. Look at the screen, not your hands.',
-         drills:['fjfj','jfjf','ffjj','fjjf'], code:'fjfjfj', outro:'Reactor online. I can think again. Thank you.' },
-    uk:{ intro:['...живлення 2%. Агов? Інженере, ти прокинувся. Добре.', 'Я ОРА, бортовий комп\'ютер. Більша частина мене вимкнена.', 'Реактору потрібен код запуску. Поклади вказівні пальці на А та О. Відчуваєш виступи?'],
+         drills:['fjfj','jfjf','ffjj','fjjf'], code:'fjfjfj', outro:'Reactor online. I can think clearly again. Thank you, {name}.' },
+    uk:{ intro:['Живлення 2%, {name}. Більша частина мене ще вимкнена.', 'Почнімо з реактора. Йому потрібен код запуску.', 'Поклади вказівні пальці на А та О. Відчуваєш виступи? Це твій дім.'],
          tip:'Тримай вказівні пальці на виступах. Дивись на екран, а не на руки.',
-         drills:['аоао','оаоа','ааоо','аооа'], code:'аоаоао', outro:'Реактор працює. Я знову можу думати. Дякую.' } },
+         drills:['аоао','оаоа','ааоо','аооа'], code:'аоаоао', outro:'Реактор працює. Я знову ясно думаю. Дякую, {name}.' } },
 
   { type:'boot', sys:{ en:'Life support', uk:'Життєзабезпечення' }, newKeys:['KeyD','KeyK'], codeLabel:{ en:'AIRFLOW CODE', uk:'КОД ПОВІТРЯ' },
     en:{ intro:['Life support is next. Air would be nice.', 'Add your middle fingers: D on the left, K on the right. Index fingers stay on the bumps.'],
@@ -344,10 +380,10 @@ const LEVELS = [
   { type:'boot', sys:{ en:'Navigation', uk:'Навігація' }, newKeys:['KeyA','Semicolon','KeyG','KeyH'], codeLabel:{ en:'NAV PASSWORD', uk:'ПАРОЛЬ НАВІГАЦІЇ' },
     en:{ intro:['Navigation needs the full home row.', 'Pinkies on A and ;. Index fingers reach over to G and H, then come back.', 'From now on you type real words. Slow is fine.'],
          tip:'Reach for G and H, then snap back to F and J.',
-         drills:['ask dad','a sad lad','had a glass','flash; hash'], code:'glass flask', outro:'All systems online. And... we are receiving a transmission.' },
+         drills:['ask dad','a sad lad','had a glass','flash; hash'], code:'glass flask', outro:'All systems online, {name}. And... we are receiving a transmission.' },
     uk:{ intro:['Навігації потрібен весь базовий ряд.', 'Мізинці на Ф та Ж. Вказівні тягнуться до П та Р і повертаються назад.', 'Відтепер ти друкуєш справжні слова. Повільно — це нормально.'],
          tip:'Тягнись до П та Р і одразу повертайся на А та О.',
-         drills:['вода лава','пора і рід','фара жар','ліва фара'], code:'парад вода', outro:'Усі системи в нормі. І... ми отримуємо передачу.' } },
+         drills:['вода лава','пора і рід','фара жар','ліва фара'], code:'парад вода', outro:'Усі системи в нормі, {name}. І... ми отримуємо передачу.' } },
 
   /* ---------------- ACT 2 · FIRST CONTACT ----------------
      Each sector: ORA briefing → new keys → warm-up → encrypted transmission
@@ -358,7 +394,7 @@ const LEVELS = [
          tip:'Reach up, then return to the bumps.',
          drills:['fur rug','hug a jar','rush; drag'],
          msg:'Little ship, you sail in [dark] water. The [shark] smells you. [Rush] home before [dusk].',
-         after:'That is Commander Vex. Raiders. He is launching drones. Type each drone\'s code to shoot it down.',
+         after:'That is Commander Vex, {name}. Raiders. He is launching drones. Type each drone\'s code to shoot it down.',
          wave:['fur','jar','hug','rush','dusk','shark','drag'],
          retreat:'Lucky shots. We will meet again, little ship.', outro:'Drones down. Vex will not stop there.' },
     uk:{ intro:['Цей сигнал — корабель. Він викликає нас, але повідомлення зашифроване.', 'Шифратору потрібні ще дві клавіші: К та Г. Вказівні тягнуться вгору і повертаються на А та О.'],
@@ -405,22 +441,54 @@ const LEVELS = [
     en:{ intro:['Vex\'s flagship is on approach.', 'The last two keys of this act: P and Q, both with your pinkies. P is up from ;. Q is up from A.'],
          tip:'Pinkies reach up, then home.',
          drills:['quad speed','pause; aqua','proud squad'],
-         msg:'Hear me, engineer. My [squad] [prowls] the [deep]. Your [power] fades. [Prepare].',
+         msg:'Hear me, {name}. My [squad] [prowls] the [deep]. Your [power] fades. [Prepare].',
          after:'This is it. His flagship and escorts. Every word counts.',
          wave:['squad','prowl','deep','power','queue','speed','equip','quake','proud','prepare'],
-         retreat:'Impossible... Retreat! The Admiral will hear of you, engineer.', outro:'Vex is running. We held the sector. But an Admiral... that is a bigger problem.' },
+         retreat:'Impossible... Retreat! The Admiral will hear of you, {name}.', outro:'Vex is running. We held the sector. But an Admiral... that is a bigger problem.' },
     uk:{ intro:['Флагман Векса наближається.', 'Останні дві клавіші цієї дії: З та Й, обидві мізинцями. З — вгору від Ж. Й — вгору від Ф.'],
          tip:'Мізинці вгору і додому.',
          drills:['гроза залп','зараз зло','край гай'],
          msg:'[Гроза] вже тут. Мій [залп] — твоя [загроза]. [Зараз]!',
          after:'Це воно. Флагман і супровід. Кожне слово важливе.',
          wave:['гроза','залп','зло','край','гай','зорі','лазур','розлад','зараз','загроза'],
-         retreat:'Неможливо... Відступаємо! Адмірал дізнається про тебе, інженере.', outro:'Векс тікає. Ми втримали сектор. Але адмірал... це більша проблема.' } }
+         retreat:'Неможливо... Відступаємо! Адмірал дізнається про тебе, {name}.', outro:'Векс тікає. Ми втримали сектор. Але адмірал... це більша проблема.' } }
 ];
 
 const ACT1_END = {
-  en: ['...#%@ ENGINEER %&... YOU... SHOULD NOT... H@VE... WOKEN... THIS SHIP...', '...&&#... TURN BACK... OR... #%@&*...'],
-  uk: ['...#%@ ІНЖЕНЕРЕ %&... ТИ... НЕ МАВ... ПРОКИД@ТИСЯ...', '...&&#... ПОВЕРТАЙСЯ... АБО... #%@&*...']
+  en: ['...#%@ {NAME} %&... YOU... SHOULD NOT... H@VE... WOKEN... THIS SHIP...', '...&&#... TURN BACK... OR... #%@&*...'],
+  uk: ['...#%@ {NAME} %&... ТИ... НЕ МАВ... ПРОКИД@ТИСЯ...', '...&&#... ПОВЕРТАЙСЯ... АБО... #%@&*...']
+};
+
+/* ---------- Cinematic intro ---------- */
+const INTRO = {
+  en: [
+    { k: 'start' },
+    { k: 'title', text: 'Deep space · Year 2471' },
+    { k: 'title', text: 'The survey ship ARGO has drifted in silence for 312 years.' },
+    { k: 'title', text: 'Its crew is gone. One cryo pod is still warm.' },
+    { k: 'title', text: 'Pod 04 · Thaw sequence complete', alert: true, fx: 'heartbeat' },
+    { k: 'ora', text: '...hello? Is someone there? Oh! Oh, you are awake!', fx: 'boot' },
+    { k: 'ora', text: 'I am ORA, the ship\'s computer. I have been alone out here for a very, very long time.' },
+    { k: 'ora', text: 'I am so happy you are here. What should I call you?' },
+    { k: 'name' },
+    { k: 'ora', text: '{name}. Nice to meet you, {name}. Let us wake this old ship up together.' }
+  ],
+  uk: [
+    { k: 'start' },
+    { k: 'title', text: 'Далекий космос · 2471 рік' },
+    { k: 'title', text: 'Дослідницький корабель АРГО дрейфує в тиші вже 312 років.' },
+    { k: 'title', text: 'Екіпажу немає. Лише одна кріокапсула ще тепла.' },
+    { k: 'title', text: 'Капсула 04 · Розморожування завершено', alert: true, fx: 'heartbeat' },
+    { k: 'ora', text: '...агов? Тут хтось є? Ох! Ти прокинувся!', fx: 'boot' },
+    { k: 'ora', text: 'Я ОРА, бортовий комп\'ютер. Я була тут сама дуже, дуже довго.' },
+    { k: 'ora', text: 'Я така рада, що ти тут. Як тебе звати?' },
+    { k: 'name' },
+    { k: 'ora', text: '{name}. Приємно познайомитися, {name}. Давай разом розбудимо цей старий корабель.' }
+  ]
+};
+const INTRO_HINT = {
+  en: { start: 'Press Space to begin', next: 'Space ␣ continue', name: 'Type your name · Enter ↵ to confirm', defName: 'Engineer' },
+  uk: { start: 'Натисни пробіл, щоб почати', next: 'Пробіл ␣ далі', name: 'Введи своє ім\'я · Enter ↵ підтвердити', defName: 'Інженер' }
 };
 
 /* ---------- State ---------- */
@@ -433,7 +501,7 @@ const S = {
   msg: '', done: { en: blank(), uk: blank() },
   sound: true, cadence: 0, lastKey: 0,
   dlg: [], dlgIdx: 0, dlgCb: null, full: '', shown: '', speaking: false, typer: null, blocking: false,
-  dec: null
+  dec: null, name: ''
 };
 const C = { ships: [], queue: [], last: 0, lasers: [], booms: [], shields: 3, typed: 0, total: 0 };
 
@@ -443,19 +511,24 @@ const t = (k) => T[S.lang][k];
 const L = () => LEVELS[S.lvl];
 const LT = () => LEVELS[S.lvl][S.lang];
 const actOf = (i) => (i >= ACTS[1].from ? 1 : 0);
+function fmt(str) {
+  const n = S.name || INTRO_HINT[S.lang].defName;
+  return String(str).replace(/\{name\}/g, n).replace(/\{NAME\}/g, n.toUpperCase());
+}
 
 function charOf(code, lang = S.lang) { if (code === 'Space') return ' '; return KEY[code] ? KEY[code][lang] : null; }
 function codeOf(ch, lang = S.lang) { if (ch === ' ') return 'Space'; for (const c in KEY) if (KEY[c][lang] === ch) return c; return null; }
 function keyLabel(code) { return code === 'Space' ? t('space') : (charOf(code) || '').toUpperCase(); }
 
 /* ---------- Save ---------- */
-function save() { try { localStorage.setItem('keyquest.story', JSON.stringify({ done: S.done, lang: S.lang })); } catch (e) {} }
+function save() { try { localStorage.setItem('keyquest.story', JSON.stringify({ done: S.done, lang: S.lang, name: S.name })); } catch (e) {} }
 function load() {
   try {
     const d = JSON.parse(localStorage.getItem('keyquest.story') || localStorage.getItem('keyquest.act1') || 'null');
     if (d && d.done) {
       const pad = (a) => { const b = blank(); (a || []).forEach((v, i) => { if (i < N) b[i] = v; }); return b; };
       S.done = { en: pad(d.done.en), uk: pad(d.done.uk) }; S.lang = d.lang === 'uk' ? 'uk' : 'en';
+      if (typeof d.name === 'string') S.name = d.name.slice(0, 16);
     }
   } catch (e) {}
 }
@@ -502,6 +575,7 @@ function initAudio() {
     f.type = 'lowpass'; f.frequency.value = 160; g.gain.value = 0;
     o1.connect(f); o2.connect(f); f.connect(g); g.connect(master); o1.start(); o2.start();
     hum = { o1, o2, f, g };
+    initMusic();
   }
   if (AC.state === 'suspended') AC.resume();
 }
@@ -524,10 +598,122 @@ const sfx = {
   breach: () => { blip('square', 200, 35, 0.5, 0.1); blip('sawtooth', 90, 30, 0.6, 0.08, 0.05); },
   glitch: () => { for (let i = 0; i < 7; i++) blip('sawtooth', 70 + Math.random() * 700, 40, 0.09, 0.04, i * 0.06); }
 };
+/* ---------- Adaptive music ----------
+   calm  : slow pad (Am F C G) + soft sparkles — the ship, ORA, Act 1
+   tense : 120 bpm phrygian bass ostinato, kick, hats, dissonant stabs — Vex, decrypt, combat
+   fanfare / defeat stingers duck both layers                                           */
+const MUS = { on: false, gCalm: null, gTense: null, cNext: 0, cStep: 0, tNext: 0, tStep: 0, noise: null, intensity: 0.4, duckUntil: 0 };
+function initMusic() {
+  MUS.gCalm = AC.createGain(); MUS.gCalm.gain.value = 0; MUS.gCalm.connect(master);
+  MUS.gTense = AC.createGain(); MUS.gTense.gain.value = 0; MUS.gTense.connect(master);
+  const len = Math.floor(AC.sampleRate * 0.4), b = AC.createBuffer(1, len, AC.sampleRate), d = b.getChannelData(0);
+  for (let i = 0; i < len; i++) d[i] = Math.random() * 2 - 1;
+  MUS.noise = b; MUS.cNext = MUS.tNext = AC.currentTime + 0.15; MUS.on = true;
+}
+function vox(dest, type, f, t0, dur, vol, att = 0.01, cutoff = 0, detune = 0) {
+  const o = AC.createOscillator(), g = AC.createGain();
+  o.type = type; o.frequency.setValueAtTime(f, t0); if (detune) o.detune.value = detune;
+  let node = o;
+  if (cutoff) { const fl = AC.createBiquadFilter(); fl.type = 'lowpass'; fl.frequency.value = cutoff; o.connect(fl); node = fl; }
+  g.gain.setValueAtTime(0.0001, t0); g.gain.linearRampToValueAtTime(vol, t0 + att); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  node.connect(g); g.connect(dest); o.start(t0); o.stop(t0 + dur + 0.05);
+}
+function noiseHit(dest, t0, dur, vol, hp, bp) {
+  const src = AC.createBufferSource(), f = AC.createBiquadFilter(), g = AC.createGain();
+  src.buffer = MUS.noise; f.type = bp ? 'bandpass' : 'highpass'; f.frequency.value = bp || hp;
+  g.gain.setValueAtTime(vol, t0); g.gain.exponentialRampToValueAtTime(0.0001, t0 + dur);
+  src.connect(f); f.connect(g); g.connect(dest); src.start(t0); src.stop(t0 + dur + 0.02);
+}
+const CALM = [
+  { root: 110,    tones: [220, 261.63, 329.63] },   // Am
+  { root: 87.31,  tones: [174.61, 220, 261.63] },   // F
+  { root: 130.81, tones: [261.63, 329.63, 392] },   // C
+  { root: 98,     tones: [196, 246.94, 293.66] }    // G
+];
+function calmStep(step, t, e) {
+  const ch = CALM[Math.floor(step / 16) % 4];
+  if (step % 16 === 0) {
+    ch.tones.forEach(f => { vox(MUS.gCalm, 'triangle', f, t, 16 * e, 0.022, 1.6, 1800, -6); vox(MUS.gCalm, 'sine', f, t, 16 * e, 0.018, 1.8, 0, 7); });
+    vox(MUS.gCalm, 'sine', ch.root, t, 16 * e, 0.05, 1.2);
+  }
+  if (step % 2 === 0) vox(MUS.gCalm, 'sine', ch.tones[(step / 2) % 3] * 2, t, 1.1, 0.012, 0.01);
+}
+const TENSE_BASS = [0, 0, 12, 0, 0, 0, 1, 0, 0, 0, 12, 0, 3, 0, 1, 0];
+function tenseStep(step, t) {
+  const I = MUS.intensity;
+  vox(MUS.gTense, 'sawtooth', 55 * Math.pow(2, TENSE_BASS[step % 16] / 12), t, 0.13, 0.085, 0.005, 280 + I * 1600);
+  if (step % 4 === 0) {
+    const o = AC.createOscillator(), g = AC.createGain(); o.type = 'sine';
+    o.frequency.setValueAtTime(120, t); o.frequency.exponentialRampToValueAtTime(40, t + 0.12);
+    g.gain.setValueAtTime(0.16, t); g.gain.exponentialRampToValueAtTime(0.0001, t + 0.16);
+    o.connect(g); g.connect(MUS.gTense); o.start(t); o.stop(t + 0.18);
+  }
+  if (step % 4 === 2 || (I > 0.7 && step % 2 === 1)) noiseHit(MUS.gTense, t, 0.04, 0.035, 7000);
+  if (I > 0.6 && step % 8 === 4) noiseHit(MUS.gTense, t, 0.12, 0.06, 0, 1800);
+  if (step % 32 === 0) [110, 116.54, 164.81].forEach(f => vox(MUS.gTense, 'sawtooth', f, t, 0.7, 0.022, 0.01, 1000));
+  if (step % 64 === 48) vox(MUS.gTense, 'square', 880, t, 0.5, 0.012, 0.01, 2000);
+}
+function musicMood() {
+  if (performance.now() < MUS.duckUntil) return { calm: 0, tense: 0 };
+  if (S.phase === 'intro') return { calm: 0.7, tense: 0 };
+  if (S.phase === 'combat') {
+    const lead = C.ships[0];
+    const close = lead ? Math.max(0, Math.min(1, 1 - (lead.x - perimeterX()) / (view.w * 0.8))) : 0;
+    MUS.intensity = 0.7 + 0.3 * close;
+    return { calm: 0, tense: 1 };
+  }
+  if (hostile()) { MUS.intensity = 0.45; return { calm: 0, tense: 0.85 }; }
+  return { calm: 1, tense: 0 };
+}
+function updateMusic() {
+  if (!MUS.on) return;
+  const at = AC.currentTime, m = musicMood();
+  MUS.gCalm.gain.setTargetAtTime(m.calm, at, 0.9);
+  MUS.gTense.gain.setTargetAtTime(m.tense, at, m.tense > 0 ? 0.4 : 0.9);
+  const e = 60 / 66 / 2, sx = 60 / 120 / 4, ahead = at + 0.2;
+  if (MUS.cNext < at - 1) MUS.cNext = at + 0.05;
+  if (MUS.tNext < at - 1) MUS.tNext = at + 0.05;
+  const calmAudible = m.calm > 0 || MUS.gCalm.gain.value > 0.002;
+  const tenseAudible = m.tense > 0 || MUS.gTense.gain.value > 0.002;
+  while (MUS.cNext < ahead) { if (calmAudible) calmStep(MUS.cStep, MUS.cNext, e); MUS.cNext += e; MUS.cStep++; }
+  while (MUS.tNext < ahead) { if (tenseAudible) tenseStep(MUS.tStep, MUS.tNext); MUS.tNext += sx; MUS.tStep++; }
+}
+function fanfare(big) {
+  if (!AC || !S.sound) return;
+  MUS.duckUntil = performance.now() + (big ? 4200 : 2600);
+  const t = AC.currentTime + 0.05;
+  const brass = (f, st, d, v) => { vox(master, 'sawtooth', f, t + st, d, v, 0.02, 2600); vox(master, 'square', f * 1.004, t + st, d, v * 0.35, 0.02, 1500); };
+  [[392, 0, .16], [523.25, .17, .16], [659.25, .34, .16], [783.99, .51, .55]].forEach(([f, st, d]) => brass(f, st, d + .08, .045));
+  const cs = 0.95;
+  [261.63, 329.63, 392, 523.25].forEach(f => brass(f, cs, big ? 2.6 : 1.6, .03));
+  if (big) [[523.25, 1.05], [659.25, 1.3], [783.99, 1.55], [1046.5, 1.8]].forEach(([f, st]) => vox(master, 'triangle', f, t + st, .7, .04, .01));
+  const o = AC.createOscillator(), g = AC.createGain(); o.type = 'sine';
+  o.frequency.setValueAtTime(110, t + cs); o.frequency.exponentialRampToValueAtTime(48, t + cs + .9);
+  g.gain.setValueAtTime(.22, t + cs); g.gain.exponentialRampToValueAtTime(.001, t + cs + 1.3);
+  o.connect(g); g.connect(master); o.start(t + cs); o.stop(t + cs + 1.4);
+}
+function defeatSting() {
+  if (!AC || !S.sound) return;
+  MUS.duckUntil = performance.now() + 2200;
+  const t = AC.currentTime + 0.05;
+  [[220, 0], [207.65, .28], [196, .56], [146.83, .9]].forEach(([f, st]) => vox(master, 'sawtooth', f, t + st, .6, .05, .01, 900));
+}
+function heartbeat() {
+  if (!AC || !S.sound) return;
+  const t = AC.currentTime + 0.05;
+  [0, 0.22, 1.1, 1.32].forEach((st, i) => {
+    const o = AC.createOscillator(), g = AC.createGain(); o.type = 'sine';
+    o.frequency.setValueAtTime(70, t + st); o.frequency.exponentialRampToValueAtTime(38, t + st + .15);
+    g.gain.setValueAtTime(i % 2 ? .12 : .2, t + st); g.gain.exponentialRampToValueAtTime(.001, t + st + .2);
+    o.connect(g); g.connect(master); o.start(t + st); o.stop(t + st + .25);
+  });
+}
+function bootChime() { if (!AC || !S.sound) return; const t = AC.currentTime + 0.05; [523.25, 659.25, 783.99, 1046.5].forEach((f, i) => vox(master, 'sine', f, t + i * .09, .5, .04, .01)); }
+
 function updateAudio(now, pw) {
   if (!AC || !hum) return;
   const at = AC.currentTime;
-  hum.g.gain.setTargetAtTime(S.sound ? 0.03 * (0.15 + 0.85 * pw[0]) : 0, at, 0.3);
+  hum.g.gain.setTargetAtTime(S.sound ? 0.014 * (0.15 + 0.85 * pw[0]) : 0, at, 0.3);
   hum.o1.frequency.setTargetAtTime(50 + pw[0] * 5 + S.cadence * 12, at, 0.25);
   hum.o2.frequency.setTargetAtTime(100 + pw[0] * 10 + S.cadence * 24, at, 0.25);
   hum.f.frequency.setTargetAtTime(150 + pw[2] * 220 + S.cadence * 520, at, 0.2);
@@ -535,6 +721,7 @@ function updateAudio(now, pw) {
     blip('sine', 165 + S.cadence * 60, 110, 0.08, 0.03);
     nextPulse = now + Math.max(160, 620 - S.cadence * 380);
   }
+  updateMusic();
 }
 
 /* ======================================================================
@@ -562,7 +749,7 @@ function sayLine(item) {
   const who = typeof item === 'string' ? 'ora' : item.who;
   const text = typeof item === 'string' ? item : item.text;
   S.speaker = who;
-  typeText(text, true);
+  typeText(fmt(text), true);
 }
 function say(lines, cb) {
   S.phase = 'dialogue'; S.dlg = lines; S.dlgIdx = 0; S.dlgCb = cb;
@@ -575,7 +762,7 @@ function advanceDialogue() {
   if (S.dlgIdx < S.dlg.length) { sayLine(S.dlg[S.dlgIdx]); renderAll(); }
   else { const cb = S.dlgCb; S.dlgCb = null; if (cb) cb(); }
 }
-function remark(text) { S.speaker = 'ora'; typeText(text, false); }
+function remark(text) { S.speaker = 'ora'; typeText(fmt(text), false); }
 
 const NOISE = '#%&@$*▓▒░<>/\\|=+';
 function noise(n) { let s = ''; for (let i = 0; i < n; i++) s += NOISE[(Math.random() * NOISE.length) | 0]; return s; }
@@ -602,16 +789,16 @@ function renderCrtText() {
 
 /* ---------- Pixel faces ---------- */
 const face = { cv: null, ctx: null, w: 0, h: 0 };
-function drawFace(now) {
-  const c = face.ctx, W = face.w, H = face.h; if (!c || !W) return;
+const cineFace = { cv: null, ctx: null, w: 0, h: 0 };
+function drawFace(obj, now, mode, speaking, forcePowered) {
+  const c = obj.ctx, W = obj.w, H = obj.h; if (!c || !W) return;
   c.clearRect(0, 0, W, H);
-  const mode = S.phase === 'decrypt' ? 'unknown' : S.speaker;
   const enemy = mode !== 'ora';
   const cols = 20, rows = 16;
   const cell = Math.max(3, Math.floor(Math.min(W / cols, H / rows)));
   const ox = Math.floor((W - cols * cell) / 2), oy = Math.floor((H - rows * cell) / 2);
   const rgb = enemy ? '255,90,82' : '255,181,71';
-  const powered = S.ending || S.lvl > 0 || S.phase !== 'dialogue' || S.dlgIdx > 0;
+  const powered = forcePowered || S.ending || S.lvl > 0 || S.phase !== 'dialogue' || S.dlgIdx > 0;
   // decrypt: the face is mostly static until the signal is cleaned up
   const clarity = mode === 'unknown' && S.dec ? S.dec.ki / Math.max(1, S.dec.keys.length) : 1;
   const flick = powered ? 1 : (0.55 + 0.45 * Math.random());
@@ -638,7 +825,7 @@ function drawFace(now) {
       px(x + shift, y, edge ? 0.95 : 0.13);
     }
   }
-  const speakFrame = S.speaking && Math.floor(now / 90) % 2 === 0;
+  const speakFrame = speaking && Math.floor(now / 90) % 2 === 0;
   if (!enemy) {
     const blink = now % 4200 < 130;
     for (const ex of [6, 12]) { px(ex, 7, 1); px(ex + 1, 7, 1); if (!blink) { px(ex, 6, 1); px(ex + 1, 6, 1); } }
@@ -667,6 +854,83 @@ function initStars() {
   view.stars = Array.from({ length: 140 }, () => ({ x: Math.random() * view.w, y: Math.random() * view.h, z: 0.4 + Math.random() * 1.6, tw: Math.random() * 6 }));
 }
 const cannon = () => ({ x: view.w * 0.5, y: view.h * 0.86 });
+view.pulses = [];
+const SHIP_HULL = [[10,2],[8.6,1.2],[5,.9],[2.2,.6],[1,.9],[.4,1.4],[.4,2.6],[1,3.1],[2.2,3.4],[5,3.1],[8.6,2.8]];
+const SYS_NODES = [[2.7,2],[4.8,2.45],[-.05,2],[8.3,1.65],[9.25,2.15]];   // reactor, life support, thrusters, sensors, nav
+const LABEL_BELOW = [true, true, false, false, true];
+const CORE = [1.5, 2];
+const km = (n) => Math.round(n).toLocaleString('en-US').replace(/,/g, ' ') + ' km';
+function schematicXf() { const s = Math.min(view.w * 0.44 / 10.8, view.h * 0.46 / 3.2); return { s, ox: view.w * 0.07 + 1.1 * s, oy: view.h * 0.53 - 2 * s }; }
+const SP = (x, y, X) => [X.ox + x * X.s, X.oy + y * X.s];
+function drawSchematic(ctx, now, pw) {
+  const X = schematicXf();
+  const act2 = S.lvl >= ACTS[1].from;
+  ctx.save();
+  ctx.globalAlpha = Math.random() < 0.04 ? 0.6 : 0.95;
+  ctx.font = '600 10px "Chakra Petch", sans-serif'; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+  ctx.fillStyle = 'rgba(120,200,255,.7)'; ctx.fillText('ARGO · ' + (S.lang === 'uk' ? 'СХЕМА КОРАБЛЯ' : 'SHIP SCHEMATIC'), ...SP(0.3, 0.35, X));
+  ctx.strokeStyle = 'rgba(120,200,255,.55)'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); SHIP_HULL.forEach(([x, y], i) => { const p = SP(x, y, X); i ? ctx.lineTo(...p) : ctx.moveTo(...p); }); ctx.closePath();
+  ctx.fillStyle = 'rgba(60,140,220,.07)'; ctx.fill(); ctx.stroke();
+  ctx.strokeStyle = 'rgba(120,200,255,.18)'; ctx.lineWidth = 1;
+  ctx.beginPath(); ctx.moveTo(...SP(1, 2, X)); ctx.lineTo(...SP(9.4, 2, X));
+  for (const rx of [2.2, 3.6, 5, 6.4, 7.8]) { ctx.moveTo(...SP(rx, 1.0, X)); ctx.lineTo(...SP(rx, 3.0, X)); }
+  ctx.stroke();
+  ctx.strokeStyle = 'rgba(120,200,255,.45)';
+  for (const yy of [1.45, 2.1]) { const p = SP(-.5, yy, X); ctx.strokeRect(p[0], p[1], .9 * X.s, .45 * X.s); }
+  if (pw[2] > 0.05) {
+    ctx.fillStyle = `rgba(111,240,168,${0.45 * pw[2]})`;
+    for (const yy of [1.67, 2.32]) {
+      const p = SP(-.5, yy, X), len = (0.5 + S.cadence * 1.3 + Math.random() * 0.25) * X.s * pw[2];
+      ctx.beginPath(); ctx.moveTo(p[0], p[1] - .17 * X.s); ctx.lineTo(p[0] - len, p[1]); ctx.lineTo(p[0], p[1] + .17 * X.s); ctx.fill();
+    }
+  }
+  const core = SP(...CORE, X);
+  SYS_NODES.forEach(([x, y], i) => {
+    const on = pw[i] > 0.99, cur = !act2 && i === S.lvl && !S.levelDone && !S.ending;
+    const col = on ? '111,240,168' : cur ? '255,181,71' : '90,110,130';
+    const b = SP(x, y, X);
+    ctx.strokeStyle = `rgba(${col},${on ? 0.45 : cur ? 0.7 : 0.25})`; ctx.setLineDash(on ? [] : [3, 4]);
+    ctx.beginPath(); ctx.moveTo(...core); ctx.lineTo(...b); ctx.stroke(); ctx.setLineDash([]);
+    const r = cur ? 6 + 2 * Math.sin(now * 0.008) : 5;
+    ctx.fillStyle = `rgba(${col},${on || cur ? 1 : .6})`; ctx.shadowColor = `rgb(${col})`; ctx.shadowBlur = on || cur ? 10 : 0;
+    ctx.beginPath(); ctx.arc(b[0], b[1], r, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+    ctx.font = '600 10px "IBM Plex Mono", monospace'; ctx.textAlign = 'center';
+    ctx.textBaseline = LABEL_BELOW[i] ? 'top' : 'bottom';
+    const ly = LABEL_BELOW[i] ? b[1] + 10 : b[1] - 10;
+    const label = LEVELS[i].sys[S.lang].toUpperCase() + (cur ? ' ' + Math.round(pw[i] * 100) + '%' : '');
+    ctx.fillStyle = `rgba(${col},.95)`; ctx.fillText(label, b[0], ly);
+  });
+  ctx.fillStyle = `rgba(255,181,71,${0.4 + 0.6 * Math.max(0.05, pw[0])})`; ctx.beginPath(); ctx.arc(core[0], core[1], 4, 0, Math.PI * 2); ctx.fill();
+  view.pulses = view.pulses.filter(p => now - p.t < 420);
+  view.pulses.forEach(p => {
+    const k = (now - p.t) / 420, b = SP(...SYS_NODES[p.i], X);
+    const x = core[0] + (b[0] - core[0]) * k, y = core[1] + (b[1] - core[1]) * k;
+    ctx.fillStyle = '#fff'; ctx.shadowColor = '#ffb547'; ctx.shadowBlur = 12;
+    ctx.beginPath(); ctx.arc(x, y, 3, 0, Math.PI * 2); ctx.fill(); ctx.shadowBlur = 0;
+  });
+  ctx.restore(); ctx.textAlign = 'left';
+}
+function drawFlagship(ctx, now, k, dist) {
+  const W = view.w, H = view.h;
+  const x = W * .42, y = H * .46 + Math.sin(now * .002) * 4;
+  const sc = Math.min(W, H) * 0.0055 * (0.35 + k * 1.3);
+  ctx.save(); ctx.translate(x, y); ctx.scale(sc, sc);
+  ctx.shadowColor = 'rgba(255,90,82,.8)'; ctx.shadowBlur = 18;
+  ctx.fillStyle = '#1c0808'; ctx.strokeStyle = 'rgba(255,90,82,.95)'; ctx.lineWidth = 1.4;
+  ctx.beginPath();
+  [[-34,4],[-14,-6],[-6,-16],[0,-12],[6,-16],[14,-6],[34,4],[12,9],[0,15],[-12,9]].forEach(([px, py], i) => i ? ctx.lineTo(px, py) : ctx.moveTo(px, py));
+  ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = 'rgba(255,90,82,.95)'; ctx.fillRect(-8, -3, 16, 3);
+  const glow = 0.6 + 0.4 * Math.sin(now * .01);
+  ctx.fillStyle = `rgba(255,140,90,${glow})`;
+  [[-22, 5], [22, 5]].forEach(([px, py]) => { ctx.beginPath(); ctx.arc(px, py, 2.6, 0, Math.PI * 2); ctx.fill(); });
+  ctx.restore();
+  ctx.font = '600 11px "IBM Plex Mono", monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+  ctx.fillStyle = 'rgba(255,90,82,.95)';
+  ctx.fillText((S.lang === 'uk' ? 'ДЖЕРЕЛО СИГНАЛУ · ' : 'SIGNAL SOURCE · ') + km(dist), x, y + 20 * sc + 8);
+  ctx.textAlign = 'left';
+}
 const perimeterX = () => view.w * 0.1;
 
 function drawRaider(ctx, s, now, isTarget) {
@@ -721,23 +985,28 @@ function drawView(now, pw) {
   ctx.globalAlpha = 1;
 
   if (pw[4] > 0.01) {
-    const px = W * .7, py = H * .45, r = Math.min(W, H) * .22;
+    const px = W * .74, py = H * .42, r = Math.min(W, H) * .2;
     ctx.globalAlpha = pw[4] * (S.phase === 'combat' ? 0.45 : 1);
     const g = ctx.createRadialGradient(px - r * .4, py - r * .4, r * .1, px, py, r);
     g.addColorStop(0, '#8fdcc8'); g.addColorStop(.55, '#2b6e78'); g.addColorStop(1, '#081620');
     ctx.fillStyle = g; ctx.beginPath(); ctx.arc(px, py, r, 0, Math.PI * 2); ctx.fill();
     ctx.strokeStyle = 'rgba(190,235,225,.45)'; ctx.lineWidth = 1.5;
     ctx.beginPath(); ctx.ellipse(px, py, r * 1.6, r * .32, -.28, 0, Math.PI * 2); ctx.stroke();
-    if (S.phase !== 'combat') {
+    if (S.phase !== 'combat' && !hostile()) {
       ctx.setLineDash([5, 7]); ctx.strokeStyle = 'rgba(111,240,168,.75)';
       ctx.beginPath(); ctx.moveTo(W * .5, H * .92); ctx.quadraticCurveTo(W * .52, H * .5, px - r * 1.15, py + r * .2); ctx.stroke();
       ctx.setLineDash([]);
+      if (pw[4] > 0.99) {
+        ctx.font = '600 11px "IBM Plex Mono", monospace'; ctx.textAlign = 'center'; ctx.textBaseline = 'top';
+        ctx.fillStyle = 'rgba(111,240,168,.9)'; ctx.fillText('KEPLER-ORA 7 · ' + km(384400 - (S.lvl >= ACTS[1].from ? 120000 : 0)), px, py + r + 10);
+        ctx.textAlign = 'left';
+      }
     }
     ctx.globalAlpha = 1;
   }
 
   if (pw[3] > 0.01) {
-    const rx = W * .13, ry = H * .66, r = Math.min(W, H) * .15;
+    const rx = W * .9, ry = H * .68, r = Math.min(W, H) * .11;
     ctx.globalAlpha = pw[3] * (S.phase === 'combat' ? 0.4 : 1);
     ctx.strokeStyle = 'rgba(111,240,168,.45)'; ctx.lineWidth = 1;
     for (const k of [1, .66, .33]) { ctx.beginPath(); ctx.arc(rx, ry, r * k, 0, Math.PI * 2); ctx.stroke(); }
@@ -810,6 +1079,14 @@ function drawView(now, pw) {
   if (dark > 0.01) {
     ctx.fillStyle = `rgba(0,0,0,${Math.max(0, dark - (Math.random() < 0.05 ? 0.2 : 0))})`;
     ctx.fillRect(-10, -10, W + 20, H + 20);
+  }
+
+  const vexOnScreen = S.lvl >= ACTS[1].from && (S.phase === 'decrypt' || S.speaker === 'vex' || S.speaker === 'unknown');
+  if (vexOnScreen) {
+    const prog = S.phase === 'decrypt' && S.dec ? S.dec.ki / S.dec.keys.length : 1;
+    drawFlagship(ctx, now, prog, 48000 - 41000 * prog);
+  } else if (S.phase !== 'combat' && S.phase !== 'intro') {
+    drawSchematic(ctx, now, pw);
   }
 
   const names = ['PWR', 'O2', 'THR', 'SNS', 'NAV'];
@@ -1064,7 +1341,7 @@ function parseMsg(s) {
 }
 function startDecrypt() {
   clearInterval(S.typer); S.speaking = false; S.blocking = false;
-  const segs = parseMsg(LT().msg);
+  const segs = parseMsg(fmt(LT().msg));
   const keys = segs.filter(x => x.key);
   const chars = keys.reduce((a, k) => a + k.k.length, 0);
   const factor = [1, 0.92, 0.85, 0.78][S.lvl - ACTS[1].from] || 0.78;
@@ -1105,7 +1382,7 @@ function combatTick(now, dt) {
     C.ships.shift(); C.typed = 0; C.shields--;
     C.booms.push({ x: lead.x, y: lead.y, t: now, r: Math.random(), bad: true });
     view.shake = 350; sfx.breach(); flashPlate();
-    if (C.shields <= 0) { S.phase = 'dialogue'; say([t('breach')], startCombat); return; }
+    if (C.shields <= 0) { defeatSting(); S.phase = 'dialogue'; say([t('breach')], startCombat); return; }
     renderTerminal(); renderKeyboard();
   }
   if (!C.queue.length && !C.ships.length && S.phase === 'combat') completeLevel();
@@ -1123,7 +1400,7 @@ function completeLevel() {
   S.done[S.lang][S.lvl] = Math.max(S.done[S.lang][S.lvl], stars);
   save();
   S.levelDone = true;
-  sfx.online();
+  fanfare(L().type === 'encounter');
   const lt = LT();
   const lines = L().type === 'encounter' ? [{ who: 'vex', text: lt.retreat }, lt.outro] : [lt.outro];
   say(lines, () => { S.phase = 'complete'; S.speaker = 'ora'; renderAll(); });
@@ -1142,9 +1419,91 @@ function startEnding(n) {
     sfx.glitch();
     say(ACT1_END[S.lang].map(text => ({ who: 'unknown', text })), () => { S.phase = 'ending'; renderAll(); });
   } else {
+    fanfare(true);
     S.phase = 'ending'; S.speaker = 'ora'; renderAll();
   }
 }
+
+/* ---------- Cinematic intro flow ---------- */
+const CI = { i: 0, typer: null, typing: false, full: '', stars: [], cv: null, ctx: null, w: 0, h: 0 };
+function introSteps() { return INTRO[S.lang]; }
+function openIntro() {
+  clearInterval(S.typer); clearInterval(CI.typer);
+  S.phase = 'intro'; CI.i = 0;
+  const el = $('#cinema'); el.hidden = false; el.classList.remove('gone');
+  resizeCine();
+  showIntroStep();
+}
+function cineType(text, speedMs, talk) {
+  clearInterval(CI.typer); CI.full = text; CI.typing = true;
+  const el = $('#cineText'); let i = 0;
+  CI.typer = setInterval(() => {
+    i++; el.textContent = text.slice(0, i);
+    if (talk && i % 2 === 0) sfx.talk();
+    if (i >= text.length) { clearInterval(CI.typer); CI.typing = false; }
+  }, speedMs);
+}
+function showIntroStep() {
+  const step = introSteps()[CI.i], H = INTRO_HINT[S.lang];
+  const el = $('#cinema'), tx = $('#cineText'), hint = $('#cineHint');
+  el.classList.toggle('ora', step.k === 'ora' || step.k === 'name');
+  el.classList.toggle('naming', step.k === 'name');
+  tx.classList.toggle('alert', !!step.alert);
+  tx.classList.toggle('big', step.k === 'start');
+  requestAnimationFrame(() => fit(cineFace, '#cineFace'));
+  if (step.k === 'start') { clearInterval(CI.typer); CI.typing = false; tx.textContent = 'KEYQUEST'; hint.textContent = H.start; return; }
+  if (step.k === 'name') {
+    const inp = $('#nameInput'); inp.value = S.name || ''; hint.textContent = H.name;
+    setTimeout(() => inp.focus(), 30);
+    return;
+  }
+  hint.textContent = H.next;
+  if (step.fx === 'heartbeat') heartbeat();
+  if (step.fx === 'boot') bootChime();
+  cineType(fmt(step.text), step.k === 'title' ? 40 : 26, step.k === 'ora');
+}
+function introAdvance() {
+  if (introSteps()[CI.i].k === 'name') { confirmName(); return; }
+  if (CI.typing) { clearInterval(CI.typer); CI.typing = false; $('#cineText').textContent = CI.full; return; }
+  CI.i++;
+  if (CI.i >= introSteps().length) { closeIntro(); return; }
+  showIntroStep();
+}
+function confirmName() {
+  const v = $('#nameInput').value.replace(/[\[\]{}<>]/g, '').trim().slice(0, 16);
+  S.name = v || INTRO_HINT[S.lang].defName; save();
+  $('#nameInput').blur(); sfx.unlock();
+  CI.i++; showIntroStep();
+}
+function closeIntro() {
+  clearInterval(CI.typer); CI.typing = false;
+  if (!S.name) { S.name = INTRO_HINT[S.lang].defName; save(); }
+  const el = $('#cinema'); el.classList.add('gone');
+  setTimeout(() => { el.hidden = true; }, 900);
+  startLevel(firstOpen());
+}
+function resizeCine() {
+  const cv = $('#cineStars'), r = cv.getBoundingClientRect();
+  CI.cv = cv; CI.ctx = cv.getContext('2d'); CI.w = r.width; CI.h = r.height;
+  cv.width = Math.round(r.width); cv.height = Math.round(r.height);
+  CI.stars = Array.from({ length: 160 }, () => ({ x: Math.random() * CI.w, y: Math.random() * CI.h, z: 0.3 + Math.random() * 1.5 }));
+  fit(cineFace, '#cineFace');
+}
+function drawCine(now) {
+  const c = CI.ctx; if (!c || !CI.w) return;
+  c.fillStyle = 'rgba(0,0,0,.35)'; c.fillRect(0, 0, CI.w, CI.h);
+  CI.stars.forEach(s => {
+    s.x -= s.z * 0.25; if (s.x < 0) { s.x = CI.w; s.y = Math.random() * CI.h; }
+    c.fillStyle = `rgba(210,228,255,${0.3 + 0.5 * (s.z / 1.8)})`; c.fillRect(s.x, s.y, s.z, s.z);
+  });
+  const step = introSteps()[CI.i];
+  if (step && (step.k === 'ora' || step.k === 'name')) drawFace(cineFace, now, 'ora', CI.typing, true);
+}
+$('#cineSkip').onclick = (e) => { e.currentTarget.blur(); initAudio(); closeIntro(); };
+$('#introBtn').onclick = (e) => { e.currentTarget.blur(); initAudio(); openIntro(); };
+$('#nameInput').addEventListener('keydown', (e) => {
+  if (e.key === 'Enter') { e.preventDefault(); e.stopPropagation(); initAudio(); confirmName(); }
+});
 
 /* ---------- Input ---------- */
 const MODS = ['ShiftLeft','ShiftRight','ControlLeft','ControlRight','AltLeft','AltRight','MetaLeft','MetaRight','CapsLock'];
@@ -1152,6 +1511,11 @@ function shakeLine() { const tl = $('#termLine'); if (tl) { tl.classList.remove(
 
 window.addEventListener('keydown', (e) => {
   if (e.metaKey || e.ctrlKey || e.altKey) return;
+  if (S.phase === 'intro') {
+    if (e.target && e.target.id === 'nameInput') return;
+    if (e.code === 'Space' || e.key === 'Enter') { e.preventDefault(); if (e.repeat) return; initAudio(); introAdvance(); }
+    return;
+  }
   initAudio();
   const kEl = document.getElementById('k-' + e.code);
   if (kEl) kEl.classList.add('pressed');
@@ -1191,6 +1555,7 @@ window.addEventListener('keydown', (e) => {
 
     if (S.phase === 'drill') {
       sfx.key();
+      if (S.lvl < ACTS[1].from) view.pulses.push({ t: now, i: S.lvl });
       const line = curLine();
       S.ch++;
       if (S.ch >= line.text.length) {
@@ -1233,8 +1598,8 @@ window.addEventListener('keyup', (e) => {
 });
 
 function firstOpen(from = 0, to = N - 1) { for (let i = from; i <= to; i++) if (!S.done[S.lang][i]) return i; return from; }
-$('#langEN').onclick = (e) => { e.currentTarget.blur(); if (S.lang !== 'en') { S.lang = 'en'; save(); const a = ACTS[actOf(S.lvl)]; startLevel(firstOpen(a.from, a.to)); } };
-$('#langUK').onclick = (e) => { e.currentTarget.blur(); if (S.lang !== 'uk') { S.lang = 'uk'; save(); const a = ACTS[actOf(S.lvl)]; startLevel(firstOpen(a.from, a.to)); } };
+$('#langEN').onclick = (e) => { e.currentTarget.blur(); if (S.phase === 'intro') { S.lang = 'en'; save(); renderChrome(); showIntroStep(); return; } if (S.lang !== 'en') { S.lang = 'en'; save(); const a = ACTS[actOf(S.lvl)]; startLevel(firstOpen(a.from, a.to)); } };
+$('#langUK').onclick = (e) => { e.currentTarget.blur(); if (S.phase === 'intro') { S.lang = 'uk'; save(); renderChrome(); showIntroStep(); return; } if (S.lang !== 'uk') { S.lang = 'uk'; save(); const a = ACTS[actOf(S.lvl)]; startLevel(firstOpen(a.from, a.to)); } };
 $('#act1').onclick = (e) => { e.currentTarget.blur(); initAudio(); startLevel(firstOpen(ACTS[0].from, ACTS[0].to)); };
 $('#act2').onclick = (e) => { e.currentTarget.blur(); initAudio(); startLevel(firstOpen(ACTS[1].from, ACTS[1].to)); };
 $('#soundBtn').onclick = (e) => {
@@ -1249,7 +1614,7 @@ function fit(obj, sel) {
   cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr);
   obj.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
-function resize() { fit(view, '#view'); fit(face, '#face'); initStars(); }
+function resize() { fit(view, '#view'); fit(face, '#face'); initStars(); if (S.phase === 'intro') resizeCine(); }
 window.addEventListener('resize', resize);
 if (window.ResizeObserver) { const ro = new ResizeObserver(() => resize()); ro.observe($('#view')); ro.observe($('#face')); }
 
@@ -1274,7 +1639,8 @@ function loop(now) {
   const target = targetPowers();
   for (let i = 0; i < 5; i++) view.pw[i] += (target[i] - view.pw[i]) * 0.05;
   drawView(now, view.pw);
-  drawFace(now);
+  drawFace(face, now, S.phase === 'decrypt' ? 'unknown' : S.speaker, S.speaking, false);
+  if (S.phase === 'intro') drawCine(now);
   updateAudio(now, view.pw);
   requestAnimationFrame(loop);
 }
@@ -1282,7 +1648,8 @@ function loop(now) {
 load();
 buildKeyboard();
 resize();
-startLevel(firstOpen());
+renderChrome();
+if (!S.name) openIntro(); else startLevel(firstOpen());
 requestAnimationFrame(loop);
 </script>
 </body>
