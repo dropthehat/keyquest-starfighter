@@ -328,6 +328,7 @@ body[data-station="decrypt"] { --st: #ffb547; }
 body[data-station="combat"]  { --st: #ff5a4e; }
 body[data-station="repair"]  { --st: #f2e14c; }
 body[data-station="pursuit"] { --st: #ff7a3a; }
+body[data-station="logs"] { --st: #e8d7a8; }
 .terminal[data-st="pursuit"]:not(.quiet) { background-color: #140d08; background-image: repeating-linear-gradient(-60deg, color-mix(in srgb, var(--st) 6%, transparent) 0 2px, transparent 2px 14px); }
 .ambient { position: fixed; inset: 0; pointer-events: none; z-index: 30; opacity: 0; transition: opacity .6s ease, box-shadow .6s ease;
   box-shadow: inset 0 0 140px color-mix(in srgb, var(--st, #000) 22%, transparent); }
@@ -493,6 +494,62 @@ body.sim-full .app, body.sim-type .app { grid-template-rows: max-content minmax(
 /* keep the console a steady height whether or not a target is up */
 .term-foot { min-height: 1.45em; }
 .term-line .c.idle { opacity: .45; background: none; box-shadow: none; border-color: transparent; color: var(--muted); }
+
+/* audio toggles: one compact group */
+.audio-seg { display: inline-flex; gap: 4px; }
+.audio-seg .btn.off { opacity: .5; text-decoration: line-through; }
+/* reveal + spotlight for newly unlocked buttons */
+.reveal-btn:not([hidden]) { animation: btnIn .5s cubic-bezier(.2,1.4,.4,1) both; }
+@keyframes btnIn { from { transform: scale(.4); opacity: 0; } to { transform: none; opacity: 1; } }
+.spot { position: relative; z-index: 2; color: #1a1206 !important; background: #ffb547 !important; border-color: #ffd28a !important; animation: spot 1.2s ease-in-out 6 !important; }
+.spot::after { content: '▲ NEW'; position: absolute; left: 50%; top: calc(100% + 10px); transform: translateX(-50%); font: 700 11px var(--f-display); letter-spacing: .2em; color: #ffb547; text-shadow: 0 0 10px rgba(255,181,71,.8); animation: nudge .6s ease-in-out infinite alternate; white-space: nowrap; }
+@keyframes spot { 0%,100% { box-shadow: 0 0 0 0 rgba(255,181,71,.7), 0 0 18px rgba(255,181,71,.6); } 50% { box-shadow: 0 0 0 12px rgba(255,181,71,0), 0 0 30px rgba(255,181,71,.9); } }
+@keyframes nudge { from { transform: translate(-50%, 0); } to { transform: translate(-50%, 5px); } }
+/* pop-up */
+.popup { position: fixed; inset: 0; z-index: 55; display: grid; place-items: center; background: rgba(2,4,6,.62); backdrop-filter: blur(2px); -webkit-backdrop-filter: blur(2px); transition: opacity .25s; padding: 16px; }
+.popup.gone { opacity: 0; }
+.pop-in { display: grid; grid-template-columns: auto 1fr; gap: 22px; align-items: center; width: min(720px, 100%); padding: 22px 26px; border-radius: 14px; border: 1px solid rgba(255,181,71,.45); background: linear-gradient(180deg, #14100a, #0a0806); box-shadow: 0 30px 80px rgba(0,0,0,.7), 0 0 40px rgba(255,181,71,.12); animation: popIn .35s cubic-bezier(.2,1.3,.4,1); }
+@keyframes popIn { from { transform: translateY(14px) scale(.96); opacity: 0; } }
+@media (max-width: 560px) { .pop-in { grid-template-columns: 1fr; justify-items: center; text-align: center; } }
+.pop-face { display: grid; justify-items: center; gap: 6px; }
+.pop-face canvas { width: 132px; height: 132px; border-radius: 10px; background: radial-gradient(#22160a, #0a0704); border: 1px solid rgba(255,181,71,.3); }
+.pop-face span { font: 600 10px var(--f-display); letter-spacing: .2em; color: #ffb547; }
+.pop-eyebrow { font: 700 11px var(--f-display); letter-spacing: .3em; color: #6ff0a8; }
+.pop-body h3 { margin: 4px 0 8px; font: 700 26px var(--f-display); letter-spacing: .16em; color: #fff3df; text-transform: uppercase; }
+.pop-body p { margin: 0 0 14px; font: 22px/1.35 var(--f-crt, 'VT323', monospace); color: #ffcf8a; min-height: 3.6em; }
+.pop-hint { font-size: 12px; color: var(--muted); }
+/* paint shop */
+.hg-paint { display: grid; gap: 14px; }
+.pt-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 8px; }
+.node.pt { justify-items: start; }
+.sw { display: block; width: 100%; height: 26px; border-radius: 5px; margin-bottom: 2px; }
+.sw.dec { background: #0d1a12; border: 1px solid rgba(96,255,150,.3); position: relative; }
+.sw.dec-stripe::after { content: ''; position: absolute; left: 8%; right: 8%; top: 9px; height: 7px; border-top: 2px solid #60ff96; border-bottom: 2px solid #60ff96; }
+.sw.dec-flame::after { content: '≈≈≈'; position: absolute; right: 10px; top: 0; color: #ffbe5a; font-size: 18px; }
+.sw.dec-stars::after { content: '★★★★'; position: absolute; left: 10px; top: 3px; color: #60ff96; font-size: 14px; }
+/* ship's logs */
+.lg-list { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 10px; margin-top: 14px; }
+.lg { position: relative; display: grid; gap: 6px; align-content: start; padding: 12px 14px; border-radius: 9px; border: 1px solid #1d2a24; background: rgba(0,0,0,.35); }
+.lg-meta { display: flex; justify-content: space-between; font: 600 10px var(--f-display); letter-spacing: .14em; color: var(--muted); text-transform: uppercase; }
+.lg b { font: 600 16px var(--f-display); letter-spacing: .06em; color: #e6ffee; }
+.lg p { margin: 0; font: 19px/1.3 'VT323', monospace; color: #9fe8bb; }
+.lg p.scr { color: #3f6a52; }
+.lg small { color: var(--muted); font-size: 11px; }
+.lg.locked { opacity: .45; }
+.lg.damaged { border-color: rgba(255,181,71,.5); }
+.lg.read { border-color: rgba(96,255,150,.4); }
+.lg .lg-go { justify-self: start; padding: 5px 10px; font-size: 11px; }
+.lg-acts { display: flex; gap: 6px; }
+.lg .badge { top: -8px; right: -6px; }
+/* line-typing programs */
+.term-line .c.auto { opacity: .38; }
+.term-line .c.auto.todo { opacity: .22; }
+.term-line .c.ok { color: var(--live); }
+.term-line .c.glyph { color: #ffbe5a; }
+.log-done .log-full { margin: 6px 0 8px; font: 20px/1.35 'VT323', monospace; color: #bff5d2; }
+.log-done .log-full span { color: var(--muted); }
+@media (max-width: 1340px) { .brand .leds { display: none; } .brand .act { font-size: 11px; letter-spacing: .1em; } .controls { gap: 6px; } }
+@media (max-width: 1260px) { .brand .act { display: none; } }
 </style>
 
 <div class="app">
@@ -504,9 +561,9 @@ body.sim-full .app, body.sim-type .app { grid-template-rows: max-content minmax(
         <button id="langUK">UA · ЙЦУКЕН</button>
       </div>
       <button class="btn" id="introBtn">INTRO</button>
-      <button class="btn hangar-btn" id="hangarBtn">HANGAR</button>
-      <button class="btn" id="musicBtn">MUSIC ON</button>
-      <button class="btn" id="soundBtn">SOUND ON</button>
+      <button class="btn hangar-btn reveal-btn" id="hangarBtn" hidden>HANGAR</button>
+      <button class="btn hangar-btn reveal-btn" id="logsBtn" hidden>LOGS</button>
+      <span class="audio-seg"><button class="btn mini" id="musicBtn" title="Music">♪</button><button class="btn mini" id="soundBtn" title="Sound effects">SFX</button><button class="btn mini" id="voiceBtn" title="Voice-over">VO</button></span>
     </div>
     <div class="readout">
       <div><span>WPM</span><b id="rWpm">0</b></div>
@@ -548,9 +605,22 @@ body.sim-full .app, body.sim-type .app { grid-template-rows: max-content minmax(
     <div class="hg-head"><h2 id="hgTitle">HANGAR</h2><span class="hg-parts" id="hgParts"></span><button class="btn" id="hgCloseBtn">✕</button></div>
     <div class="hg-grid">
       <section class="hg-ship"><span class="tag" id="hgShipTag"></span><canvas id="hgShip"></canvas><span class="tag" id="hgStatsTag"></span><div class="hg-stats" id="hgStats"></div></section>
-      <section class="hg-right"><div class="hg-tabs" id="hgTabs"></div><div class="hg-tree" id="hgTree"></div><div class="hg-modes" id="hgModes" hidden></div></section>
+      <section class="hg-right"><div class="hg-tabs" id="hgTabs"></div><div class="hg-tree" id="hgTree"></div><div class="hg-paint" id="hgPaint" hidden></div><div class="hg-modes" id="hgModes" hidden></div></section>
     </div>
     <div class="cine-hint" id="hgClose"></div>
+  </div>
+</div>
+<div class="hangar logs" id="logs" hidden>
+  <div class="hg-in">
+    <div class="hg-head"><h2 id="lgTitle">SHIP'S LOGS</h2><span class="hg-parts" id="lgSub"></span><button class="btn" id="lgCloseBtn">✕</button></div>
+    <div class="lg-list" id="lgList"></div>
+    <div class="cine-hint" id="lgClose"></div>
+  </div>
+</div>
+<div class="popup" id="popup" hidden>
+  <div class="pop-in">
+    <div class="pop-face"><canvas id="popFace" width="132" height="132"></canvas><span id="popWho"></span></div>
+    <div class="pop-body"><div class="pop-eyebrow" id="popEyebrow"></div><h3 id="popTitle"></h3><p id="popText"></p><div class="pop-hint" id="popHint"></div></div>
   </div>
 </div>
 <div class="card" id="card" hidden>
@@ -799,7 +869,7 @@ const S = {
   lines: [], lineIdx: 0, ch: 0, levelDone: false, ending: 0, speaker: 'ora',
   correct: 0, total: 0, startT: null, lastStars: 0, lastWpm: 0, lastAcc: 100,
   msg: '', done: { en: blank(), uk: blank() },
-  sound: true, music: true, hands: true, kb: true, played: [], parts: 0, up: { armor: false, cap: false, reactive: false, twin: false, overdrive: false, flak: false, dish: false, booster: false, chrono: false }, hgTab: 'up', train: {}, best: {}, seen: [], miss: null, cadence: 0, lastKey: 0,
+  sound: true, music: true, hands: true, kb: true, played: [], parts: 0, up: { armor: false, cap: false, reactive: false, twin: false, overdrive: false, flak: false, dish: false, booster: false, chrono: false, nano: false, lance: false, precog: false }, hgTab: 'up', voice: true, pops: [], logsRead: [], paint: { phos: 'green', decal: 'none', owned: ['green', 'none'] }, train: {}, best: {}, seen: [], miss: null, cadence: 0, lastKey: 0,
   dlg: [], dlgIdx: 0, dlgCb: null, full: '', shown: '', speaking: false, typer: null, blocking: false,
   dec: null, name: ''
 };
@@ -821,7 +891,7 @@ function codeOf(ch, lang = S.lang) { if (ch === ' ') return 'Space'; for (const 
 function keyLabel(code) { return code === 'Space' ? t('space') : (charOf(code) || '').toUpperCase(); }
 
 /* ---------- Save ---------- */
-function save() { try { localStorage.setItem('keyquest.story', JSON.stringify({ done: S.done, lang: S.lang, name: S.name, music: S.music, hands: S.hands, kb: S.kb, miss: S.miss, parts: S.parts, up: S.up, train: S.train, best: S.best, seen: S.seen, played: S.played, hgTab: S.hgTab })); } catch (e) {} }
+function save() { try { localStorage.setItem('keyquest.story', JSON.stringify({ done: S.done, lang: S.lang, name: S.name, music: S.music, hands: S.hands, kb: S.kb, miss: S.miss, parts: S.parts, up: S.up, train: S.train, best: S.best, seen: S.seen, played: S.played, hgTab: S.hgTab, voice: S.voice, pops: S.pops, logsRead: S.logsRead, paint: S.paint })); } catch (e) {} }
 function load() {
   try {
     const d = JSON.parse(localStorage.getItem('keyquest.story') || localStorage.getItem('keyquest.act1') || 'null');
@@ -838,7 +908,11 @@ function load() {
       if (d.best) S.best = d.best;
       if (Array.isArray(d.seen)) S.seen = d.seen;
       if (Array.isArray(d.played)) S.played = d.played;
-      if (d.hgTab === 'sim' || d.hgTab === 'up') S.hgTab = d.hgTab;
+      if (['sim', 'up', 'paint'].includes(d.hgTab)) S.hgTab = d.hgTab;
+      if (typeof d.voice === 'boolean') S.voice = d.voice;
+      if (Array.isArray(d.pops)) S.pops = d.pops;
+      if (Array.isArray(d.logsRead)) S.logsRead = d.logsRead;
+      if (d.paint && d.paint.owned) S.paint = d.paint;
       if (d.miss && d.miss.words) S.miss = d.miss;
     }
   } catch (e) {}
@@ -857,6 +931,7 @@ function curLine() { return S.lines[S.lineIdx]; }
 function expectedChar() {
   if (S.phase === 'drill') { const l = curLine(); return l ? l.text[S.ch] : null; }
   if (S.phase === 'decrypt') { const k = S.dec.keys[S.dec.ki]; return k ? k.k[S.dec.ch] : null; }
+  if (isLineMode() && !S.tr.done) return lineExpected();
   if (S.phase === 'combat' || (S.phase === 'train' && S.tr && !S.tr.done && S.tr.mode !== 'arcade')) { const e = alive(C.lock) ? C.lock : recommended(); return e ? e.word[e.typed] : null; }
   return null;
 }
@@ -1084,6 +1159,7 @@ function typeText(text, blocking, cb) {
   S.typeAt = performance.now();
   if (S.phase === 'combat') C.slowUntil = S.typeAt + text.length * 24 + 1400;
   S.full = text; S.shown = ''; S.speaking = true; S.blocking = blocking; S.typeCb = cb || null;
+  if (blocking || S.speaker !== 'ora') speak(text, S.speaker);
   let i = 0;
   S.typer = setInterval(() => {
     i++; S.shown = S.full.slice(0, i);
@@ -1231,8 +1307,25 @@ function drawFace(obj, now, mode, speaking, forcePowered) {
    ====================================================================== */
 const view = { cv: null, ctx: null, w: 0, h: 0, stars: [], pw: [0.02, 0, 0, 0, 0], shake: 0, pulses: [], banner: null, flash: 0, sparks: [], nodePos: [], assembled: [] };
 function initStars() { view.stars = Array.from({ length: 70 }, () => ({ x: Math.random() * view.w, y: Math.random() * view.h, z: 0.4 + Math.random() * 1.4 })); }
-const G = (a = 1) => `rgba(96,255,150,${a})`;
-const HOT = (a = 1) => `rgba(255,190,90,${a})`;
+const PAINT = {
+  phos: {
+    green: { cost: 0,  rgb: '96,255,150',  hot: '255,190,90', en: 'Phosphor green', uk: 'Зелений люмінофор' },
+    amber: { cost: 40, rgb: '255,184,72',  hot: '255,96,84',  en: 'Amber terminal', uk: 'Бурштиновий термінал' },
+    cyan:  { cost: 60, rgb: '96,220,255',  hot: '255,170,80', en: 'Ion blue', uk: 'Іонний синій' },
+    ice:   { cost: 80, rgb: '226,238,255', hot: '255,150,90', en: 'Ice white', uk: 'Крижаний білий' },
+    rose:  { cost: 90, rgb: '255,120,200', hot: '255,210,90', en: 'Nebula pink', uk: 'Рожева туманність' }
+  },
+  decal: {
+    none:   { cost: 0,  en: 'Factory hull', uk: 'Заводський корпус' },
+    stripe: { cost: 30, en: 'Racing stripes', uk: 'Гоночні смуги' },
+    flame:  { cost: 50, en: 'Nose flames', uk: 'Полум\'я на носі' },
+    stars:  { cost: 70, en: 'Star tally', uk: 'Зірки перемог' }
+  }
+};
+let PHOS = '96,255,150', HOTRGB = '255,190,90';
+function applyPaint() { const p = PAINT.phos[S.paint.phos] || PAINT.phos.green; PHOS = p.rgb; HOTRGB = p.hot; }
+const G = (a = 1) => `rgba(${PHOS},${a})`;
+const HOT = (a = 1) => `rgba(${HOTRGB},${a})`;
 const BG = '#030b06';
 const MONO = '"VT323", "IBM Plex Mono", monospace';
 const cannon = () => ({ x: view.w * 0.5, y: view.h * 0.8 });
@@ -1759,8 +1852,10 @@ function drawView(now, pw) {
     header(ctx, uw('comms'), [[uw('freq'), '147.3'], [uw('sig'), `${Math.round(sig * 100)}%`, sig < 0.3], [uw('src'), isVex && prog >= 1 ? 'PUMPKIN' : uw('unknown'), true], [uw('dist'), isVex ? km(dist) : '—']]);
     tabs(ctx, 'comms');
   } else if (mode === 'sim') {
-    if (S.tr && S.tr.mode === 'arcade') { drawArcade(ctx, now); drawPursuit(ctx, now); } else drawTarget(ctx, now);
-    if (S.tr) simHeader(ctx, now);
+    if (S.tr && S.tr.mode === 'arcade') { drawArcade(ctx, now); drawPursuit(ctx, now); }
+    else if (S.tr && LINE_MODES.includes(S.tr.mode)) drawLineMode(ctx, now);
+    else drawTarget(ctx, now);
+    if (S.tr && !LINE_MODES.includes(S.tr.mode)) simHeader(ctx, now);
     tabs(ctx, 'sim');
   } else {
     drawTarget(ctx, now);
@@ -1901,11 +1996,12 @@ const STATIONS = {
   decrypt: { col: '#ffb547', icon: '#', en: ['DECRYPTION', 'Type each cipher key before the signal fades.'], uk: ['ДЕШИФРУВАННЯ', 'Набери кожен ключ, поки сигнал не зник.'] },
   combat:  { col: '#ff5a4e', icon: '⊕', en: ['WEAPONS', 'Type a target\'s first letter to lock on, then finish the word.'], uk: ['ЗБРОЯ', 'Набери першу літеру цілі, щоб захопити її, і допиши слово.'] },
   pursuit: { col: '#ff7a3a', icon: '»', en: ['PURSUIT', 'The raiders are fleeing. No typing: arrows fly, Space fire, B bomb.'], uk: ['ПОГОНЯ', 'Рейдери тікають. Без друку: стрілки — політ, пробіл — вогонь, B — бомба.'] },
+  logs:    { col: '#e8d7a8', icon: '✎', en: ['SHIP\'S LOG', 'Type the damaged log to restore it. Grey letters fill in by themselves.'], uk: ['БОРТОВИЙ ЖУРНАЛ', 'Надрукуй пошкоджений запис, щоб відновити його. Сірі літери заповнюються самі.'] },
   sim:     { col: '#3fe0c5', icon: '◇', en: ['SIMULATOR', 'Training program. Earn parts for ship upgrades.'], uk: ['СИМУЛЯТОР', 'Тренувальна програма. Заробляй деталі на покращення.'] },
   repair:  { col: '#f2e14c', icon: '✚', en: ['REPAIR BAY', 'Retype the damaged words. Slow and clean.'], uk: ['РЕМОНТНИЙ ВІДСІК', 'Передрукуй пошкоджені слова. Повільно і чисто.'] }
 };
 function station() {
-  if (S.phase === 'train') return S.tr && !S.tr.done ? (S.tr.replay ? 'pursuit' : 'sim') : null;
+  if (S.phase === 'train') return S.tr && !S.tr.done ? (S.tr.replay ? 'pursuit' : S.tr.mode === 'log' ? 'logs' : 'sim') : null;
   if (S.levelDone || S.ending) return null;
   if (S.phase === 'decrypt') return 'decrypt';
   if (S.phase === 'combat') return 'combat';
@@ -2162,8 +2258,13 @@ function renderChrome() {
   $('#act2').classList.toggle('on', a === 1);
   $('#deckLabel').textContent = t('deck');
   $('#deckHint').textContent = t('tabHint');
-  $('#soundBtn').textContent = t('sound')[S.sound ? 0 : 1];
-  $('#musicBtn').textContent = (S.lang === 'uk' ? ['МУЗИКА УВІМК', 'МУЗИКА ВИМК'] : ['MUSIC ON', 'MUSIC OFF'])[S.music ? 0 : 1];
+  $('#soundBtn').textContent = S.sound ? p2('soundOn') : p2('soundOff');
+  $('#musicBtn').textContent = S.music ? p2('musicOn') : p2('musicOff');
+  $('#voiceBtn').textContent = S.voice ? p2('voiceOn') : p2('voiceOff');
+  $('#soundBtn').classList.toggle('off', !S.sound); $('#musicBtn').classList.toggle('off', !S.music); $('#voiceBtn').classList.toggle('off', !S.voice);
+  $('#hangarBtn').hidden = !S.pops.includes('hangar');
+  $('#logsBtn').hidden = !S.pops.includes('logs');
+  $('#logsBtn').innerHTML = `${esc(p2('logs'))}${logsNews() ? `<i class="badge">${esc(p2('newT'))}</i>` : ''}`;
   $('.deck').classList.toggle('collapsed', !S.kb);
   $('#hangarBtn').innerHTML = `${esc(hg('title'))} · ⚙${S.parts}${hangarNews() ? `<i class="badge">${esc(hg('newBadge'))}</i>` : ''}`;
   $('#kbBtn').textContent = (S.lang === 'uk' ? ['СХОВАТИ КЛАВІАТУРУ', 'ПОКАЗАТИ КЛАВІАТУРУ'] : ['HIDE KEYBOARD', 'SHOW KEYBOARD'])[S.kb ? 0 : 1];
@@ -2185,12 +2286,27 @@ function buildLines(lv) {
   const lt = lv[S.lang], out = [];
   if (lv.type === 'encounter') { const rw = repairWords(3); if (rw.length) out.push({ kind: 'repair', text: rw.join(' ') }); }
   lv.newKeys.forEach(code => out.push({ kind: 'locate', text: charOf(code).repeat(3), code }));
+  letterDrills(lv).forEach(text => out.push({ kind: 'letters', text }));
   lt.drills.forEach(text => out.push({ kind: 'drill', text }));
   if (lv.type === 'boot') out.push({ kind: 'code', text: lt.code });
   return out;
 }
 
 
+/* letter warm-ups before any words: new keys on their own, then paired with keys you already know */
+function letterDrills(lv) {
+  const idx = LEVELS.indexOf(lv);
+  const fresh = lv.newKeys.filter(k => k !== 'Space').map(k => charOf(k));
+  const known = []; for (let i = 0; i < idx; i++) LEVELS[i].newKeys.forEach(k => { if (k !== 'Space' && k !== 'Semicolon') known.push(charOf(k)); });
+  if (!fresh.length || !known.length) return [];
+  const pick = (a) => a[(Math.random() * a.length) | 0];
+  const mix = () => Math.random() < 0.6 ? pick(fresh) : pick(known);
+  if (idx < 2) return [Array.from({ length: 8 }, mix).join('')];   // no space key yet
+  const pairs = [];
+  fresh.forEach(c => { const a = pick(known), b = pick(known); pairs.push(c + a, a + c, c + b, c + c); });
+  const group = () => Array.from({ length: 5 }, () => Array.from({ length: 3 }, mix).join('')).join(' ');
+  return idx < 4 ? [pairs.join(' '), group()] : [pairs.join(' '), group(), group()];
+}
 function startLevel(i) {
   clearInterval(S.typer);
   S.lvl = i; S.ending = 0; S.levelDone = false; S.dec = null; S.speaker = 'ora';
@@ -2375,7 +2491,7 @@ function missileCode(len) {
 function fireMissile(fx, fy, now) {
   if (C.missiles.length >= 2) return;
   const cn = cannon(), cfg = COMBAT[S.lvl];
-  C.missiles.push({ kind: 'missile', word: missileCode(cfg.mlen), typed: 0, sx: fx - 14, sy: fy, x: fx, y: fy, tx: cn.x, ty: cn.y - 14, p: 0, dur: (cfg.mspeed + EASE.mspeed) * (S.up.dish ? 1.15 : 1), hit: 0 });
+  C.missiles.push({ kind: 'missile', word: missileCode(cfg.mlen), typed: 0, sx: fx - 14, sy: fy, x: fx, y: fy, tx: cn.x, ty: cn.y - 14, p: 0, dur: (cfg.mspeed + EASE.mspeed) * (S.up.dish ? 1.15 : 1) * (S.up.precog ? 1.15 : 1), hit: 0 });
   sfx.missile();
   if (!C.said.missile) { C.said.missile = 1; banner(uw('incoming'), true); remark(tw('missile')); }
   renderTerminal(); renderKeyboard();
@@ -2482,7 +2598,7 @@ function combatKey(ch, now) {
   e.typed++; e.hit = 90;
   const [x, y] = pos(e);
   C.lasers.push({ x, y, t: now, off: (e.typed % 2 ? -8 : 8) });
-  C.heat = Math.min(1, C.heat + 0.045 * (S.up.twin ? 1.5 : 1));
+  C.heat = Math.min(1, C.heat + 0.045 * (S.up.twin ? 1.5 : 1) * (S.up.lance ? 1.3 : 1));
   if (C.heat >= 1 && !C.over) {
     C.over = true; banner(uw('overcharge')); sfx.charge();
     if (!C.said.over) { C.said.over = 1; remark(tw('over')); }
@@ -2659,9 +2775,8 @@ function completeLevel() {
   fanfare(L().type === 'encounter');
   const lt = LT();
   const lines = [lt.outro];
-  if (!wasDone) Object.keys(MODES).filter(m => MODES[m].need === S.lvl).forEach(m => lines.push(hg('newProg').replace('{m}', MODES[m][S.lang][0])));
   if (L().type === 'encounter') { S.afterPursuit = lines; say([hg('replayIntro')], () => startReplay(S.lvl)); return; }
-  say(lines, () => { S.phase = 'complete'; S.speaker = 'ora'; renderAll(); });
+  say(lines, enterComplete);
 }
 
 function nextLevel() {
@@ -2722,6 +2837,17 @@ const UPG = {
     en: ['Chrono field', 'Everything in battle moves 10% slower.', 'Enemy fire 50% slower.'],
     uk: ['Хронополе', 'Усе в бою рухається на 10% повільніше.', 'Ворожий вогонь на 50% повільніший.'] }
 };
+Object.assign(UPG, {
+  nano:   { b: 'def', t: 3, cost: 200, req: 'reactive', icon: '✚',
+    en: ['Nano-repair', 'Typos no longer reset your shield recharge.', 'Regain a life when a mothership falls.'],
+    uk: ['Наноремонт', 'Помилки більше не скидають підзарядку щита.', 'Повертає життя, коли падає носій.'] },
+  lance:  { b: 'wpn', t: 3, cost: 220, req: 'flak', icon: 'ϟ',
+    en: ['Ion lance', 'Overcharge builds 30% faster.', 'Every shot does double damage.'],
+    uk: ['Іонний спис', 'Перезаряд накопичується на 30% швидше.', 'Кожен постріл завдає подвійної шкоди.'] },
+  precog: { b: 'sys', t: 3, cost: 210, req: 'chrono', icon: '◉',
+    en: ['Precog array', 'Enemy missiles fly a further 15% slower.', 'Power-ups last twice as long and drop more often.'],
+    uk: ['Передбачувач', 'Ворожі ракети летять ще на 15% повільніше.', 'Спецзброя діє вдвічі довше і падає частіше.'] }
+});
 const upgReady = (k) => !UPG[k].req || S.up[UPG[k].req];
 const MODES = {
   range:  { need: 0, icon: '⊙', typing: true, th: [12, 20, 28],
@@ -2730,6 +2856,12 @@ const MODES = {
   arcade: { need: 1, icon: '▲', typing: false, th: [12, 28, 45],
     en: ['Raider Run', 'No typing! Arrows to fly, Space to fire, B for a bomb. Your upgrades become skills.'],
     uk: ['Рейдерський забіг', 'Без друку! Стрілки — політ, пробіл — вогонь, B — бомба. Твої покращення стають навичками.'] },
+  clinic: { need: 2, icon: '✚', typing: true, line: true, th: [85, 92, 97],
+    en: ['Weak-Key Clinic', 'Practise the keys you miss most. Accuracy counts, not speed.'],
+    uk: ['Клініка слабких клавіш', 'Тренуй клавіші, на яких найчастіше помиляєшся. Важить точність, не швидкість.'] },
+  code:   { need: 5, icon: '⌗', typing: true, line: true, th: [5, 9, 13],
+    en: ['Code Breaker', 'Read the glyph key, decode each word and type it. 60 seconds.'],
+    uk: ['Зламувач кодів', 'Читай ключ гліфів, розшифровуй слова і набирай їх. 60 секунд.'] },
   belt:   { need: 2, icon: '✺', typing: true, th: [10, 20, 34],
     en: ['Asteroid Belt', 'Type the words on the rocks before they hit the hull. How long can you last?'],
     uk: ['Пояс астероїдів', 'Набирай слова на каменях, поки вони не влучили в корпус. Скільки протримаєшся?'] }
@@ -2742,7 +2874,8 @@ const HG = {
         defeatTip: 'Later, the Target Range in the hangar will sharpen your aim.', over: 'SIMULATION OVER', newBadge: 'NEW',
         tabUp: 'Upgrade tree', tabSim: 'Simulator', stats: 'Ship stats', requires: 'Requires', replay: 'Pursuit', replayIntro: 'They are running! Take the helm, {name}. No typing now: arrows to fly, Space to fire, B for a bomb. Grab the capsules for special weapons. Your hangar upgrades are your skills.',
         replayOn: 'Pursuit! Arrows fly, Space fire, B bomb.', replayDone: 'VICTORY', escaped: 'HE GOT AWAY', cont: 'continue', skip: 'skip', inHangar: 'You can fly that kind of run any time: Raider Run, in the Hangar simulator.', escapedOra: 'He slipped away, but the sector is ours.', mother: 'Mothership', motherDown: 'MOTHERSHIP DOWN', bombs: 'BOMBS', pw: { spread: 'SPREAD SHOT', rapid: 'RAPID FIRE', homing: 'HOMING MISSILES', bomb: 'BOMB +1' },
-        st: { shields: 'Shields', recharge: 'Recharge', every: 'every {n} kills', absorb: 'First hit absorbed', heat: 'Heat build', chain: 'Overcharge chain', targets: '{n} target(s)', missiles: 'Missile speed', flak: 'Flak burst', decrypt: 'Decrypt time', speed: 'Battle speed', yes: 'yes', no: '—' } },
+        tabPaint: 'Paint shop', phosT: 'Monitor phosphor', decalT: 'Hull decal', equip: 'Use', equipped: 'In use',
+        st: { nano: 'Typo-proof recharge', lance: 'Overcharge rate', shields: 'Shields', recharge: 'Recharge', every: 'every {n} kills', absorb: 'First hit absorbed', heat: 'Heat build', chain: 'Overcharge chain', targets: '{n} target(s)', missiles: 'Missile speed', flak: 'Flak burst', decrypt: 'Decrypt time', speed: 'Battle speed', yes: 'yes', no: '—' } },
   uk: { title: 'АНГАР', parts: 'деталей', ship: 'АРГО-7 · ПОКРАЩЕННЯ', sim: 'СИМУЛЯТОР', buy: 'Встановити', installed: 'Встановлено', need: 'Треба', locked: 'Відкривається після', close: 'Esc · закрити',
         tiers: ['Кадет', 'Пілот', 'Ас'], tierLock: 'Отримай 2★ на попередньому рівні', newProg: 'Нова програма симулятора в ангарі: {m}. Тренуйся там, щоб заробити деталі на покращення.',
         retry: 'ще раз', back: 'до місії', hangar: 'ангар', score: 'Рахунок', earned: 'Зароблено деталей', best: 'Рекорд', time: 'ЧАС', hull: 'КОРПУС', wave: 'ХВИЛЯ', lives: 'ЖИТТЯ',
@@ -2750,7 +2883,8 @@ const HG = {
         defeatTip: 'Згодом тир в ангарі відточить твою точність.', over: 'СИМУЛЯЦІЮ ЗАВЕРШЕНО', newBadge: 'НОВЕ',
         tabUp: 'Дерево покращень', tabSim: 'Симулятор', stats: 'Характеристики', requires: 'Потрібно', replay: 'Погоня', replayIntro: 'Вони тікають! Бери штурвал, {name}. Тепер без друку: стрілки — політ, пробіл — вогонь, B — бомба. Хапай капсули зі спецзброєю. Твої покращення з ангара — це навички.',
         replayOn: 'Погоня! Стрілки — політ, пробіл — вогонь, B — бомба.', replayDone: 'ПЕРЕМОГА', escaped: 'ВІН ВТІК', cont: 'далі', skip: 'пропустити', inHangar: 'Такий політ можна повторити будь-коли: Рейдерський забіг у симуляторі ангара.', escapedOra: 'Він вислизнув, але сектор наш.', mother: 'Носій', motherDown: 'НОСІЙ ЗБИТО', bombs: 'БОМБИ', pw: { spread: 'РОЗКИДНИЙ ПОСТРІЛ', rapid: 'ШВИДКИЙ ВОГОНЬ', homing: 'САМОНАВІДНІ РАКЕТИ', bomb: 'БОМБА +1' },
-        st: { shields: 'Щити', recharge: 'Підзарядка', every: 'кожні {n} влучання', absorb: 'Перше влучання поглинається', heat: 'Ріст заряду', chain: 'Ланцюг перезаряду', targets: '{n} ціль(і)', missiles: 'Швидкість ракет', flak: 'Зенітний залп', decrypt: 'Час дешифрування', speed: 'Швидкість бою', yes: 'так', no: '—' } }
+        tabPaint: 'Фарбування', phosT: 'Люмінофор монітора', decalT: 'Декаль корпусу', equip: 'Обрати', equipped: 'Обрано',
+        st: { nano: 'Підзарядка без скидання', lance: 'Швидкість перезаряду', shields: 'Щити', recharge: 'Підзарядка', every: 'кожні {n} влучання', absorb: 'Перше влучання поглинається', heat: 'Ріст заряду', chain: 'Ланцюг перезаряду', targets: '{n} ціль(і)', missiles: 'Швидкість ракет', flak: 'Зенітний залп', decrypt: 'Час дешифрування', speed: 'Швидкість бою', yes: 'так', no: '—' } }
 };
 const hg = (k) => HG[S.lang][k];
 const modeOpen = (m) => S.done[S.lang][MODES[m].need] > 0;
@@ -2790,7 +2924,9 @@ function poolWord(used) {
 
 /* ---------- Hangar screen ---------- */
 function openHangar() {
-  if (S.phase === 'intro') return;
+  if (S.phase === 'intro' || !S.pops.includes('hangar')) return;
+  if (S.logsOpen) closeLogs();
+  $('#hangarBtn').classList.remove('spot');
   S.hangarOpen = true;
   Object.keys(MODES).forEach(m => { if (modeOpen(m) && !S.seen.includes(m)) S.seen.push(m); });
   save();
@@ -2805,6 +2941,23 @@ function closeHangar() {
   setTimeout(() => { if (!S.hangarOpen) el.hidden = true; }, 300);
   renderChrome();
 }
+function renderPaint() {
+  const box = $('#hgPaint');
+  const group = (kind, title) => `<div class="pt-group"><div class="branch-h">${esc(title)}</div><div class="pt-row">${Object.entries(PAINT[kind]).map(([k, v]) => {
+    const own = S.paint.owned.includes(k), on = S.paint[kind] === k, can = S.parts >= v.cost;
+    const sw = kind === 'phos' ? `<i class="sw" style="background:rgb(${v.rgb});box-shadow:0 0 12px rgb(${v.rgb})"></i>` : `<i class="sw dec dec-${k}"></i>`;
+    const act = on ? `<span class="hg-own">✓ ${esc(hg('equipped'))}</span>` : own ? `<button class="btn hg-buy pt-go" data-k="${kind}" data-v="${k}">${esc(hg('equip'))}</button>` : `<button class="btn hg-buy pt-go" data-k="${kind}" data-v="${k}" ${can ? '' : 'disabled'}>${esc(can ? hg('buy') : hg('need'))} · ${v.cost} ⚙</button>`;
+    return `<div class="node pt ${on ? 'own' : own ? '' : can ? 'can' : 'locked'}">${sw}<b>${esc(v[S.lang])}</b>${act}</div>`;
+  }).join('')}</div></div>`;
+  box.innerHTML = group('phos', hg('phosT')) + group('decal', hg('decalT'));
+  box.querySelectorAll('.pt-go').forEach(b => b.onclick = () => {
+    b.blur(); const kind = b.dataset.k, k = b.dataset.v, v = PAINT[kind][k];
+    if (!S.paint.owned.includes(k)) { if (S.parts < v.cost) return; S.parts -= v.cost; S.paint.owned.push(k); sfx.assemble(); }
+    else sfx.key();
+    S.paint[kind] = k; applyPaint(); save(); hgShip.flash = performance.now();
+    renderHangar(); renderChrome();
+  });
+}
 function renderHangar() {
   const st = hg('st');
   $('#hgTitle').textContent = hg('title');
@@ -2813,7 +2966,7 @@ function renderHangar() {
   $('#hgStatsTag').textContent = hg('stats');
   $('#hgClose').textContent = hg('close');
   const newSim = Object.keys(MODES).some(m => modeOpen(m) && !(S.played || []).includes(m));
-  $('#hgTabs').innerHTML = ['up', 'sim'].map(tb => `<button class="hg-tab ${S.hgTab === tb ? 'on' : ''}" data-tab="${tb}">${esc(tb === 'up' ? hg('tabUp') : hg('tabSim'))}${tb === 'sim' && newSim ? `<i class="badge">${esc(hg('newBadge'))}</i>` : ''}</button>`).join('');
+  $('#hgTabs').innerHTML = ['up', 'paint', 'sim'].map(tb => `<button class="hg-tab ${S.hgTab === tb ? 'on' : ''}" data-tab="${tb}">${esc(tb === 'up' ? hg('tabUp') : tb === 'paint' ? hg('tabPaint') : hg('tabSim'))}${tb === 'sim' && newSim ? `<i class="badge">${esc(hg('newBadge'))}</i>` : ''}</button>`).join('');
   $('#hgTabs').querySelectorAll('.hg-tab').forEach(b => b.onclick = () => { b.blur(); S.hgTab = b.dataset.tab; save(); renderHangar(); });
   // ship stats readout
   const rows = [
@@ -2825,12 +2978,15 @@ function renderHangar() {
     [st.flak, S.up.flak ? st.yes : st.no, S.up.flak],
     [st.missiles, S.up.dish ? '−15%' : '100%', S.up.dish],
     [st.decrypt, S.up.booster ? '+20%' : '+0%', S.up.booster],
-    [st.speed, S.up.chrono ? '90%' : '100%', S.up.chrono]
+    [st.speed, S.up.chrono ? '90%' : '100%', S.up.chrono],
+    [st.nano, S.up.nano ? st.yes : st.no, S.up.nano],
+    [st.lance, S.up.lance ? '×1.3' : '×1', S.up.lance]
   ];
   $('#hgStats').innerHTML = rows.map(([k, v, on]) => `<div class="hs ${on ? 'on' : ''}"><span>${esc(k)}</span><b>${esc(v)}</b></div>`).join('');
   // upgrade tree
   const tree = $('#hgTree'), modes = $('#hgModes');
-  tree.hidden = S.hgTab !== 'up'; modes.hidden = S.hgTab !== 'sim';
+  tree.hidden = S.hgTab !== 'up'; modes.hidden = S.hgTab !== 'sim'; $('#hgPaint').hidden = S.hgTab !== 'paint';
+  renderPaint();
   tree.innerHTML = Object.entries(BRANCHES).map(([bk, br]) => {
     const nodes = Object.entries(UPG).filter(([, u]) => u.b === bk).sort((a, b) => a[1].t - b[1].t).map(([k, u]) => {
       const own = S.up[k], ready = upgReady(k), can = ready && S.parts >= u.cost;
@@ -2893,6 +3049,13 @@ function drawHangarShip(now) {
 function drawUpgrades(ctx, P, s, now, big) {
   ctx.save();
   ctx.strokeStyle = G(); ctx.lineWidth = big ? 2 : 1.6;
+  const dec = S.paint && S.paint.decal;
+  if (dec === 'stripe') { ctx.save(); ctx.lineWidth = big ? 1.6 : 1.2; ctx.strokeStyle = G(.8); line(ctx, [P(2.4, 1.78), P(9.3, 1.9)]); line(ctx, [P(2.4, 2.22), P(9.3, 2.1)]); ctx.restore(); }
+  if (dec === 'flame') { ctx.save(); ctx.strokeStyle = HOT(.9); ctx.lineWidth = big ? 1.8 : 1.3; line(ctx, [P(9.7, 1.95), P(9.0, 1.55), P(9.2, 1.8), P(8.5, 1.45), P(8.8, 1.85), P(8.2, 1.7), P(8.4, 2.0), P(8.2, 2.3), P(8.8, 2.15), P(8.5, 2.55), P(9.2, 2.2), P(9.0, 2.45), P(9.7, 2.05)]); ctx.restore(); }
+  if (dec === 'stars') { ctx.save(); ctx.fillStyle = G(.9); [3.2, 3.7, 4.2, 4.7].forEach(x => { const [cx, cy] = P(x, 2.65); ctx.beginPath(); for (let i = 0; i < 10; i++) { const a = -Math.PI / 2 + i * Math.PI / 5, r = (i % 2 ? 0.07 : 0.16) * s; ctx[i ? 'lineTo' : 'moveTo'](cx + Math.cos(a) * r, cy + Math.sin(a) * r); } ctx.fill(); }); ctx.restore(); }
+  if (S.up.nano) { [[3.0, 1.2], [6.0, 2.8], [7.4, 1.3]].forEach(([x, y]) => { const [cx, cy] = P(x, y), r = 0.09 * s; line(ctx, [[cx - r, cy], [cx + r, cy]]); line(ctx, [[cx, cy - r], [cx, cy + r]]); }); }
+  if (S.up.lance) { ctx.save(); ctx.strokeStyle = G(0.6 + 0.4 * Math.sin(now * 0.012)); line(ctx, [P(9.4, 2), P(10.9, 2)]); line(ctx, [P(10.3, 1.88), P(10.9, 2), P(10.3, 2.12)]); ctx.restore(); }
+  if (S.up.precog) { const [cx, cy] = P(6.9, 0.55); ctx.beginPath(); ctx.ellipse(cx, cy, 0.32 * s, 0.16 * s, 0, 0, Math.PI * 2); ctx.stroke(); ctx.fillStyle = G(); ctx.beginPath(); ctx.arc(cx + Math.sin(now * 0.002) * 0.12 * s, cy, 0.06 * s, 0, Math.PI * 2); ctx.fill(); }
   if (S.up.armor) {
     for (let x = 2.4; x < 8.0; x += 0.8) {
       const a = P(x, 0.98 - (x - 2.4) * 0.02), b = P(x + 0.65, 3.02 + (x - 2.4) * 0.02);
@@ -2954,17 +3117,22 @@ function startTraining(mode, tier) {
   S.correct = 0; S.total = 0; S.startT = null;
   const now = performance.now();
   if (!S.played.includes(mode) && !S.replayPending) S.played.push(mode);
-  S.tr = { replay: S.replayPending || null, mode, tier, t0: now, end: now + 60000, score: 0, hull: 3, done: false, last: -1e9, pool: MODES[mode].typing ? trainPool(tier) : [], cross: [16000, 13000, 10500][tier], gap: [3000, 2500, 2000][tier] };
+  const md = MODES[mode] || { typing: true };
+  S.tr = { replay: S.replayPending || null, mode, tier, t0: now, end: now + 60000, score: 0, hull: 3, done: false, last: -1e9, pool: md.typing ? trainPool(Math.max(tier, mode === 'code' ? 2 : 0)) : [], cross: [16000, 13000, 10500][tier], gap: [3000, 2500, 2000][tier] };
   S.phase = 'train';
   applySimLayout();
   if (mode === 'arcade') initArcade(tier);
+  if (mode === 'clinic') initClinic(tier);
+  if (mode === 'code') initCode();
   S.replayPending = null;
-  if (S.tr.replay) remark(hg('replayOn')); else remark(hg('simOn').replace('{m}', MODES[mode][S.lang][0]).replace('{t}', hg('tiers')[tier]));
+  if (mode === 'log') { /* startLog sets its own remark */ }
+  else if (S.tr.replay) remark(hg('replayOn')); else remark(hg('simOn').replace('{m}', MODES[mode][S.lang][0]).replace('{t}', hg('tiers')[tier]));
   renderAll();
 }
 function trainTick(now, dt) {
   const tr = S.tr; if (!tr || tr.done) return;
   if (tr.mode === 'arcade') { arcadeTick(now, dt); return; }
+  if (LINE_MODES.includes(tr.mode)) { if (tr.mode === 'code' && now > tr.end) endTraining(); return; }
   const W = view.w, H = view.h;
   if (tr.mode === 'range') {
     if (C.ships.length < 3 && now - tr.last > [1100, 950, 800][tr.tier]) {
@@ -3003,9 +3171,11 @@ function trainTick(now, dt) {
 function endTraining() {
   const tr = S.tr; if (!tr || tr.done) return;
   tr.done = true; C.ships = []; C.lock = null;
-  const th = MODES[tr.mode].th, sc = tr.mode === 'arcade' ? S.ar.score : tr.score;
+  const acc = S.total ? Math.round(S.correct / S.total * 100) : 100;
+  const th = MODES[tr.mode].th, sc = tr.mode === 'arcade' ? S.ar.score : tr.mode === 'clinic' ? acc : tr.score;
   const stars = sc >= th[2] ? 3 : sc >= th[1] ? 2 : sc >= th[0] ? 1 : 0;
-  const earned = Math.min(45, Math.round(sc * [0.5, 0.75, 1][tr.tier])) + stars * 3;
+  const earned = tr.mode === 'clinic' ? 6 + stars * 8 + tr.tier * 4 : Math.min(45, Math.round(sc * [0.5, 0.75, 1][tr.tier])) + stars * 3;
+  if (tr.mode === 'clinic' && S.miss && S.miss.keys) tr.focus.forEach(ch => { if (S.miss.keys[ch]) S.miss.keys[ch] = Math.floor(S.miss.keys[ch] / 2); });
   tr.stars = stars; tr.earned = earned; tr.final = sc;
   S.parts += earned;
   if (!S.train[tr.mode]) S.train[tr.mode] = [0, 0, 0];
@@ -3032,7 +3202,7 @@ const PT = {
 function ptaunt(text, now) {
   const A = S.ar; if (!A) return;
   A.taunt = { text: fmt(text), t0: now, said: 0 };
-  squelch();
+  squelch(); speak(A.taunt.text, 'vex');
 }
 function ptauntKey(key, now) {
   const A = S.ar; if (!A || A.endAt) return;
@@ -3062,9 +3232,10 @@ function endReplay() {
   const lines = (won ? [] : [hg('escapedOra')]).concat(S.afterPursuit || [LT().outro]);
   if (lvl === ACTS[1].from) lines.push(hg('inHangar'));
   S.afterPursuit = null;
-  say(lines, () => { S.phase = 'complete'; S.speaker = 'ora'; renderAll(); });
+  say(lines, enterComplete);
 }
 function leaveTraining() {
+  voStop();
   S.tr = null; S.ar = null; resetCombat();
   startLevel(S.returnLvl != null ? S.returnLvl : S.lvl);
 }
@@ -3130,20 +3301,20 @@ function arDrop(x, y, kind) { S.ar.drops.push({ x, y, kind: kind || AR_PW[(Math.
 function arPickup(now, kind) {
   const A = S.ar;
   if (kind === 'bomb') A.bombs = Math.min(3, A.bombs + 1);
-  else { A.pw = kind; A.pwUntil = now + 9000; }
+  else { A.pw = kind; A.pwDur = S.up.precog ? 18000 : 9000; A.pwUntil = now + A.pwDur; }
   banner(hg('pw')[kind]); sfx.recharge(); blip('square', 990, 1480, 0.12, 0.04, 0.08);
 }
-function arShipDmg(now, v, n) {
+function arShipDmg(now, v, n, quiet) {
   const A = S.ar, [x, y] = arPos(v);
   v.hp -= n; v.hit = 120;
-  if (v.hp > 0) { sfx.clang(); C.booms.push({ x: x + (Math.random() - .5) * 10, y, t: now, r: Math.random() * 0.3 }); return; }
+  if (v.hp > 0) { if (!quiet) sfx.clang(); C.booms.push({ x: x + (Math.random() - .5) * 10, y, t: now, r: Math.random() * 0.3 }); return; }
   v.alive = false; A.score += AR_PTS[v.type] + (v.dive ? 2 : 0);
-  C.booms.push({ x, y, t: now, r: Math.random(), big: v.type === 'cruiser' }); sfx.boom();
-  if (Math.random() < (v.type === 'cruiser' ? 0.35 : v.dive ? 0.2 : 0.06)) arDrop(x, y);
+  C.booms.push({ x, y, t: now, r: Math.random(), big: v.type === 'cruiser' }); if (!quiet) sfx.boom();
+  if (Math.random() < (v.type === 'cruiser' ? 0.35 : v.dive ? 0.2 : 0.06) * (S.up.precog ? 1.6 : 1)) arDrop(x, y);
 }
-function arBossDmg(now, n) {
+function arBossDmg(now, n, quiet) {
   const A = S.ar, B = A.boss;
-  B.hp = Math.max(0, B.hp - n); B.hit = 90; sfx.clang();
+  B.hp = Math.max(0, B.hp - n); B.hit = 90; if (!quiet) sfx.clang();
   C.booms.push({ x: B.x + (Math.random() - .5) * 90 * B.sc * A.k, y: B.y + (Math.random() - .5) * 30 * A.k, t: now, r: Math.random() * 0.4 });
   if (B.hp <= 0) {
     A.score += B.kind === 'flagship' ? 40 : 15;
@@ -3151,15 +3322,16 @@ function arBossDmg(now, n) {
     sfx.boom(); view.shake = 600;
     banner(B.kind === 'flagship' ? uw('flagshipDown') : hg('motherDown'));
     arDrop(B.x - 24, B.y, 'bomb'); arDrop(B.x + 24, B.y);
+    if (S.up.nano) A.lives++;
   }
 }
 function arcadeBomb(now) {
   const A = S.ar; if (!A || !A.bombs || A.endAt || (S.tr && S.tr.done)) return;
   A.bombs--; A.bombFx = now; A.eshots = [];
-  A.inv.forEach(v => { if (v.alive && arPos(v)[1] > 20) arShipDmg(now, v, 2); });
-  if (A.boss && A.boss.hp > 0) arBossDmg(now, 4);
-  view.shake = 500; sfx.boom();
-  if (AC && S.sound) noiseHit(master, AC.currentTime, 0.4, 0.12, 900);
+  A.inv.forEach(v => { if (v.alive && arPos(v)[1] > 20) arShipDmg(now, v, 2, true); });
+  if (A.boss && A.boss.hp > 0) arBossDmg(now, 4, true);
+  view.shake = 400;
+  if (AC && S.sound) { const t = AC.currentTime; vox(master, 'sine', 90, t, 0.45, 0.06, 0.005); noiseHit(master, t, 0.3, 0.035, 500); }
 }
 function arcadeTick(now, dt) {
   const A = S.ar, W = view.w, H = view.h;
@@ -3293,14 +3465,14 @@ function arcadeTick(now, dt) {
   A.shots = A.shots.filter(b => {
     if (b.y < 26 || b.y > H || b.x < 0 || b.x > W) return false;
     const BB = A.boss;
-    if (BB && BB.hp > 0 && Math.abs(BB.x - b.x) < 66 * BB.sc * A.k && Math.abs(BB.y - b.y) < 30 * BB.sc * A.k) { arBossDmg(now, b.homing ? 2 : 1); return false; }
+    if (BB && BB.hp > 0 && Math.abs(BB.x - b.x) < 66 * BB.sc * A.k && Math.abs(BB.y - b.y) < 30 * BB.sc * A.k) { arBossDmg(now, (b.homing ? 2 : 1) * (S.up.lance ? 2 : 1)); return false; }
     const hit = A.inv.find(v => {
       if (!v.alive || (b.hits && b.hits.has(v))) return false;
       const [x, y] = arPos(v), w = v.type === 'cruiser' ? 19 : 15;
       return Math.abs(x - b.x) < w * A.k && Math.abs(y - b.y) < 12 * A.k;
     });
     if (!hit) return true;
-    arShipDmg(now, hit, b.homing ? 2 : 1);
+    arShipDmg(now, hit, (b.homing ? 2 : 1) * (S.up.lance ? 2 : 1));
     if (S.up.flak && !b.homing) { (b.hits = b.hits || new Set()).add(hit); return true; }   // flak: shots pierce
     return false;
   });
@@ -3397,7 +3569,7 @@ function drawArcade(ctx, now) {
   if (A.pw) {
     const left = Math.max(0, A.pwUntil - now);
     const w = vtext(ctx, hg('pw')[A.pw], 26, hy - 22, 18, 'left', G());
-    ctx.strokeStyle = G(.5); ctx.strokeRect(36 + w, hy - 26, 60, 6); ctx.fillStyle = G(); ctx.fillRect(36 + w, hy - 26, 60 * left / 9000, 6);
+    ctx.strokeStyle = G(.5); ctx.strokeRect(36 + w, hy - 26, 60, 6); ctx.fillStyle = G(); ctx.fillRect(36 + w, hy - 26, 60 * left / (A.pwDur || 9000), 6);
   }
 }
 const pf = { cv: null, ctx: null, w: 0, h: 0 };
@@ -3486,6 +3658,7 @@ function simHeader(ctx, now) {
 }
 function trainTerminal(el, prompt, chips) {
   const tr = S.tr, m = MODES[tr.mode];
+  if (LINE_MODES.includes(tr.mode) && (!tr.done || tr.mode === 'log')) { lineTerminal(el, prompt); return; }
   if (tr.done) {
     const st = '★★★'.slice(0, tr.stars) + '☆☆☆'.slice(0, 3 - tr.stars);
     el.innerHTML = `<div class="done">
@@ -3533,6 +3706,7 @@ function openIntro() {
 }
 function cineType(text, speedMs, isOra) {
   clearInterval(CI.typer); CI.full = text; CI.ora = isOra; CI.typing = true;
+  if (isOra) speak(text, 'ora');
   const el = $('#cineText'); let i = 0;
   if (isOra) {
     const paint = () => { el.innerHTML = typedHtml(text, i, true); };
@@ -3654,9 +3828,15 @@ window.addEventListener('keydown', (e) => {
     if (e.code === 'Space' || e.key === 'Enter') { e.preventDefault(); if (e.repeat) return; initAudio(); introAdvance(); }
     return;
   }
+  if (S.popOpen) { if (e.code === 'Space' || e.key === 'Enter' || e.code === 'Escape') { e.preventDefault(); if (!e.repeat) closePopup(); } return; }
+  if (S.logsOpen) { if (e.code === 'Escape' || e.code === 'KeyL') { e.preventDefault(); closeLogs(); } return; }
   if (S.hangarOpen) { if (e.code === 'Escape' || e.code === 'KeyH') { e.preventDefault(); closeHangar(); } return; }
   if (S.phase === 'train' && S.tr) {
     if (e.code === 'Escape') { e.preventDefault(); if (S.tr.replay) endReplay(); else leaveTraining(); return; }
+    if (S.tr.done && S.tr.mode === 'log') {
+      if (e.code === 'Space' || e.key === 'Enter') { e.preventDefault(); if (!e.repeat) { leaveTraining(); openLogs(); } }
+      return;
+    }
     if (S.tr.done) {
       if (e.code === 'Space' || e.key === 'Enter') { e.preventDefault(); if (!e.repeat) { initAudio(); if (S.tr.replay) endReplay(); else startTraining(S.tr.mode, S.tr.tier); } }
       else if (e.code === 'KeyH') { e.preventDefault(); openHangar(); }
@@ -3679,6 +3859,7 @@ window.addEventListener('keydown', (e) => {
   }
   if (S.phase === 'dialogue' || S.phase === 'complete' || S.phase === 'ending') {
     if (S.phase === 'complete' && e.code === 'KeyH') { e.preventDefault(); openHangar(); return; }
+    if (S.phase === 'complete' && e.code === 'KeyL') { e.preventDefault(); openLogs(); return; }
     if (e.code === 'Space' || e.key === 'Enter') {
       e.preventDefault();
       if (e.repeat) return;
@@ -3692,6 +3873,7 @@ window.addEventListener('keydown', (e) => {
   if (KEY[e.code] || e.code === 'Space') e.preventDefault();
   if (switching()) return;   // station switch card is showing
 
+  if (isLineMode()) { if (!S.tr.done) lineKey(e, kEl); return; }
   if (S.phase === 'combat' || S.phase === 'train') {
     if (e.code === 'Space') return;   // habit-space between words is harmless in combat
     const now = performance.now();
@@ -3707,7 +3889,7 @@ window.addEventListener('keydown', (e) => {
     } else {
       sfx.err(); S.cadence *= 0.5;
       if (C.heat > 0.3) sfx.vent();
-      C.heat = 0; C.over = false; C.streak = 0;
+      C.heat = 0; C.over = false; if (!S.up.nano) C.streak = 0;
       const tgt = alive(C.lock) ? C.lock : recommended();
       if (tgt) noteMiss(tgt.word, tgt.word[tgt.typed]);
       S.msg = onlineKeys().has(e.code) || !KEY[e.code] ? t('wrongKey') : t('offKey');
@@ -3776,13 +3958,397 @@ $('#act1').onclick = (e) => { e.currentTarget.blur(); initAudio(); startLevel(fi
 $('#act2').onclick = (e) => { e.currentTarget.blur(); initAudio(); startLevel(firstOpen(ACTS[1].from, ACTS[1].to)); };
 $('#hangarBtn').onclick = (e) => { e.currentTarget.blur(); initAudio(); if (S.phase === 'train' && S.tr && !S.tr.done) return; S.hangarOpen ? closeHangar() : openHangar(); };
 $('#hgCloseBtn').onclick = (e) => { e.currentTarget.blur(); closeHangar(); };
+$('#logsBtn').onclick = (e) => { e.currentTarget.blur(); initAudio(); if (S.phase === 'train' && S.tr && !S.tr.done) return; S.logsOpen ? closeLogs() : openLogs(); };
+$('#lgCloseBtn').onclick = (e) => { e.currentTarget.blur(); closeLogs(); };
+$('#voiceBtn').onclick = (e) => { e.currentTarget.blur(); initAudio(); S.voice = !S.voice; if (!S.voice) voStop(); save(); renderChrome(); };
+$('#popup').onclick = () => closePopup();
 $('#musicBtn').onclick = (e) => { e.currentTarget.blur(); initAudio(); S.music = !S.music; save(); renderChrome(); };
 $('#kbBtn').onclick = (e) => { e.currentTarget.blur(); S.kb = !S.kb; save(); renderChrome(); requestAnimationFrame(resize); };
 $('#handsBtn').onclick = (e) => { e.currentTarget.blur(); S.hands = !S.hands; save(); renderChrome(); renderKeyboard(); };
 $('#soundBtn').onclick = (e) => {
   e.currentTarget.blur(); initAudio();
-  S.sound = !S.sound; if (master) master.gain.value = S.sound ? 0.9 : 0; renderChrome();
+  S.sound = !S.sound; if (master) master.gain.value = S.sound ? 0.9 : 0; if (!S.sound) voStop(); renderChrome();
 };
+
+/* ======================================================================
+   PHASE 2: voice-over, pop-ups, ship's logs, line-typing programs
+   ====================================================================== */
+const P2 = {
+  en: { logs: 'LOGS', logsTitle: "SHIP'S LOGS", logsSub: 'Recovered crew logs. Type a damaged log to restore it.', damaged: 'Damaged · type to restore', restore: 'Restore', retype: 'Type again',
+        lockedAfter: 'Recovered after', restored: 'LOG RESTORED', logReward: 'parts for restoring it', back: 'back to the logs', newT: 'NEW',
+        voiceOn: 'VO', voiceOff: 'VO', musicOn: '♪', musicOff: '♪', soundOn: 'SFX', soundOff: 'SFX',
+        popHint: 'Space to continue', unlocked: 'UNLOCKED', newProgram: 'NEW SIMULATOR PROGRAM',
+        popHangar: "I've powered up the hangar, {name}. Look up top, the new button. Spend the parts ⚙ you earn on ship upgrades and paint, and practise in the simulator whenever you like.",
+        popLogs: "{name}, while the systems warmed up I found the crew's logs. They are badly damaged. Type them out and I can restore them. Maybe we finally learn where everyone went.",
+        popMode: 'New program in the Hangar simulator: {m}. {d}',
+        logTyping: 'Restoring log', autoNote: 'Grey letters fill in by themselves until you learn those keys.',
+        focus: 'Focus keys', glyphKey: 'Glyph key', decoded: 'decoded', acc: 'Accuracy', lineOf: 'line {a} of {b}' },
+  uk: { logs: 'ЖУРНАЛИ', logsTitle: 'БОРТОВІ ЖУРНАЛИ', logsSub: 'Знайдені записи екіпажу. Надрукуй пошкоджений запис, щоб відновити його.', damaged: 'Пошкоджено · надрукуй, щоб відновити', restore: 'Відновити', retype: 'Надрукувати знову',
+        lockedAfter: 'Відкриється після', restored: 'ЗАПИС ВІДНОВЛЕНО', logReward: 'деталей за відновлення', back: 'назад до журналів', newT: 'НОВЕ',
+        voiceOn: 'VO', voiceOff: 'VO', musicOn: '♪', musicOff: '♪', soundOn: 'SFX', soundOff: 'SFX',
+        popHint: 'Пробіл — далі', unlocked: 'ВІДКРИТО', newProgram: 'НОВА ПРОГРАМА СИМУЛЯТОРА',
+        popHangar: 'Я увімкнула ангар, {name}. Глянь угору — там нова кнопка. Витрачай зароблені деталі ⚙ на покращення і фарбу та тренуйся в симуляторі, коли захочеш.',
+        popLogs: '{name}, поки системи прогрівались, я знайшла журнали екіпажу. Вони сильно пошкоджені. Надрукуй їх, і я зможу їх відновити. Може, нарешті дізнаємось, куди всі зникли.',
+        popMode: 'Нова програма в симуляторі ангара: {m}. {d}',
+        logTyping: 'Відновлення запису', autoNote: 'Сірі літери заповнюються самі, поки ти не вивчиш ці клавіші.',
+        focus: 'Слабкі клавіші', glyphKey: 'Ключ гліфів', decoded: 'розшифровано', acc: 'Точність', lineOf: 'рядок {a} з {b}' }
+};
+const p2 = (k) => P2[S.lang][k];
+
+/* ---------- the crew mystery: one log per sector/system, from level 1 on ---------- */
+const LOGS = [
+  { lvl: 1, who: { en: 'Capt. Imani Rhee', uk: 'Капітан Імані Рі' }, day: 212,
+    en: { t: 'A song in the static', x: 'Day 212. The survey of Kepler-ORA 7 goes well. The crew is bored. Cadet Bo found a strange signal today. It sounds like a song.' },
+    uk: { t: 'Пісня в шумі', x: 'День 212. Огляд Кеплер-ОРА 7 іде добре. Екіпаж нудьгує. Кадет Бо сьогодні знайшов дивний сигнал. Він звучить як пісня.' } },
+  { lvl: 2, who: { en: 'Eng. Tomas Okafor', uk: 'Інженер Томас Окафор' }, day: 215,
+    en: { t: 'It knows my name', x: 'The song gets louder at night. ORA says it is just noise from the star. Then why does it repeat my name?' },
+    uk: { t: 'Воно знає моє імʼя', x: 'Уночі пісня гучнішає. ОРА каже, що це просто шум зірки. Тоді чому воно повторює моє імʼя?' } },
+  { lvl: 3, who: { en: 'Nav. Lin Park', uk: 'Штурман Лін Парк' }, day: 219,
+    en: { t: 'Missing stars', x: 'The charts moved. Three stars are gone from the map. I checked twice. Something big sits between us and home.' },
+    uk: { t: 'Зниклі зорі', x: 'Карти зсунулись. Три зорі зникли з мапи. Я перевірила двічі. Щось велике стоїть між нами і домом.' } },
+  { lvl: 4, who: { en: 'Dr. Sasha Vey', uk: 'Лікарка Саша Вей' }, day: 223,
+    en: { t: 'Humming', x: 'Bo has not slept in four days. He hums the song while he works. Now Tomas hums it too. I am keeping a close eye on them both.' },
+    uk: { t: 'Наспівування', x: 'Бо не спить уже чотири дні. Він наспівує ту пісню, коли працює. Тепер і Томас її наспівує. Я пильно стежу за обома.' } },
+  { lvl: 5, who: { en: 'Capt. Imani Rhee', uk: 'Капітан Імані Рі' }, day: 226,
+    en: { t: 'The Admiral', x: 'The signal has a source: a ship with no lights, bigger than a moon. It calls itself the Admiral. It asked us to come aboard.' },
+    uk: { t: 'Адмірал', x: 'У сигналу є джерело: корабель без вогнів, більший за місяць. Він називає себе Адміралом. Він запросив нас на борт.' } },
+  { lvl: 6, who: { en: 'Cadet Bo', uk: 'Кадет Бо' }, day: 227,
+    en: { t: 'So warm', x: 'the admiral says we will never be cold again. the captain says no. but the song is so warm. i think i will go.' },
+    uk: { t: 'Так тепло', x: 'адмірал каже, що нам більше ніколи не буде холодно. капітан каже ні. але пісня така тепла. мабуть, я піду.' } },
+  { lvl: 7, who: { en: 'Capt. Imani Rhee', uk: 'Капітан Імані Рі' }, day: 228,
+    en: { t: 'Forgive me, ORA', x: 'Bo took the shuttle. Tomas and Lin went after him. I am putting ORA to sleep so the song cannot reach her. Forgive me, ORA.' },
+    uk: { t: 'Пробач, ОРА', x: 'Бо забрав шатл. Томас і Лін полетіли за ним. Я присиплю ОРА, щоб пісня не дісталася до неї. Пробач мені, ОРА.' } },
+  { lvl: 8, who: { en: 'Capt. Imani Rhee', uk: 'Капітан Імані Рі' }, day: 229,
+    en: { t: 'To whoever wakes her', x: 'If you read this, you woke her. Good. Do not trust the song. Find the Admiral, and bring my crew home.' },
+    uk: { t: 'Тому, хто її розбудить', x: 'Якщо ти це читаєш, ти її розбудив. Добре. Не вір пісні. Знайди Адмірала і поверни мій екіпаж додому.' } }
+];
+const logOpen = (i) => (S.done[S.lang][LOGS[i].lvl] || 0) > 0;
+const anyLog = () => LOGS.some((_, i) => logOpen(i));
+const logsNews = () => LOGS.some((_, i) => logOpen(i) && !S.logsRead.includes(i));
+
+/* ---------- voice-over (the browser's built-in speech) ---------- */
+const VO = { voices: [] };
+function voLoad() { try { VO.voices = speechSynthesis.getVoices() || []; } catch (e) {} }
+if ('speechSynthesis' in window) { voLoad(); try { speechSynthesis.onvoiceschanged = voLoad; } catch (e) {} }
+function voPick(who) {
+  const lang = S.lang === 'uk' ? 'uk' : 'en';
+  const vs = VO.voices.filter(v => (v.lang || '').toLowerCase().startsWith(lang));
+  if (!vs.length) return null;
+  const prefs = who === 'ora' ? ['Samantha', 'Google UK English Female', 'Aria', 'Jenny', 'Serena', 'Karen', 'Moira', 'Tessa', 'Female', 'Lesya']
+    : who === 'vex' ? ['Daniel', 'Google UK English Male', 'Guy', 'Fred', 'Ralph', 'Male', 'Lesya']
+    : ['Alex', 'Google US English', 'Tom', 'Arthur', 'Rishi', 'Lesya'];
+  for (const p of prefs) { const v = vs.find(v => v.name.includes(p)); if (v) return v; }
+  return vs[0];
+}
+function speak(text, who) {
+  if (!('speechSynthesis' in window) || !S.sound || !S.voice) return;
+  try {
+    speechSynthesis.cancel();
+    const clean = String(text).replace(/[\[\]{}#%&@$*▓▒░<>|=+_~]/g, ' ').replace(/\.{3}/g, ', ').replace(/\s+/g, ' ').trim();
+    if (!clean || !/\p{L}/u.test(clean)) return;
+    const u = new SpeechSynthesisUtterance(clean);
+    u.lang = S.lang === 'uk' ? 'uk-UA' : 'en-GB';
+    const v = voPick(who); if (v) u.voice = v;
+    const prm = { ora: [1.02, 1.2], vex: [1.08, 0.55], unknown: [0.78, 0.25], crew: [0.96, 0.95] }[who] || [1, 1];
+    u.rate = prm[0]; u.pitch = prm[1]; u.volume = 0.95;
+    speechSynthesis.speak(u);
+  } catch (e) {}
+}
+function voStop() { try { if ('speechSynthesis' in window) speechSynthesis.cancel(); } catch (e) {} }
+
+/* ---------- pop-ups: ORA steps out of the console for the important stuff ---------- */
+const popFace = { cv: null, ctx: null, w: 0, h: 0 };
+const POPQ = [];
+function popup(item) { POPQ.push(item); if (!S.popOpen) nextPopup(); }
+function nextPopup() {
+  const it = POPQ.shift(); if (!it) return;
+  S.popOpen = it;
+  const el = $('#popup'); el.hidden = false; el.classList.remove('gone');
+  $('#popEyebrow').textContent = it.eyebrow || p2('unlocked');
+  $('#popTitle').textContent = it.title;
+  $('#popWho').textContent = it.who === 'vex' ? (S.lang === 'uk' ? 'ГАРБУЗ' : 'PUMPKIN') : (S.lang === 'uk' ? 'ОРА · ШІ КОРАБЛЯ' : 'ORA · SHIP AI');
+  $('#popHint').innerHTML = `<kbd>${esc(t('spaceKey'))}</kbd> ${esc(p2('popHint').replace(/^\S+\s/, ''))}`;
+  const cv = $('#popFace'), dpr = Math.min(2, window.devicePixelRatio || 1);
+  popFace.cv = cv; popFace.ctx = cv.getContext('2d'); popFace.w = 132; popFace.h = 132;
+  cv.width = 132 * dpr; cv.height = 132 * dpr; popFace.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+  const text = fmt(it.text); let i = 0;
+  clearInterval(S.popTyper); it.full = text; it.typing = true;
+  const out = $('#popText');
+  out.innerHTML = '';
+  S.popTyper = setInterval(() => {
+    i++; out.innerHTML = esc(text.slice(0, i)) + '<span class="caret">█</span>';
+    if (i % 2 === 0) sfx.talk();
+    if (i >= text.length) { clearInterval(S.popTyper); it.typing = false; out.textContent = text; }
+  }, 22);
+  sfx.card(); speak(text, it.who || 'ora');
+}
+function closePopup() {
+  const it = S.popOpen; if (!it) return;
+  if (it.typing) { clearInterval(S.popTyper); it.typing = false; $('#popText').textContent = it.full; return; }
+  S.popOpen = null; voStop();
+  const el = $('#popup'); el.classList.add('gone'); setTimeout(() => { if (!S.popOpen) el.hidden = true; }, 260);
+  if (it.reveal) it.reveal();
+  renderChrome();
+  if (it.target) setTimeout(() => spotlight(it.target), 60);
+  if (it.then) it.then();
+  setTimeout(nextPopup, 380);
+}
+function spotlight(sel) {
+  const el = $(sel); if (!el || el.hidden) return;
+  el.classList.remove('spot'); void el.offsetWidth; el.classList.add('spot'); sfx.unlock();
+  setTimeout(() => el.classList.remove('spot'), 7200);
+}
+/* everything that is unlocked but has not been announced yet */
+function flushUnlocks() {
+  const mark = (k) => { if (!S.pops.includes(k)) { S.pops.push(k); save(); } };
+  if (modeOpen('range') && !S.pops.includes('hangar')) popup({ title: hg('title'), text: p2('popHangar'), target: '#hangarBtn', reveal: () => mark('hangar') });
+  if (anyLog() && !S.pops.includes('logs')) popup({ title: p2('logsTitle'), text: p2('popLogs'), target: '#logsBtn', reveal: () => mark('logs') });
+  Object.keys(MODES).sort((a, b) => MODES[a].need - MODES[b].need).forEach(m => {
+    if (m === 'range' || !modeOpen(m) || S.pops.includes('m:' + m)) return;
+    popup({ eyebrow: p2('newProgram'), title: MODES[m][S.lang][0], text: p2('popMode').replace('{m}', MODES[m][S.lang][0]).replace('{d}', MODES[m][S.lang][1]), target: '#hangarBtn', reveal: () => mark('m:' + m) });
+  });
+}
+function enterComplete() { S.phase = 'complete'; S.speaker = 'ora'; renderAll(); flushUnlocks(); }
+
+/* ---------- ship's logs panel ---------- */
+function openLogs() {
+  if (!S.pops.includes('logs') || S.phase === 'intro') return;
+  $('#logsBtn').classList.remove('spot');
+  closeHangar(); S.logsOpen = true;
+  const el = $('#logs'); el.hidden = false; el.classList.remove('gone');
+  renderLogs(); sfx.card(); renderChrome();
+}
+function closeLogs() {
+  S.logsOpen = false; voStop();
+  const el = $('#logs'); el.classList.add('gone');
+  setTimeout(() => { if (!S.logsOpen) el.hidden = true; }, 300);
+  renderChrome();
+}
+function renderLogs() {
+  $('#lgTitle').textContent = p2('logsTitle');
+  $('#lgSub').textContent = p2('logsSub');
+  $('#lgClose').textContent = hg('close');
+  $('#lgList').innerHTML = LOGS.map((lg, i) => {
+    const open = logOpen(i), read = S.logsRead.includes(i), L2 = lg[S.lang];
+    const head = `<div class="lg-meta"><span>${esc(lg.who[S.lang])}</span><span>${S.lang === 'uk' ? 'ДЕНЬ' : 'DAY'} ${lg.day}</span></div>`;
+    if (!open) return `<div class="lg locked">${head}<b>▒▒▒▒▒▒ ▒▒▒▒</b><small>🔒 ${esc(p2('lockedAfter'))}: ${esc(LEVELS[lg.lvl].sys[S.lang])}</small></div>`;
+    if (!read) return `<div class="lg damaged">${head}<b>${esc(L2.t)}</b><p class="scr">${esc(scramble(L2.x, 0.55))}</p><button class="btn lg-go" data-i="${i}">▶ ${esc(p2('restore'))}</button><i class="badge">${esc(p2('newT'))}</i></div>`;
+    return `<div class="lg read">${head}<b>${esc(L2.t)}</b><p>${esc(L2.x)}</p><div class="lg-acts"><button class="btn mini lg-play" data-i="${i}">🔊</button><button class="btn mini lg-go" data-i="${i}">${esc(p2('retype'))}</button></div></div>`;
+  }).join('');
+  $('#lgList').querySelectorAll('.lg-go').forEach(b => b.onclick = () => { b.blur(); startLog(+b.dataset.i); });
+  $('#lgList').querySelectorAll('.lg-play').forEach(b => b.onclick = () => { b.blur(); initAudio(); speak(LOGS[+b.dataset.i][S.lang].x, 'crew'); });
+}
+function scramble(text, k) { return [...text].map(c => c !== ' ' && Math.random() < k ? NOISE[(Math.random() * NOISE.length) | 0] : c).join(''); }
+
+/* ---------- line-typing programs: log restore, clinic, code breaker ---------- */
+const LINE_MODES = ['log', 'clinic', 'code'];
+const isLineMode = () => S.phase === 'train' && S.tr && LINE_MODES.includes(S.tr.mode);
+function splitLines(text, max) {
+  const out = []; let cur = '';
+  text.split(' ').forEach(w => { const t2 = cur ? cur + ' ' + w : w; if (t2.length > max && cur) { out.push(cur); cur = w; } else cur = t2; });
+  if (cur) out.push(cur); return out;
+}
+function canType(c) {
+  if (c === ' ') return learnedCodes().has('Space');
+  const code = codeOf(c.toLowerCase());
+  return !!code && learnedCodes().has(code);
+}
+function startLog(i) {
+  closeLogs();
+  startTraining('log', 0);
+  const tr = S.tr; tr.log = i;
+  const lines = splitLines(LOGS[i][S.lang].x, 46);
+  tr.lines = lines; tr.li = 0; tr.ch = 0;
+  tr.auto = lines.map(l => [...l].map(c => !canType(c)));
+  skipAuto();
+  remark(p2('autoNote'));
+  renderAll();
+}
+function weakKeys() {
+  const codes = [...learnedCodes()].filter(c => c !== 'Space');
+  const letters = codes.map(c => charOf(c)).filter(Boolean);
+  const miss = (S.miss && S.miss.keys) || {};
+  const ranked = letters.slice().sort((a, b) => (miss[b] || 0) - (miss[a] || 0));
+  const top = ranked.filter(ch => (miss[ch] || 0) > 0).slice(0, 3);
+  while (top.length < 3 && ranked.length > top.length) { const c = ranked[(Math.random() * ranked.length) | 0]; if (!top.includes(c)) top.push(c); }
+  return { top, letters };
+}
+function initClinic(tier) {
+  const tr = S.tr, { top, letters } = weakKeys();
+  const pick = (a) => a[(Math.random() * a.length) | 0];
+  const mix = () => Math.random() < 0.65 ? pick(top) : pick(letters);
+  const n = [5, 7, 9][tier], lines = [];
+  lines.push(top.map(c => c.repeat(3)).join(' '));
+  for (let i = 1; i < n; i++) lines.push(Array.from({ length: 5 }, () => Array.from({ length: 2 + ((Math.random() * 3) | 0) }, mix).join('')).join(' '));
+  tr.lines = lines; tr.li = 0; tr.ch = 0; tr.auto = lines.map(l => [...l].map(() => false));
+  tr.focus = top; tr.heat = Object.assign({}, (S.miss && S.miss.keys) || {});
+}
+const GLYPHS = ['◆', '▲', '●', '■', '★', '◇', '△', '○', '□', '☆', '♦', '♣', '♠', '♥', '⊕', '⊗', '⌂', '◐', '◑', '▼', '▽', '◎', '✚', '✖', '⬢', '⬡', '❖', '✦', '✧', '♪', '☾', '☀', '⚑'];
+function shuffleCode() {
+  const tr = S.tr, letters = [...learnedCodes()].filter(c => c !== 'Space').map(c => charOf(c)).filter(ch => ch && /\p{L}/u.test(ch));
+  const g = GLYPHS.slice().sort(() => Math.random() - 0.5);
+  tr.map = {}; letters.forEach((ch, i) => { tr.map[ch] = g[i % g.length]; });
+  tr.letters = letters;
+}
+function nextCodeWord() {
+  const tr = S.tr;
+  if (!tr.map || tr.since >= [3, 2, 1][tr.tier]) { shuffleCode(); tr.since = 0; tr.shuffled = performance.now(); }
+  let w = poolWord(new Set()); if (!w) w = 'fjdk';
+  tr.word = w; tr.lines = [w]; tr.li = 0; tr.ch = 0; tr.auto = [[...w].map(() => false)];
+}
+function initCode() { const tr = S.tr; tr.since = 99; tr.solved = 0; nextCodeWord(); }
+function skipAuto() {
+  const tr = S.tr; if (!tr.lines) return;
+  while (tr.li < tr.lines.length && tr.ch < tr.lines[tr.li].length && tr.auto[tr.li][tr.ch]) {
+    tr.ch++;
+    if (tr.ch >= tr.lines[tr.li].length) { tr.li++; tr.ch = 0; }
+  }
+}
+function lineExpected() {
+  const tr = S.tr; if (!tr || !tr.lines || tr.li >= tr.lines.length) return null;
+  const c = tr.lines[tr.li][tr.ch]; return c == null ? null : c.toLowerCase();
+}
+function lineAdvance(now) {
+  const tr = S.tr;
+  tr.ch++;
+  if (tr.mode === 'code') {
+    if (tr.ch >= tr.word.length) { tr.score++; tr.solved++; tr.since++; sfx.reveal(); tr.flash = performance.now(); tr.last = tr.word; nextCodeWord(); }
+    return;
+  }
+  if (tr.ch >= tr.lines[tr.li].length) {
+    tr.li++; tr.ch = 0; sfx.weld();
+  }
+  skipAuto();
+  if (tr.li >= tr.lines.length) { if (tr.mode === 'log') logDone(); else endTraining(); }
+}
+function lineKey(e, kEl) {
+  const exp = lineExpected(); if (exp == null) return;
+  const ok = charOf(e.code) === exp || (e.key && e.key.toLowerCase() === exp);
+  const now = performance.now(); if (!S.startT) S.startT = now; S.total++;
+  if (ok) {
+    S.correct++; S.msg = '';
+    const dt = now - S.lastKey; S.lastKey = now;
+    S.cadence = S.cadence * 0.65 + (dt < 1500 ? Math.min(1.6, (1000 / dt) / 4) : 0.15) * 0.35;
+    sfx.key(); lineAdvance(now);
+  } else {
+    sfx.err(); S.cadence *= 0.5; noteMiss(null, exp);
+    S.msg = onlineKeys().has(e.code) || !KEY[e.code] ? t('wrongKey') : t('offKey');
+    if (kEl) { kEl.classList.add('wrong'); setTimeout(() => kEl.classList.remove('wrong'), 220); }
+  }
+  renderTerminal(); renderKeyboard(); renderStats();
+  if (!ok) shakeLine();
+}
+function logDone() {
+  const tr = S.tr; if (!tr || tr.done) return;
+  tr.done = true;
+  const first = !S.logsRead.includes(tr.log);
+  tr.earned = first ? 15 : 0;
+  if (first) { S.logsRead.push(tr.log); S.parts += 15; }
+  save(); banner(p2('restored'), false); fanfare(false);
+  setTimeout(() => { if (S.tr && S.tr.done && S.tr.mode === 'log') speak(LOGS[tr.log][S.lang].x, 'crew'); }, 900);
+  renderAll();
+}
+function lineTerminal(el, prompt) {
+  const tr = S.tr;
+  if (!tr.lines) { el.innerHTML = ''; return; }
+  if (tr.done && tr.mode === 'log') {
+    const lg = LOGS[tr.log];
+    el.innerHTML = `<div class="done log-done"><h3>${esc(p2('restored'))} · ${esc(lg[S.lang].t.toUpperCase())}</h3>
+      <p class="log-full">“${esc(lg[S.lang].x)}” <span>— ${esc(lg.who[S.lang])}</span></p>
+      <div class="row">${tr.earned ? `<span class="label">${esc(hg('earned'))}<b>+${tr.earned} ⚙</b></span>` : ''}</div>
+      <div class="waiting"><kbd>${esc(t('spaceKey'))}</kbd> ${esc(p2('back'))} &nbsp; <kbd>Esc</kbd> ${esc(hg('back'))}</div></div>`;
+    return;
+  }
+  const line = tr.lines[Math.min(tr.li, tr.lines.length - 1)] || '', auto = tr.auto[Math.min(tr.li, tr.lines.length - 1)] || [];
+  const exp = lineExpected(), curCode = exp ? codeOf(exp) : null;
+  const curColor = curCode && KEY[curCode] ? FINGER_COLOR[KEY[curCode].finger] : 'var(--live)';
+  let label, hint, prog;
+  if (tr.mode === 'log') { label = `${p2('logTyping')} · ${LOGS[tr.log][S.lang].t}`; hint = p2('lineOf').replace('{a}', Math.min(tr.li + 1, tr.lines.length)).replace('{b}', tr.lines.length); prog = (tr.li + tr.ch / Math.max(1, line.length)) / tr.lines.length; }
+  else if (tr.mode === 'clinic') { label = `${MODES.clinic[S.lang][0]} · ${hg('tiers')[tr.tier]}`; hint = `${p2('focus')}: ${tr.focus.join(' ').toUpperCase()}`; prog = (tr.li + tr.ch / Math.max(1, line.length)) / tr.lines.length; }
+  else { label = `${MODES.code[S.lang][0]} · ${hg('tiers')[tr.tier]}`; hint = `${tr.score} ${p2('decoded')}`; prog = Math.max(0, (tr.end - performance.now()) / 60000); }
+  const chars = [...line].map((c, i) => {
+    const shown = tr.mode === 'code' && i >= tr.ch ? (tr.map[c] || c) : (c === ' ' ? '&nbsp;' : esc(c));
+    const cls = i < tr.ch ? (auto[i] ? 'c auto' : 'c ok') : i === tr.ch ? 'c cur' : (auto[i] ? 'c auto todo' : 'c');
+    return `<span class="${cls}${tr.mode === 'code' && i >= tr.ch ? ' glyph' : ''}">${shown}</span>`;
+  }).join('');
+  el.innerHTML = `
+    <div class="term-head"><span class="label kind">${esc(label)}</span><span class="label">${esc(hint)}</span></div>
+    <div class="progress"><i style="width:${(prog * 100).toFixed(1)}%"></i></div>
+    <div class="chips"></div>
+    <div class="term-line" id="termLine" style="--cur:${curColor}"><span class="prompt">${esc(prompt)}</span>${chars}</div>
+    ${footHtml()}`;
+}
+function drawLineMode(ctx, now) {
+  const tr = S.tr, W = view.w, H = view.h;
+  if (!tr.lines) return;
+  view.stars.forEach(st => { ctx.fillStyle = G(0.15 + 0.2 * st.z / 1.8); ctx.fillRect(st.x, st.y, st.z, st.z); });
+  if (tr.mode === 'log') {
+    const lg = LOGS[tr.log], L2 = lg[S.lang];
+    header(ctx, 'LOG', [[S.lang === 'uk' ? 'Автор' : 'Author', lg.who[S.lang]], [S.lang === 'uk' ? 'День' : 'Day', String(lg.day)]]);
+    // tape reels
+    const spin = now * (0.001 + S.cadence * 0.004), ry = 64 + Math.min(40, H * 0.06), rr = Math.min(34, H * 0.07);
+    [W * 0.42, W * 0.58].forEach((rx, k) => {
+      ctx.strokeStyle = G(.8); ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(rx, ry, rr, 0, Math.PI * 2); ctx.stroke();
+      ctx.beginPath(); ctx.arc(rx, ry, 8, 0, Math.PI * 2); ctx.stroke();
+      for (let i = 0; i < 3; i++) { const a = spin * (k ? 1 : 1.2) + i * Math.PI * 2 / 3; line(ctx, [[rx + Math.cos(a) * 10, ry + Math.sin(a) * 10], [rx + Math.cos(a) * (rr - 4), ry + Math.sin(a) * (rr - 4)]]); }
+    });
+    ctx.strokeStyle = G(.4); line(ctx, [[W * 0.42, ry + rr], [W * 0.5, ry + rr + 10], [W * 0.58, ry + rr]]);
+    vtext(ctx, L2.t.toUpperCase(), W / 2, ry + rr + 34, 24, 'center', G());
+    // the log text: restored part is clean, the rest is static
+    let done = 0; for (let i = 0; i < tr.li; i++) done += tr.lines[i].length + 1; done += tr.done ? 1e9 : tr.ch;
+    const full = L2.x, y0 = ry + rr + 70, avail = H - 46 - y0;
+    let size = Math.max(16, Math.min(28, W / 40)), rows;
+    for (;;) { ctx.font = `${size}px ${MONO}`; rows = wrapText(ctx, full, W * 0.76); if (rows.length * size * 1.3 <= avail || size <= 16) break; size -= 1; }
+    let pos = 0, y = y0;
+    rows.forEach(r => {
+      let x = W * 0.12;
+      [...r].forEach(c => {
+        const ok = pos < done, txt = ok || c === ' ' ? c : (Math.random() < 0.85 ? NOISE[(Math.random() * NOISE.length) | 0] : c);
+        vtext(ctx, txt, x, y, size, 'left', ok ? G() : G(0.22 + Math.random() * 0.15)); x += ctx.measureText(c).width; pos++;
+      });
+      pos++; y += size * 1.3;
+    });
+  } else if (tr.mode === 'clinic') {
+    const acc = S.total ? Math.round(S.correct / S.total * 100) : 100;
+    header(ctx, 'SIM', [[p2('acc'), acc + '%', acc < 85], [p2('focus'), tr.focus.join(' ').toUpperCase()]]);
+    const rows = ROWS.slice(1, 4).filter(row => row.some(([code]) => learnedCodes().has(code))), on = learnedCodes(), maxM = Math.max(1, ...Object.values(tr.heat || {}));
+    const kw = Math.min(64, (W - 120) / 12, (H - 150) / 3.6), kh = kw * 0.9, top = Math.max(100, H * 0.26);
+    vtext(ctx, S.lang === 'uk' ? 'КАРТА ПОМИЛОК' : 'MISS MAP', W / 2, top - 18, 20, 'center', G(.7));
+    rows.forEach((row, r) => {
+      const keys = row.filter(([code]) => KEY[code] && /^Key|Semicolon/.test(code));
+      const x0 = W / 2 - (keys.length * (kw + 6)) / 2 + r * kw * 0.3;
+      keys.forEach(([code], i) => {
+        const ch = charOf(code), x = x0 + i * (kw + 6), y = top + r * (kh + 8), m = (tr.heat || {})[ch] || 0, isF = tr.focus.includes(ch), lit = on.has(code);
+        ctx.fillStyle = lit ? `rgba(255,90,82,${0.08 + 0.6 * m / maxM})` : 'rgba(255,255,255,.02)'; ctx.fillRect(x, y, kw, kh);
+        ctx.strokeStyle = isF ? HOT(0.6 + 0.4 * Math.sin(now * 0.008)) : G(lit ? .45 : .1); ctx.lineWidth = isF ? 2.5 : 1; ctx.strokeRect(x, y, kw, kh);
+        vtext(ctx, (ch || '').toUpperCase(), x + kw / 2, y + kh / 2 + 6, 24, 'center', lit ? G() : G(.2));
+        if (m && lit) vtext(ctx, String(m), x + kw - 6, y + 14, 14, 'right', HOT(.9));
+      });
+    });
+  } else {
+    const left = Math.max(0, Math.ceil((tr.end - now) / 1000));
+    header(ctx, 'SIM', [[hg('time'), `${left}s`, left <= 10], [p2('decoded'), String(tr.score)], [hg('best'), String(S.best.code || 0)]]);
+    // glyph key
+    const ls = tr.letters || [], n = ls.length, cw2 = Math.min(56, (W - 80) / Math.max(1, Math.ceil(n / 2))), top = 66;
+    const fresh = now - (tr.shuffled || 0) < 700;
+    vtext(ctx, p2('glyphKey').toUpperCase() + (fresh ? (S.lang === 'uk' ? ' · ПЕРЕМІШАНО' : ' · RESHUFFLED') : ''), W / 2, top, 18, 'center', fresh ? HOT() : G(.7));
+    ls.forEach((ch, i) => {
+      const row = i < Math.ceil(n / 2) ? 0 : 1, col = row ? i - Math.ceil(n / 2) : i, cnt = row ? n - Math.ceil(n / 2) : Math.ceil(n / 2);
+      const x = W / 2 - cnt * cw2 / 2 + col * cw2 + cw2 / 2, y = top + 18 + row * 70;
+      ctx.strokeStyle = G(.3); ctx.lineWidth = 1; ctx.strokeRect(x - cw2 / 2 + 3, y, cw2 - 6, 60);
+      vtext(ctx, tr.map[ch], x, y + 26, 26, 'center', HOT());
+      vtext(ctx, ch, x, y + 52, 22, 'center', G());
+    });
+    if (now - (tr.flash || 0) < 650) vtext(ctx, `${(tr.last || '').toUpperCase()} ✓`, W / 2, H * 0.48, 30, 'center', G(1 - (now - tr.flash) / 650));
+    // the encrypted word
+    const w = tr.word || '', big = Math.min(70, (W * 0.7) / Math.max(4, w.length)), wy = H * 0.66;
+    [...w].forEach((c, i) => {
+      const x = W / 2 - (w.length * big) / 2 + i * big + big / 2, solved = i < tr.ch;
+      vtext(ctx, solved ? c : tr.map[c], x, wy, big * 0.8, 'center', solved ? G() : HOT(i === tr.ch ? 1 : 0.75));
+      ctx.fillStyle = i === tr.ch ? G() : G(.25); ctx.fillRect(x - big * 0.35, wy + 14, big * 0.7, 3);
+    });
+  }
+}
 
 /* ---------- Canvas sizing + loop ---------- */
 function fit(obj, sel) {
@@ -3801,7 +4367,7 @@ function loop(now) {
   if (now - S.lastKey > 900) S.cadence *= 0.985;
   if (view.shake > 0) view.shake -= dt;
 
-  const paused = switching() || S.hangarOpen;
+  const paused = switching() || S.hangarOpen || !!S.popOpen || S.logsOpen;
   if (S.phase === 'decrypt' && S.dec) {
     if (!paused) S.dec.left -= dt;
     if (now - lastNoise > 110) { lastNoise = now; renderCrtText(); }
@@ -3822,6 +4388,7 @@ function loop(now) {
   drawView(now, view.pw);
   drawFace(face, now, S.phase === 'decrypt' ? 'unknown' : S.speaker, S.speaking, false);
   if (S.phase === 'intro') drawCine(now);
+  if (S.popOpen && popFace.ctx) drawFace(popFace, now, S.popOpen.who || 'ora', S.popOpen.typing, true);
   const sm = S.sideModeLast;
   if (sm === 'enemy' || sm === 'combat' || sm === 'repair') {
     if (sm === 'repair') { if (sideFace.ctx) drawShipIcon(sideFace, now); }
@@ -3833,10 +4400,12 @@ function loop(now) {
 }
 
 load();
+applyPaint();
 for (let i = 0; i < 5; i++) if (S.done[S.lang][i]) view.assembled[i] = 1;
 buildKeyboard();
 resize();
 renderChrome();
 if (!S.name) openIntro(); else startLevel(firstOpen());
+setTimeout(() => { if (S.phase !== 'intro') flushUnlocks(); }, 700);   // returning players see anything new
 requestAnimationFrame(loop);
 </script>
