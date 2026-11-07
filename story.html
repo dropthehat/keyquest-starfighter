@@ -309,6 +309,8 @@ body[data-station="boot"]    { --st: #6ff0a8; }
 body[data-station="decrypt"] { --st: #ffb547; }
 body[data-station="combat"]  { --st: #ff5a4e; }
 body[data-station="repair"]  { --st: #f2e14c; }
+body[data-station="pursuit"] { --st: #ff7a3a; }
+.terminal[data-st="pursuit"]:not(.quiet) { background-color: #140d08; background-image: repeating-linear-gradient(-60deg, color-mix(in srgb, var(--st) 6%, transparent) 0 2px, transparent 2px 14px); }
 .ambient { position: fixed; inset: 0; pointer-events: none; z-index: 30; opacity: 0; transition: opacity .6s ease, box-shadow .6s ease;
   box-shadow: inset 0 0 140px color-mix(in srgb, var(--st, #000) 22%, transparent); }
 body[data-station] .ambient { opacity: 1; }
@@ -559,7 +561,7 @@ body.sim-full .app, body.sim-type .app { grid-template-rows: max-content minmax(
 /* ======================================================================
    KEYQUEST
    ACT 1 · COLD BOOT     — wake the ship with ORA, learn the home row.
-   ACT 2 · FIRST CONTACT — Commander Vex: decrypt his transmissions,
+   ACT 2 · FIRST CONTACT — Commander Pumpkin: decrypt his transmissions,
                            then shoot down his raiders by typing words.
    ====================================================================== */
 
@@ -591,7 +593,7 @@ const T = {
         locate:'LOCATE KEY', boot:'BOOT SEQUENCE', warm:'WARM-UP', step:'Step', next:'Next',
         online:'ONLINE', offline:'OFFLINE', booting:'BOOTING', cleared:'CLEARED', acc:'Accuracy', wpm:'WPM', cont:'to continue', nextSys:'next',
         find:'Find', lastOne:'Last line. Enter the code.', offKey:'That key is still offline.', wrongKey:'Not that one.',
-        incoming:'Message', oraName:'ORA · SHIP AI', unknown:'UNKNOWN SIGNAL', vexName:'VEX · RAIDER COMMAND',
+        incoming:'Message', oraName:'ORA · SHIP AI', unknown:'UNKNOWN SIGNAL', vexName:'PUMPKIN · RAIDER COMMAND',
         encrypted:'TRANSMISSION ENCRYPTED', decOff:'The decryption module needs more keys. Act 2 adds them.', startAct2:'start Act 2',
         act2done:'ACT 2 COMPLETE', act3:'ACT 3 · CIPHER WAR — next build', replay:'Replay this act', reset:'Reset progress',
         space:'SPACE', sound:['SOUND ON','SOUND OFF'], systems:'Ship systems', sectors:'Sectors',
@@ -603,7 +605,7 @@ const T = {
         locate:'ЗНАЙДИ КЛАВІШУ', boot:'ПОСЛІДОВНІСТЬ ЗАПУСКУ', warm:'РОЗМИНКА', step:'Крок', next:'Далі',
         online:'ПРАЦЮЄ', offline:'ВИМКНЕНО', booting:'ЗАПУСК', cleared:'ЗАЧИЩЕНО', acc:'Точність', wpm:'Слів/хв', cont:'щоб продовжити', nextSys:'далі',
         find:'Знайди', lastOne:'Останній рядок. Введи код.', offKey:'Ця клавіша ще вимкнена.', wrongKey:'Не та клавіша.',
-        incoming:'Повідомлення', oraName:'ОРА · БОРТОВИЙ ШІ', unknown:'НЕВІДОМИЙ СИГНАЛ', vexName:'ВЕКС · КОМАНДУВАННЯ РЕЙДЕРІВ',
+        incoming:'Повідомлення', oraName:'ОРА · БОРТОВИЙ ШІ', unknown:'НЕВІДОМИЙ СИГНАЛ', vexName:'ГАРБУЗ · КОМАНДУВАННЯ РЕЙДЕРІВ',
         encrypted:'ПЕРЕДАЧА ЗАШИФРОВАНА', decOff:'Модулю дешифрування потрібно більше клавіш. Дія 2 їх додає.', startAct2:'почати Дію 2',
         act2done:'ДІЮ 2 ЗАВЕРШЕНО', act3:'ДІЯ 3 · ВІЙНА ШИФРІВ — у наступній версії', replay:'Пройти дію знову', reset:'Скинути прогрес',
         space:'ПРОБІЛ', sound:['ЗВУК УВІМК','ЗВУК ВИМК'], systems:'Системи корабля', sectors:'Сектори',
@@ -669,32 +671,32 @@ const LEVELS = [
          tip:'Reach up, then return to the bumps.',
          drills:['fur rug','hug a jar','rush; drag'],
          msg:'Little ship, you sail in [dark] water. The [shark] smells you. [Rush] home before [dusk].',
-         after:'That is Commander Vex, {name}. Raiders. He is launching drones. Type each drone\'s code to shoot it down.',
+         after:'That is Commander Pumpkin, {name}. Raiders. He is launching drones. Type each drone\'s code to shoot it down.',
          wave:['fur','jar','hug','rush','dusk','shark','drag'],
-         retreat:'Lucky shots. We will meet again, little ship.', outro:'Drones down. Vex will not stop there.' },
+         retreat:'Grr! Lucky shots, little ship. Next time I bring a bigger army!', outro:'Drones down. Pumpkin will not stop there.' },
     uk:{ intro:['Цей сигнал — корабель. Він викликає нас, але повідомлення зашифроване.', 'Шифратору потрібні ще дві клавіші: К та Г. Вказівні тягнуться вгору і повертаються на А та О.'],
          tip:'Тягнись вгору і повертайся на виступи.',
          drills:['рік гора','крок кора','дорога далі'],
-         msg:'Я — Векс, твій [ворог]. Ця [дорога] не для тебе. Зроби [крок] назад і лети [далі].',
-         after:'Це командир Векс. Рейдери. Він запускає дрони. Набери код дрона, щоб його збити.',
+         msg:'Я — Гарбуз, твій [ворог]. Ця [дорога] не для тебе. Зроби [крок] назад і лети [далі].',
+         after:'Це командир Гарбуз. Рейдери. Він запускає дрони. Набери код дрона, щоб його збити.',
          wave:['рік','гора','крок','кора','ворог','дорога','порог'],
-         retreat:'Пощастило. Ми ще зустрінемось, кораблику.', outro:'Дрони збито. Векс на цьому не зупиниться.' } },
+         retreat:'Гррр! Пощастило, кораблику. Наступного разу приведу більшу армію!', outro:'Дрони збито. Гарбуз на цьому не зупиниться.' } },
 
   { type:'encounter', sys:{ en:'Warning shots', uk:'Попередження' }, newKeys:['KeyE','KeyI'], cross:14000, gap:3100,
-    en:{ intro:['Vex is coming back with more ships.', 'Two new keys: E and I. Middle fingers reach up from D and K.'],
+    en:{ intro:['Pumpkin is coming back with more ships.', 'Two new keys: E and I. Middle fingers reach up from D and K.'],
          tip:'Middle fingers reach up, then back to D and K.',
          drills:['fire ride','hide; seek','skies glide'],
          msg:'Your [shields] are weak. My [raiders] [seek] you. [Flee] while you still can.',
          after:'He is bluffing. Mostly. Here they come.',
          wave:['fire','ride','hide','seek','skies','glide','shield','raider'],
-         retreat:'Fine. You have teeth. So do I.', outro:'Two waves down. Rest your hands for a second.' },
-    uk:{ intro:['Векс повертається з більшою кількістю кораблів.', 'Дві нові клавіші: У та Ш. Середні пальці тягнуться вгору від В та Л.'],
+         retreat:'You beat me AGAIN? Fine. Next time, twice as many ships!', outro:'Two waves down. Rest your hands for a second.' },
+    uk:{ intro:['Гарбуз повертається з більшою кількістю кораблів.', 'Дві нові клавіші: У та Ш. Середні пальці тягнуться вгору від В та Л.'],
          tip:'Середні вгору, потім назад на В та Л.',
          drills:['душа груша','пушка шлак','рука шукала'],
          msg:'Твій корабель — [шкаралупа]. Моя [пушка] дасть [шквал] вогню. [Ура]!',
          after:'Він блефує. Майже. Ось вони.',
          wave:['душа','груша','пушка','шлак','рука','шквал','шукала','шкаралупа'],
-         retreat:'Гаразд. У тебе є зуби. У мене теж.', outro:'Дві хвилі позаду. Дай рукам хвилину відпочити.' } },
+         retreat:'Ти знову мене переміг? Гаразд. Наступного разу кораблів буде вдвічі більше!', outro:'Дві хвилі позаду. Дай рукам хвилину відпочити.' } },
 
   { type:'encounter', sys:{ en:'The pack', uk:'Зграя' }, newKeys:['KeyW','KeyO'], cross:13000, gap:2800,
     en:{ intro:['A bigger pack is forming on the radar.', 'Ring fingers reach up now: W from S, O from L.'],
@@ -703,30 +705,30 @@ const LEVELS = [
          msg:'[Fool]. Your [world] is [hollow]. My [wolf] pack will [follow] your [glow].',
          after:'A wolf pack. Faster ships. Stay calm, stay accurate.',
          wave:['slow','word','world','sword','howl','wolf','glow','follow','hollow'],
-         retreat:'Enough. Next time I come myself.', outro:'The pack is scattered. Vex is angry now. Good.' },
+         retreat:'Enough! Next time I come myself, with my whole fleet.', outro:'The pack is scattered. Pumpkin is angry now. Good.' },
     uk:{ intro:['На радарі збирається більша зграя.', 'Безіменні пальці тягнуться вгору: Ц від І, Щ від Д.'],
          tip:'Безіменні вгору, решта відпочиває.',
          drills:['щука щур','палац гуща','площа краща'],
          msg:'Ти [щур] у [пащі]. Мій [палац] — [гуща] зірок.',
          after:'Зграя. Швидші кораблі. Спокійно і точно.',
          wave:['щур','щука','паща','палац','гуща','площа','краща','ціпок','щока'],
-         retreat:'Досить. Наступного разу прийду сам.', outro:'Зграю розбито. Векс злий. Це добре.' } },
+         retreat:'Досить! Наступного разу прийду сам, з усім флотом.', outro:'Зграю розбито. Гарбуз злий. Це добре.' } },
 
-  { type:'encounter', sys:{ en:'Vex', uk:'Векс' }, newKeys:['KeyP','KeyQ'], cross:12000, gap:2500,
-    en:{ intro:['Vex\'s flagship is on approach.', 'The last two keys of this act: P and Q, both with your pinkies. P is up from ;. Q is up from A.'],
+  { type:'encounter', sys:{ en:'Pumpkin', uk:'Гарбуз' }, newKeys:['KeyP','KeyQ'], cross:12000, gap:2500,
+    en:{ intro:['Pumpkin\'s flagship is on approach.', 'The last two keys of this act: P and Q, both with your pinkies. P is up from ;. Q is up from A.'],
          tip:'Pinkies reach up, then home.',
          drills:['quad speed','pause; aqua','proud squad'],
          msg:'Hear me, {name}. My [squad] [prowls] the [deep]. Your [power] fades. [Prepare].',
          after:'This is it. His flagship and escorts. Every word counts.',
          wave:['squad','prowl','deep','power','queue','speed','equip','quake','proud','prepare'],
-         retreat:'Impossible... Retreat! The Admiral will hear of you, {name}.', outro:'Vex is running. We held the sector. But an Admiral... that is a bigger problem.' },
-    uk:{ intro:['Флагман Векса наближається.', 'Останні дві клавіші цієї дії: З та Й, обидві мізинцями. З — вгору від Ж. Й — вгору від Ф.'],
+         retreat:'Impossible... You defeated me this time, {name}. But the Admiral has a far bigger army. We will be back!', outro:'Pumpkin is running. We held the sector. But an Admiral... that is a bigger problem.' },
+    uk:{ intro:['Флагман Гарбуза наближається.', 'Останні дві клавіші цієї дії: З та Й, обидві мізинцями. З — вгору від Ж. Й — вгору від Ф.'],
          tip:'Мізинці вгору і додому.',
          drills:['гроза залп','зараз зло','край гай'],
          msg:'[Гроза] вже тут. Мій [залп] — твоя [загроза]. [Зараз]!',
          after:'Це воно. Флагман і супровід. Кожне слово важливе.',
          wave:['гроза','залп','зло','край','гай','зорі','лазур','розлад','зараз','загроза'],
-         retreat:'Неможливо... Відступаємо! Адмірал дізнається про тебе, {name}.', outro:'Векс тікає. Ми втримали сектор. Але адмірал... це більша проблема.' } }
+         retreat:'Неможливо... Цього разу ти мене переміг, {name}. Але в адмірала армія набагато більша. Ми повернемось!', outro:'Гарбуз тікає. Ми втримали сектор. Але адмірал... це більша проблема.' } }
 ];
 
 const ACT1_END = {
@@ -895,6 +897,7 @@ const sfx = {
     else if (st === 'boot') { blip('sawtooth', 90, 360, 0.5, 0.05); blip('triangle', 660, null, 0.2, 0.04, 0.45); }
     else if (st === 'decrypt') { [1200, 900, 1500, 700, 1800, 1100].forEach((f, i) => blip('square', f, null, 0.05, 0.03, i * 0.055)); }
     else if (st === 'combat') { for (let i = 0; i < 2; i++) { blip('sawtooth', 520, null, 0.18, 0.06, i * 0.4); blip('sawtooth', 390, null, 0.18, 0.06, i * 0.4 + 0.2); } }
+    else if (st === 'pursuit') { blip('sawtooth', 220, 880, 0.35, 0.05); blip('sawtooth', 330, 1320, 0.35, 0.04, 0.12); }
     else if (st === 'repair') { for (let i = 0; i < 5; i++) blip('square', 260 + i * 30, 120, 0.04, 0.05, i * 0.07); blip('triangle', 880, null, 0.2, 0.04, 0.4); }
   },
   recharge: () => { [523.25, 783.99, 1046.5].forEach((f, i) => blip('sine', f, null, 0.18, 0.05, i * 0.06)); },
@@ -905,7 +908,7 @@ const sfx = {
 };
 /* ---------- Adaptive music ----------
    calm  : slow pad (Am F C G) + soft sparkles — the ship, ORA, Act 1
-   tense : 120 bpm phrygian bass ostinato, kick, hats, dissonant stabs — Vex, decrypt, combat
+   tense : 120 bpm phrygian bass ostinato, kick, hats, dissonant stabs — Pumpkin, decrypt, combat
    fanfare / defeat stingers duck both layers                                           */
 const MUS = { on: false, gCalm: null, gTense: null, cNext: 0, cStep: 0, tNext: 0, tStep: 0, noise: null, intensity: 0.4, duckUntil: 0 };
 function initMusic() {
@@ -1109,7 +1112,7 @@ function noise(n) { let s = ''; for (let i = 0; i < n; i++) s += NOISE[(Math.ran
 
 function renderCrtText() {
   const el = $('#crtText');
-  const who = S.speaker === 'ora' ? 'ORA' : (S.speaker === 'vex' ? 'VEX' : '??');
+  const who = S.speaker === 'ora' ? 'ORA' : (S.speaker === 'vex' ? 'PUMPKIN' : '??');
   if (S.phase === 'decrypt' && S.dec) {
     const html = S.dec.segs.map((sg) => {
       if (!sg.key) return esc(sg.s);
@@ -1140,7 +1143,7 @@ function drawFace(obj, now, mode, speaking, forcePowered) {
   const cols = 20, rows = 16;
   const cell = Math.max(3, Math.floor(Math.min(W / cols, H / rows)));
   const ox = Math.floor((W - cols * cell) / 2), oy = Math.floor((H - rows * cell) / 2);
-  const rgb = enemy ? '255,90,82' : '255,181,71';
+  const rgb = mode === 'vex' ? '255,128,48' : enemy ? '255,90,82' : '255,181,71';
   const powered = forcePowered || S.ending || S.lvl > 0 || S.phase !== 'dialogue' || S.dlgIdx > 0;
   // decrypt: the face is mostly static until the signal is cleaned up
   const clarity = mode === 'unknown' && S.dec ? S.dec.ki / Math.max(1, S.dec.keys.length) : 1;
@@ -1176,13 +1179,20 @@ function drawFace(obj, now, mode, speaking, forcePowered) {
     else for (let x = 8; x <= 11; x++) px(x, 11, 1);
     for (let y = 6; y <= 9; y++) { px(0, y, 0.7); px(19, y, 0.7); }
   } else {
-    if (mode === 'vex') {           // Vex: swept crest fins + scar
-      [[3,0],[4,1],[5,2],[16,0],[15,1],[14,2]].forEach(([x, y]) => px(x, y, 1));
-      px(12, 8, 0.8); px(13, 9, 0.8); px(14, 10, 0.8);
+    if (mode === 'vex') {           // Commander Pumpkin: stem + leaf, ribbed shell, carved grin
+      px(9, 0, 1); px(10, 0, 1); px(11, 0, 0.8); px(12, 0, 0.6);
+      for (let y = 3; y <= 13; y++) { px(6, y, 0.3); px(13, y, 0.3); }
+      const blinkP = now % 3600 < 120;
+      [[5, 6, 7], [12, 13, 14]].forEach(([a, b2, c2]) => { if (blinkP) { px(a, 6, 1); px(b2, 6, 1); px(c2, 6, 1); } else { px(b2, 5, 1); px(a, 6, 1); px(b2, 6, 1); px(c2, 6, 1); px(a, 7, 1); px(b2, 7, 1); px(c2, 7, 1); } });
+      px(9, 8, 0.9); px(10, 8, 0.9);
+      const open = speakFrame ? 1 : 0;
+      for (let x = 5; x <= 14; x++) { const up = (x % 2) ? 0 : 1; px(x, 10 + up, 1); if (open) px(x, 12 + up, 0.85); }
+      px(4, 10, 0.9); px(15, 10, 0.9);
+    } else {
+      for (let x = 4; x <= 15; x++) px(x, 6, 0.95);
+      const scan = 4 + Math.floor(now / 70) % 12; px(scan, 7, 1); px(Math.min(15, scan + 1), 7, 0.6);
+      for (let x = 6; x <= 13; x++) if ((x + (speakFrame ? 1 : 0)) % 2) { px(x, 11, 0.9); px(x, 12, 0.6); }
     }
-    for (let x = 4; x <= 15; x++) px(x, 6, 0.95);
-    const scan = 4 + Math.floor(now / 70) % 12; px(scan, 7, 1); px(Math.min(15, scan + 1), 7, 0.6);
-    for (let x = 6; x <= 13; x++) if ((x + (speakFrame ? 1 : 0)) % 2) { px(x, 11, 0.9); px(x, 12, 0.6); }
     const n = mode === 'unknown' ? 40 : 10;
     for (let i = 0; i < n; i++) { c.fillStyle = `rgba(${rgb},.25)`; c.fillRect(ox + ((Math.random() * cols) | 0) * cell, oy + ((Math.random() * rows) | 0) * cell, cell - 1, cell - 1); }
   }
@@ -1208,8 +1218,8 @@ const cannon = () => ({ x: view.w * 0.5, y: view.h * 0.8 });
 const perimeterX = () => view.w * 0.13;
 const km = (n) => Math.round(n).toLocaleString('en-US').replace(/,/g, ' ') + ' km';
 const UIW = {
-  en: { status: 'STATUS', comms: 'COMMS', target: 'TARGET', nav: 'NAV', offline: 'OFFLINE', booting: 'BOOTING', low: 'LOW POWER', hull: 'HULL', crew: 'CREW', dist: 'DIST', spd: 'SPD', level: 'Level', freq: 'FREQ', sig: 'SIG', src: 'SRC', unknown: 'UNKNOWN', shields: 'SHIELDS', hostiles: 'HOSTILES', perimeter: 'PERIMETER', lock: 'LOCK', sim: 'SIM', vex: 'VEX · RAIDER COMMAND', heat: 'HEAT', overcharge: 'OVERCHARGE', flagship: 'FLAGSHIP', hullHit: 'HULL HIT', absorbed: 'HIT ABSORBED', recharge: 'SHIELD +1', repair: 'REPAIR BAY', repaired: 'HULL REPAIRED', ready: 'COMBAT READY', incoming: 'INCOMING', cleared: 'SECTOR CLEARED', sysOnline: 'SYSTEM ONLINE', phase2: 'PHASE 2', flagshipDown: 'FLAGSHIP DOWN', srcUnknown: 'SOURCE UNKNOWN', navOff: 'NAV OFFLINE' },
-  uk: { status: 'СТАТУС', comms: 'ЗВ\'ЯЗОК', target: 'ЦІЛЬ', nav: 'НАВ', offline: 'ВИМКНЕНО', booting: 'ЗАПУСК', low: 'МАЛО ЖИВЛЕННЯ', hull: 'КОРПУС', crew: 'ЕКІПАЖ', dist: 'ВІДСТ', spd: 'ШВИД', level: 'Рівень', freq: 'ЧАСТ', sig: 'СИГН', src: 'ДЖЕР', unknown: 'НЕВІДОМО', shields: 'ЩИТИ', hostiles: 'ВОРОГИ', perimeter: 'ПЕРИМЕТР', lock: 'ЦІЛЬ', sim: 'СИМ', vex: 'ВЕКС · РЕЙДЕРИ', heat: 'ЗАРЯД', overcharge: 'ПЕРЕЗАРЯД', flagship: 'ФЛАГМАН', hullHit: 'ВЛУЧАННЯ', absorbed: 'ВЛУЧАННЯ ПОГЛИНУТО', recharge: 'ЩИТ +1', repair: 'РЕМОНТ', repaired: 'КОРПУС ВІДНОВЛЕНО', ready: 'ГОТОВИЙ ДО БОЮ', incoming: 'РАКЕТА', cleared: 'СЕКТОР ЗАЧИЩЕНО', sysOnline: 'СИСТЕМА ПРАЦЮЄ', phase2: 'ФАЗА 2', flagshipDown: 'ФЛАГМАН ЗБИТО', srcUnknown: 'ДЖЕРЕЛО НЕВІДОМЕ', navOff: 'НАВ ВИМКНЕНО' }
+  en: { status: 'STATUS', comms: 'COMMS', target: 'TARGET', nav: 'NAV', offline: 'OFFLINE', booting: 'BOOTING', low: 'LOW POWER', hull: 'HULL', crew: 'CREW', dist: 'DIST', spd: 'SPD', level: 'Level', freq: 'FREQ', sig: 'SIG', src: 'SRC', unknown: 'UNKNOWN', shields: 'SHIELDS', hostiles: 'HOSTILES', perimeter: 'PERIMETER', lock: 'LOCK', sim: 'SIM', vex: 'PUMPKIN · RAIDER COMMAND', heat: 'HEAT', overcharge: 'OVERCHARGE', flagship: 'FLAGSHIP', hullHit: 'HULL HIT', absorbed: 'HIT ABSORBED', recharge: 'SHIELD +1', repair: 'REPAIR BAY', repaired: 'HULL REPAIRED', ready: 'COMBAT READY', incoming: 'INCOMING', cleared: 'SECTOR CLEARED', sysOnline: 'SYSTEM ONLINE', phase2: 'PHASE 2', flagshipDown: 'FLAGSHIP DOWN', srcUnknown: 'SOURCE UNKNOWN', navOff: 'NAV OFFLINE' },
+  uk: { status: 'СТАТУС', comms: 'ЗВ\'ЯЗОК', target: 'ЦІЛЬ', nav: 'НАВ', offline: 'ВИМКНЕНО', booting: 'ЗАПУСК', low: 'МАЛО ЖИВЛЕННЯ', hull: 'КОРПУС', crew: 'ЕКІПАЖ', dist: 'ВІДСТ', spd: 'ШВИД', level: 'Рівень', freq: 'ЧАСТ', sig: 'СИГН', src: 'ДЖЕР', unknown: 'НЕВІДОМО', shields: 'ЩИТИ', hostiles: 'ВОРОГИ', perimeter: 'ПЕРИМЕТР', lock: 'ЦІЛЬ', sim: 'СИМ', vex: 'ГАРБУЗ · РЕЙДЕРИ', heat: 'ЗАРЯД', overcharge: 'ПЕРЕЗАРЯД', flagship: 'ФЛАГМАН', hullHit: 'ВЛУЧАННЯ', absorbed: 'ВЛУЧАННЯ ПОГЛИНУТО', recharge: 'ЩИТ +1', repair: 'РЕМОНТ', repaired: 'КОРПУС ВІДНОВЛЕНО', ready: 'ГОТОВИЙ ДО БОЮ', incoming: 'РАКЕТА', cleared: 'СЕКТОР ЗАЧИЩЕНО', sysOnline: 'СИСТЕМА ПРАЦЮЄ', phase2: 'ФАЗА 2', flagshipDown: 'ФЛАГМАН ЗБИТО', srcUnknown: 'ДЖЕРЕЛО НЕВІДОМЕ', navOff: 'НАВ ВИМКНЕНО' }
 };
 const uw = (k) => UIW[S.lang][k];
 
@@ -1725,10 +1735,10 @@ function drawView(now, pw) {
     const isVex = S.lvl >= ACTS[1].from;
     const sig = S.phase === 'decrypt' && S.dec ? Math.max(0, S.dec.left / S.dec.total) : 1;
     const dist = drawComms(ctx, now);
-    header(ctx, uw('comms'), [[uw('freq'), '147.3'], [uw('sig'), `${Math.round(sig * 100)}%`, sig < 0.3], [uw('src'), isVex && prog >= 1 ? 'VEX' : uw('unknown'), true], [uw('dist'), isVex ? km(dist) : '—']]);
+    header(ctx, uw('comms'), [[uw('freq'), '147.3'], [uw('sig'), `${Math.round(sig * 100)}%`, sig < 0.3], [uw('src'), isVex && prog >= 1 ? 'PUMPKIN' : uw('unknown'), true], [uw('dist'), isVex ? km(dist) : '—']]);
     tabs(ctx, 'comms');
   } else if (mode === 'sim') {
-    if (S.tr && S.tr.mode === 'arcade') drawArcade(ctx, now); else drawTarget(ctx, now);
+    if (S.tr && S.tr.mode === 'arcade') { drawArcade(ctx, now); drawPursuit(ctx, now); } else drawTarget(ctx, now);
     if (S.tr) simHeader(ctx, now);
     tabs(ctx, 'sim');
   } else {
@@ -1740,7 +1750,7 @@ function drawView(now, pw) {
     tabs(ctx, 'target');
     // subtitles: whoever is talking appears on the monitor, where your eyes are
     if (S.shown && now - (S.typeAt || 0) < S.full.length * 24 + 3500) {
-      const who = S.speaker === 'vex' ? 'VEX' : 'ORA', col = S.speaker === 'vex' ? HOT() : 'rgba(255,190,90,.95)';
+      const who = S.speaker === 'vex' ? 'PUMPKIN' : 'ORA', col = S.speaker === 'vex' ? HOT() : 'rgba(255,190,90,.95)';
       ctx.font = `20px ${MONO}`;
       const txt = `${who}> ${S.shown}`, maxW = W - 140;
       let shown = txt; while (ctx.measureText(shown).width > maxW && shown.length > 10) shown = '…' + shown.slice(Math.floor(shown.length * 0.15));
@@ -1869,11 +1879,12 @@ const STATIONS = {
   boot:    { col: '#6ff0a8', icon: '▶', en: ['SYSTEM INSTALL', 'Type the boot sequence to install the module.'], uk: ['ВСТАНОВЛЕННЯ', 'Набери послідовність запуску, щоб встановити модуль.'] },
   decrypt: { col: '#ffb547', icon: '#', en: ['DECRYPTION', 'Type each cipher key before the signal fades.'], uk: ['ДЕШИФРУВАННЯ', 'Набери кожен ключ, поки сигнал не зник.'] },
   combat:  { col: '#ff5a4e', icon: '⊕', en: ['WEAPONS', 'Type a target\'s first letter to lock on, then finish the word.'], uk: ['ЗБРОЯ', 'Набери першу літеру цілі, щоб захопити її, і допиши слово.'] },
+  pursuit: { col: '#ff7a3a', icon: '»', en: ['PURSUIT', 'The raiders are fleeing. No typing: ← → steer, Space fire.'], uk: ['ПОГОНЯ', 'Рейдери тікають. Без друку: ← → кермо, пробіл — вогонь.'] },
   sim:     { col: '#3fe0c5', icon: '◇', en: ['SIMULATOR', 'Training program. Earn parts for ship upgrades.'], uk: ['СИМУЛЯТОР', 'Тренувальна програма. Заробляй деталі на покращення.'] },
   repair:  { col: '#f2e14c', icon: '✚', en: ['REPAIR BAY', 'Retype the damaged words. Slow and clean.'], uk: ['РЕМОНТНИЙ ВІДСІК', 'Передрукуй пошкоджені слова. Повільно і чисто.'] }
 };
 function station() {
-  if (S.phase === 'train') return S.tr && !S.tr.done ? 'sim' : null;
+  if (S.phase === 'train') return S.tr && !S.tr.done ? (S.tr.replay ? 'pursuit' : 'sim') : null;
   if (S.levelDone || S.ending) return null;
   if (S.phase === 'decrypt') return 'decrypt';
   if (S.phase === 'combat') return 'combat';
@@ -2029,12 +2040,12 @@ function sideMode() {
   return 'list';
 }
 const SIDE = {
-  en: { tx: 'Enemy · Transmission', tac: 'Tactical', dmg: 'Damage report', vex: 'COMMANDER VEX', unk: '???', faction: 'Faction', raiders: 'Raider Command', vessel: 'Vessel', threat: 'Threat', status: 'Status', dist: 'Distance',
+  en: { tx: 'Enemy · Transmission', tac: 'Tactical', dmg: 'Damage report', vex: 'COMMANDER PUMPKIN', unk: '???', faction: 'Faction', raiders: 'Raider Command', vessel: 'Vessel', threat: 'Threat', status: 'Status', dist: 'Distance',
         encrypted: 'ENCRYPTED', hostile: 'HOSTILE', retreat: 'RETREATING', ident: 'IDENTIFYING…', unknownF: 'Unknown', watching: 'is watching', speaking: 'transmitting',
         drones: 'Raiders', cruisers: 'Cruisers', kamikaze: 'Kamikaze', missiles: 'Missiles', flagship: 'Flagship', phase: 'Phase', inbound: 'Inbound', shields: 'Shields', recharge: 'Recharge', heat: 'Heat',
         hull: 'Hull integrity', weak: 'Weakest keys', words: 'Damaged words', none: 'none yet',
         ships: ['Drone carrier', 'Raider wing', 'Wolf pack', 'Flagship RAZORBACK'] },
-  uk: { tx: 'Ворог · Передача', tac: 'Тактика', dmg: 'Звіт про пошкодження', vex: 'КОМАНДИР ВЕКС', unk: '???', faction: 'Фракція', raiders: 'Рейдери', vessel: 'Корабель', threat: 'Загроза', status: 'Статус', dist: 'Відстань',
+  uk: { tx: 'Ворог · Передача', tac: 'Тактика', dmg: 'Звіт про пошкодження', vex: 'КОМАНДИР ГАРБУЗ', unk: '???', faction: 'Фракція', raiders: 'Рейдери', vessel: 'Корабель', threat: 'Загроза', status: 'Статус', dist: 'Відстань',
         encrypted: 'ЗАШИФРОВАНО', hostile: 'ВОРОЖИЙ', retreat: 'ВІДСТУПАЄ', ident: 'ВИЗНАЧЕННЯ…', unknownF: 'Невідомо', watching: 'спостерігає', speaking: 'передає',
         drones: 'Рейдери', cruisers: 'Крейсери', kamikaze: 'Камікадзе', missiles: 'Ракети', flagship: 'Флагман', phase: 'Фаза', inbound: 'На підході', shields: 'Щити', recharge: 'Підзарядка', heat: 'Заряд',
         hull: 'Цілісність корпусу', weak: 'Найслабші клавіші', words: 'Пошкоджені слова', none: 'поки немає',
@@ -2088,7 +2099,7 @@ function renderSystems() {
   }
   if (mode === 'combat') {
     $('#sideTag').textContent = W2.tac;
-    $('#sideId').innerHTML = `<b>VEX</b><small>${esc(S.speaker === 'vex' && S.speaking ? W2.speaking : W2.watching)}</small>`;
+    $('#sideId').innerHTML = `<b>PUMPKIN</b><small>${esc(S.speaker === 'vex' && S.speaking ? W2.speaking : W2.watching)}</small>`;
     const n = (type) => C.ships.filter(x => x.type === type).length;
     let rows = '';
     if (C.boss) rows += row(W2.flagship, `${W2.phase} ${C.boss.phase}/2 · ${meter(C.boss.parts.filter(p => p.alive).length, C.boss.parts.length, 'red')}`);
@@ -2234,7 +2245,7 @@ function signalLost() {
 
 /* ---------- Combat 2.0 ----------
    Targets: raiders (drone / scout / cruiser / kamikaze), missiles they fire at you,
-   and the weak points of Vex's flagship. Type any target's first letter to lock on,
+   and the weak points of Pumpkin's flagship. Type any target's first letter to lock on,
    then finish its word. Clean typing builds HEAT; a full bar overcharges the cannon
    so your next kill chains to a second target. A typo vents the heat.            */
 const COMBAT = {
@@ -2522,7 +2533,7 @@ const CARDW = {
           scout: ['SCOUTS + MISSILES', 'Scouts are fast. Raiders now fire missiles at you: type the code to intercept.'],
           cruiser: ['CRUISER', 'Armoured. Takes two words to destroy.'],
           kamikaze: ['KAMIKAZE', 'Speeds up the moment you lock on. Finish it fast.'],
-          boss: ['VEX\'S FLAGSHIP', 'Weak points, two phases, escorts and missile barrages.'] } },
+          boss: ['PUMPKIN\'S FLAGSHIP', 'Weak points, two phases, escorts and missile barrages.'] } },
   uk: { act: 'ДІЯ', sector: 'СЕКТОР', system: 'СИСТЕМА', newKeys: 'Нові клавіші', begin: 'Пробіл ␣ почати', obj: 'Завдання',
         power: 'Увімкни систему: {sys}', decrypt: 'Розшифруй передачу', destroy: 'Збий рейдерів: {n}', boss: 'Знищ слабкі місця флагмана (2 фази)',
         lock: 'Набери першу літеру цілі, щоб її захопити',
@@ -2530,7 +2541,7 @@ const CARDW = {
           scout: ['РОЗВІДНИКИ + РАКЕТИ', 'Розвідники швидкі. Рейдери стріляють ракетами: набери код, щоб збити.'],
           cruiser: ['КРЕЙСЕР', 'Броньований. Потрібно два слова.'],
           kamikaze: ['КАМІКАДЗЕ', 'Прискорюється, щойно ти його захопиш. Добий швидко.'],
-          boss: ['ФЛАГМАН ВЕКСА', 'Слабкі місця, дві фази, супровід і ракетні залпи.'] } }
+          boss: ['ФЛАГМАН ГАРБУЗА', 'Слабкі місця, дві фази, супровід і ракетні залпи.'] } }
 };
 const THREAT_OF = { 0: 'mod0', 1: 'mod1', 2: 'mod2', 3: 'mod3', 4: 'mod4', 5: 'scout', 6: 'cruiser', 7: 'kamikaze', 8: 'boss' };
 const MODULES = {
@@ -2626,9 +2637,9 @@ function completeLevel() {
   if (L().type !== 'encounter') banner(uw('sysOnline'));
   fanfare(L().type === 'encounter');
   const lt = LT();
-  const lines = L().type === 'encounter' ? [{ who: 'vex', text: lt.retreat }, lt.outro] : [lt.outro];
+  const lines = [lt.outro];
   if (!wasDone) Object.keys(MODES).filter(m => MODES[m].need === S.lvl).forEach(m => lines.push(hg('newProg').replace('{m}', MODES[m][S.lang][0])));
-  if (L().type === 'encounter') { lines.push(hg('replayIntro')); say(lines, () => startReplay(S.lvl)); return; }
+  if (L().type === 'encounter') { S.afterPursuit = lines; say([hg('replayIntro')], () => startReplay(S.lvl)); return; }
   say(lines, () => { S.phase = 'complete'; S.speaker = 'ora'; renderAll(); });
 }
 
@@ -2708,16 +2719,16 @@ const HG = {
         retry: 'retry', back: 'back to mission', hangar: 'hangar', score: 'Score', earned: 'Parts earned', best: 'Best', time: 'TIME', hull: 'HULL', wave: 'WAVE', lives: 'LIVES',
         skills: 'Skills', move: '← → move · Space fire · Esc quit', typeHint: 'Type a target\'s first letter to lock on · Esc quit', simOn: 'Simulator online. {m}, {t} tier.',
         defeatTip: 'Later, the Target Range in the hangar will sharpen your aim.', over: 'SIMULATION OVER', newBadge: 'NEW',
-        tabUp: 'Upgrade tree', tabSim: 'Simulator', stats: 'Ship stats', requires: 'Requires', replay: 'Battle replay', replayIntro: 'Battle recorded. Let us replay it in the simulator: no typing, just reflexes. Your hangar upgrades are your skills.',
-        replayOn: 'Battle replay. ← → move, Space fire. Your upgrades are your skills.', replayDone: 'REPLAY COMPLETE', cont: 'continue', skip: 'skip', inHangar: 'Raider Run is always available in your Hangar.',
+        tabUp: 'Upgrade tree', tabSim: 'Simulator', stats: 'Ship stats', requires: 'Requires', replay: 'Pursuit', replayIntro: 'They are running! Take the helm, {name}. No typing now: ← → to steer, Space to fire. Your hangar upgrades are your skills.',
+        replayOn: 'Pursuit! ← → steer, Space fire.', replayDone: 'VICTORY', escaped: 'HE GOT AWAY', cont: 'continue', skip: 'skip', inHangar: 'You can fly that kind of run any time: Raider Run, in the Hangar simulator.', escapedOra: 'He slipped away, but the sector is ours.',
         st: { shields: 'Shields', recharge: 'Recharge', every: 'every {n} kills', absorb: 'First hit absorbed', heat: 'Heat build', chain: 'Overcharge chain', targets: '{n} target(s)', missiles: 'Missile speed', flak: 'Flak burst', decrypt: 'Decrypt time', speed: 'Battle speed', yes: 'yes', no: '—' } },
   uk: { title: 'АНГАР', parts: 'деталей', ship: 'АРГО-7 · ПОКРАЩЕННЯ', sim: 'СИМУЛЯТОР', buy: 'Встановити', installed: 'Встановлено', need: 'Треба', locked: 'Відкривається після', close: 'Esc · закрити',
         tiers: ['Кадет', 'Пілот', 'Ас'], tierLock: 'Отримай 2★ на попередньому рівні', newProg: 'Нова програма симулятора в ангарі: {m}. Тренуйся там, щоб заробити деталі на покращення.',
         retry: 'ще раз', back: 'до місії', hangar: 'ангар', score: 'Рахунок', earned: 'Зароблено деталей', best: 'Рекорд', time: 'ЧАС', hull: 'КОРПУС', wave: 'ХВИЛЯ', lives: 'ЖИТТЯ',
         skills: 'Навички', move: '← → рух · пробіл вогонь · Esc вихід', typeHint: 'Набери першу літеру цілі · Esc вихід', simOn: 'Симулятор увімкнено. {m}, рівень «{t}».',
         defeatTip: 'Згодом тир в ангарі відточить твою точність.', over: 'СИМУЛЯЦІЮ ЗАВЕРШЕНО', newBadge: 'НОВЕ',
-        tabUp: 'Дерево покращень', tabSim: 'Симулятор', stats: 'Характеристики', requires: 'Потрібно', replay: 'Повтор бою', replayIntro: 'Бій записано. Повторімо його в симуляторі: без друку, лише реакція. Твої покращення з ангара — це твої навички.',
-        replayOn: 'Повтор бою. ← → рух, пробіл — вогонь. Твої покращення — це навички.', replayDone: 'ПОВТОР ЗАВЕРШЕНО', cont: 'далі', skip: 'пропустити', inHangar: 'Рейдерський забіг завжди доступний в ангарі.',
+        tabUp: 'Дерево покращень', tabSim: 'Симулятор', stats: 'Характеристики', requires: 'Потрібно', replay: 'Погоня', replayIntro: 'Вони тікають! Бери штурвал, {name}. Тепер без друку: ← → кермо, пробіл — вогонь. Твої покращення з ангара — це навички.',
+        replayOn: 'Погоня! ← → кермо, пробіл — вогонь.', replayDone: 'ПЕРЕМОГА', escaped: 'ВІН ВТІК', cont: 'далі', skip: 'пропустити', inHangar: 'Такий політ можна повторити будь-коли: Рейдерський забіг у симуляторі ангара.', escapedOra: 'Він вислизнув, але сектор наш.',
         st: { shields: 'Щити', recharge: 'Підзарядка', every: 'кожні {n} влучання', absorb: 'Перше влучання поглинається', heat: 'Ріст заряду', chain: 'Ланцюг перезаряду', targets: '{n} ціль(і)', missiles: 'Швидкість ракет', flak: 'Зенітний залп', decrypt: 'Час дешифрування', speed: 'Швидкість бою', yes: 'так', no: '—' } }
 };
 const hg = (k) => HG[S.lang][k];
@@ -2980,20 +2991,57 @@ function endTraining() {
   S.train[tr.mode][tr.tier] = Math.max(S.train[tr.mode][tr.tier], stars);
   S.best[tr.mode] = Math.max(S.best[tr.mode] || 0, sc);
   save();
-  banner(tr.replay ? hg('replayDone') : hg('over'), false);
-  if (stars) fanfare(stars >= 2); else defeatSting();
+  if (!tr.replay) { banner(hg('over'), false); if (stars) fanfare(stars >= 2); else defeatSting(); }
   renderAll();
+}
+const PT = {
+  en: { start: ['Catch me if you can, little ship!', 'A chase? I love a chase!', 'Nobody laughs at Commander Pumpkin!', 'My raiders fly faster than you type!'],
+        hit: ['Ha! Right in the hull!', 'Too slow, little ship!', 'Did that tickle?'],
+        half: ['Stop shooting my ships!', 'Hold formation, you fools!', 'Those ships were NEW!'],
+        few: ['No, no, no! Regroup!', 'Somebody cover me!'],
+        boss: ['My flagship! Not the paint!', 'You scratched my beautiful flagship!'],
+        escaped: ['Ha! Too slow. See you next time, {name}!'] },
+  uk: { start: ['Спіймай мене, якщо зможеш, кораблику!', 'Погоня? Обожнюю погоні!', 'Ніхто не сміється з командира Гарбуза!', 'Мої рейдери літають швидше, ніж ти друкуєш!'],
+        hit: ['Ха! Просто в корпус!', 'Повільно, кораблику!', 'Лоскотно?'],
+        half: ['Перестань збивати мої кораблі!', 'Тримати стрій, бовдури!', 'Це були НОВІ кораблі!'],
+        few: ['Ні, ні, ні! Перегрупуватись!', 'Хтось, прикрийте мене!'],
+        boss: ['Мій флагман! Тільки не фарба!', 'Ти подряпав мій чудовий флагман!'],
+        escaped: ['Ха! Запізно. До зустрічі, {name}!'] }
+};
+function ptaunt(text, now) {
+  const A = S.ar; if (!A) return;
+  A.taunt = { text: fmt(text), t0: now, said: 0 };
+  squelch();
+}
+function ptauntKey(key, now) {
+  const A = S.ar; if (!A || A.endAt) return;
+  if (A.taunt && now - A.taunt.t0 < A.taunt.text.length * 26 + 900) return;
+  const pool = PT[S.lang][key]; ptaunt(pool[(Math.random() * pool.length) | 0], now);
+}
+const pTalking = (now) => { const T = S.ar && S.ar.taunt; return !!T && now - T.t0 < T.text.length * 26 + 300; };
+function pursuitEnd(now, won) {
+  const A = S.ar; if (!A || A.endAt) return;
+  A.won = won; A.keys = {}; A.eshots = [];
+  const line = won ? LEVELS[A.replay][S.lang].retreat : PT[S.lang].escaped[0];
+  ptaunt(line, now + (won ? 700 : 300));
+  A.endAt = now + Math.max(4200, A.taunt.text.length * 26 + 3200);
+  if (won) {
+    A.score += 10; fanfare(true); banner(hg('replayDone')); view.shake = 300;
+    A.bursts = Array.from({ length: 10 }, (_, i) => ({ t: now + 150 + i * 330, x: view.w * (0.1 + Math.random() * 0.6), y: view.h * (0.15 + Math.random() * 0.4) }));
+  } else { defeatSting(); banner(hg('escaped'), true); }
 }
 function startReplay(lvl) {
   S.replayPending = lvl;
   startTraining('arcade', lvl >= 7 ? 1 : 0);
 }
 function endReplay() {
-  const lvl = S.tr.replay;
+  const lvl = S.tr.replay, won = S.ar && S.ar.won;
   S.tr = null; S.ar = null; resetCombat();
-  S.lvl = lvl; S.levelDone = true; S.phase = 'complete'; S.speaker = 'ora';
-  remark(hg('inHangar'));
-  renderAll();
+  S.lvl = lvl; S.levelDone = true;
+  const lines = (won ? [] : [hg('escapedOra')]).concat(S.afterPursuit || [LT().outro]);
+  if (lvl === ACTS[1].from) lines.push(hg('inHangar'));
+  S.afterPursuit = null;
+  say(lines, () => { S.phase = 'complete'; S.speaker = 'ora'; renderAll(); });
 }
 function leaveTraining() {
   S.tr = null; S.ar = null; resetCombat();
@@ -3017,8 +3065,8 @@ function buildWave() {
   A.inv = [];
   const types = rtypes || ['kamikaze', 'scout', 'drone', 'drone', 'drone'];
   for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) A.inv.push({ c, r, alive: true, type: types[r], hp: types[r] === 'cruiser' ? 2 : 1, hit: 0, dx: c * gx, dy: r * gy });
-  A.boss = A.replay === 8 ? { x: W / 2, y: 64 + 24 * A.k, dir: 1, hp: 14, max: 14, fireAt: performance.now() + 2500, hit: 0 } : null;
-  A.gx = gx; A.ox = (W - (cols - 1) * gx) / 2; A.oy = 58 + 10 * A.k; A.dir = 1;
+  A.boss = A.replay === 8 ? { x: (W - pursuitCol()) / 2, y: 64 + 24 * A.k, dir: 1, hp: 14, max: 14, fireAt: performance.now() + 2500, hit: 0 } : null;
+  A.gx = gx; A.ox = (W - pursuitCol() - (cols - 1) * gx) / 2; A.oy = 58 + 10 * A.k; A.dir = 1;
   if (A.boss) A.oy += 84 * A.k;
   A.total = A.inv.length;
   A.speed = (W * 0.00005) * ([1, 1.25, 1.5][A.tier]) * (1 + (A.wave - 1) * 0.18) * (S.up.booster ? 0.85 : 1);
@@ -3034,6 +3082,13 @@ const arPY = () => view.h - 50 - 22 * ((S.ar && S.ar.k) || 1);
 function arcadeTick(now, dt) {
   const A = S.ar, W = view.w, H = view.h, py = arPY();
   if (!A) return;
+  if (A.replay) {
+    pursuitFx(now, dt);
+    if (A.endAt) { if (now > A.endAt) endTraining(); return; }
+    if (pTalking(now)) dt *= 0.45;   // slow motion while Pumpkin talks, like the typing battle
+    if (!A.said) A.said = {};
+    if (!A.said.start && now - S.tr.t0 > 900) { A.said.start = 1; ptauntKey('start', now); }
+  }
   const sp = W * 0.00065;
   if (A.keys.left) A.x -= sp * dt;
   if (A.keys.right) A.x += sp * dt;
@@ -3047,16 +3102,21 @@ function arcadeTick(now, dt) {
   const alive = A.inv.filter(v => v.alive);
   if (A.boss) {
     const B = A.boss;
-    B.x += B.dir * W * 0.00008 * dt; if (B.x > W - 90 || B.x < 90) B.dir *= -1;
+    B.x += B.dir * W * 0.00008 * dt; if (B.x > W - 90 - pursuitCol() || B.x < 90) B.dir *= -1;
     if (now > B.fireAt) { B.fireAt = now + 1500; [-0.35, 0, 0.35].forEach(vx => A.eshots.push({ x: B.x, y: B.y + 24 * A.k, vx })); }
     if (B.hit > 0) B.hit -= dt;
   }
-  if (!alive.length && A.replay && (!A.boss || A.boss.hp <= 0)) { A.score += 10; endTraining(); return; }
+  if (!alive.length && A.replay && (!A.boss || A.boss.hp <= 0)) { pursuitEnd(now, true); return; }
+  if (A.replay) {
+    if (!A.said.half && alive.length <= A.total / 2) { A.said.half = 1; ptauntKey('half', now); }
+    else if (!A.said.few && alive.length <= 3 && alive.length) { A.said.few = 1; ptauntKey('few', now); }
+    if (A.boss && !A.said.boss && A.boss.hp <= A.boss.max / 2) { A.said.boss = 1; ptauntKey('boss', now); }
+  }
   if (!alive.length && !A.replay) { A.wave++; A.score += 5; banner(`${hg('wave')} ${A.wave}`); sfx.recharge(); buildWave(); return; }
   const k = 1 + (1 - alive.length / A.total) * 1.6;
   A.ox += A.dir * A.speed * k * dt;
   const xs = alive.map(v => A.ox + v.dx);
-  if (Math.max(...xs) > W - 40 || Math.min(...xs) < 40) { A.dir *= -1; A.ox += A.dir * 4; A.oy += 14; }
+  if (Math.max(...xs) > W - 40 - pursuitCol() || Math.min(...xs) < 40) { A.dir *= -1; A.ox += A.dir * 4; A.oy += 14; }
   const bottom = Math.max(...alive.map(v => A.oy + v.dy));
   if (bottom > py - 30) { A.lives = 0; arcadeHit(now, true); return; }
   // enemy fire
@@ -3090,11 +3150,13 @@ function arcadeTick(now, dt) {
 }
 function arcadeHit(now, fatal) {
   const A = S.ar;
+  if (A.endAt) return;
   if (!fatal && A.shieldUp) { A.shieldUp = false; A.shieldAt = now + (S.up.cap ? 8000 : 12000); sfx.clang(); C.booms.push({ x: A.x, y: arPY(), t: now, r: 0 }); return; }
   if (!fatal) A.lives--;
   A.hurt = now; view.shake = 320; view.flash = 1; sfx.breach();
   C.booms.push({ x: A.x, y: arPY(), t: now, r: Math.random(), bad: true, big: true });
-  if (A.lives <= 0) endTraining();
+  if (A.lives <= 0) { if (A.replay) pursuitEnd(now, false); else endTraining(); return; }
+  if (A.replay && !fatal) ptauntKey('hit', now);
 }
 function drawArcade(ctx, now) {
   const A = S.ar, W = view.w, H = view.h, py = arPY(); if (!A) return;
@@ -3135,11 +3197,79 @@ function drawArcade(ctx, now) {
     ctx.fillStyle = G(ready >= 1 ? 1 : .55); ctx.fillRect(A.x - 20, py + 20, 40 * ready, 4);
   }
 }
+const pf = { cv: null, ctx: null, w: 0, h: 0 };
+function pursuitCol() { return S.ar && S.ar.replay ? Math.round(Math.max(150, Math.min(230, view.w * 0.19))) : 0; }
+function pursuitFx(now, dt) {
+  const A = S.ar;
+  if (!A.fw) A.fw = [];
+  const T = A.taunt;
+  if (T && now >= T.t0) { const n = Math.min(T.text.length, Math.floor((now - T.t0) / 26)); if (n - T.said >= 2) { T.said = n; sfx.talk(); } }
+  (A.bursts || []).forEach(b => {
+    if (b.done || now < b.t) return; b.done = true;
+    const cols = ['#7dffa8', '#ffbe5a', '#ffffff', '#ff7a3a'], col = cols[(Math.random() * cols.length) | 0];
+    for (let i = 0; i < 70; i++) { const a = Math.random() * Math.PI * 2, v = 0.08 + Math.random() * 0.2; A.fw.push({ x: b.x, y: b.y, vx: Math.cos(a) * v, vy: Math.sin(a) * v, born: now, life: 900 + Math.random() * 700, col }); }
+    blip('triangle', 900 + Math.random() * 500, 300, 0.25, 0.04); noiseHit && AC && S.sound && noiseHit(master, AC.currentTime, 0.18, 0.05, 2400);
+  });
+  A.fw = A.fw.filter(p => { p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 0.00012 * dt; p.vx *= 0.995; return now - p.born < p.life; });
+}
+function wrapText(ctx, text, maxW) {
+  const out = []; let cur = '';
+  text.split(' ').forEach(w => { const t2 = cur ? cur + ' ' + w : w; if (ctx.measureText(t2).width > maxW && cur) { out.push(cur); cur = w; } else cur = t2; });
+  if (cur) out.push(cur); return out;
+}
+function drawPursuit(ctx, now) {
+  const A = S.ar, W = view.w, cw = pursuitCol(); if (!A || !cw) return;
+  // fireworks
+  (A.fw || []).forEach(p => { const a = 1 - (now - p.born) / p.life; ctx.globalAlpha = Math.max(0, a); ctx.fillStyle = p.col; ctx.fillRect(p.x - 2, p.y - 2, 4, 4); });
+  ctx.globalAlpha = 1;
+  if (A.endAt && A.won) {
+    const cx = (W - cw) / 2, a = Math.min(1, (now - (A.endAt - Math.max(4200, 0))) / 400);
+    ctx.save(); ctx.shadowColor = G(.9); ctx.shadowBlur = 18;
+    vtext(ctx, hg('replayDone').split('').join(' '), cx, view.h * 0.42, 54 + 3 * Math.sin(now * 0.008), 'center', G(Math.max(0.6, a)));
+    ctx.restore();
+  }
+  // Pumpkin's live feed, top right
+  const x0 = W - cw - 14, y0 = 70, fh = Math.round(cw * 0.66);
+  if (!pf.cv) { pf.cv = document.createElement('canvas'); pf.ctx = pf.cv.getContext('2d'); }
+  if (pf.w !== cw) { pf.cv.width = cw; pf.cv.height = fh; pf.w = cw; pf.h = fh; }
+  const T = A.taunt, talking = pTalking(now);
+  drawFace(pf, now, 'vex', talking && Math.floor(now / 90) % 2 === 0 || talking, true);
+  const OR = (a) => `rgba(255,128,48,${a})`;
+  ctx.save();
+  ctx.fillStyle = 'rgba(18,6,2,.9)'; ctx.fillRect(x0, y0, cw, fh);
+  ctx.beginPath(); ctx.rect(x0, y0, cw, fh); ctx.clip();
+  const strips = 10, sh = fh / strips, loud = talking ? 1 : 0.25;
+  ctx.globalAlpha = talking ? 1 : 0.6 + 0.25 * Math.random();
+  for (let i = 0; i < strips; i++) {
+    const off = Math.random() < 0.18 * loud + 0.03 ? (Math.random() - .5) * 22 * loud : 0;
+    ctx.drawImage(pf.cv, 0, i * sh, cw, sh, x0 + off, y0 + i * sh, cw, sh);
+  }
+  ctx.globalAlpha = 1;
+  for (let i = 0; i < (talking ? 90 : 30); i++) { ctx.fillStyle = OR(0.08 + Math.random() * 0.25); ctx.fillRect(x0 + Math.random() * cw, y0 + Math.random() * fh, 2, 1); }
+  if (Math.random() < 0.08 * loud + 0.01) { ctx.fillStyle = OR(0.25); ctx.fillRect(x0, y0 + Math.random() * fh, cw, 2 + Math.random() * 6); }
+  ctx.fillStyle = 'rgba(0,0,0,.28)'; for (let y = y0; y < y0 + fh; y += 3) ctx.fillRect(x0, y, cw, 1);
+  ctx.restore();
+  ctx.strokeStyle = OR(talking ? 0.6 + 0.4 * Math.sin(now * 0.02) : 0.45); ctx.lineWidth = 1.5; ctx.strokeRect(x0, y0, cw, fh);
+  const rec = Math.floor(now / 500) % 2;
+  if (rec) { ctx.fillStyle = OR(1); ctx.beginPath(); ctx.arc(x0 + 10, y0 - 9, 3.5, 0, Math.PI * 2); ctx.fill(); }
+  vtext(ctx, `${S.lang === 'uk' ? 'ГАРБУЗ' : 'PUMPKIN'} · LIVE`, x0 + 19, y0 - 9, 17, 'left', OR(.95));
+  // his words, under the feed
+  if (T && now >= T.t0 && now - T.t0 < T.text.length * 26 + 3800) {
+    const n = Math.min(T.text.length, Math.floor((now - T.t0) / 26));
+    ctx.font = `19px ${MONO}`;
+    const lines = wrapText(ctx, T.text, cw - 16), shownLines = []; let left = n;
+    lines.forEach(l => { if (left <= 0) return; shownLines.push(l.slice(0, left)); left -= l.length + 1; });
+    const bh = lines.length * 20 + 12;
+    ctx.fillStyle = 'rgba(18,6,2,.85)'; ctx.fillRect(x0, y0 + fh + 6, cw, bh);
+    ctx.strokeStyle = OR(.35); ctx.lineWidth = 1; ctx.strokeRect(x0, y0 + fh + 6, cw, bh);
+    shownLines.forEach((l, i) => vtext(ctx, l, x0 + 8, y0 + fh + 6 + 16 + i * 20, 19, 'left', 'rgba(255,190,120,.97)'));
+  }
+}
 function simHeader(ctx, now) {
   const tr = S.tr;
   if (tr.mode === 'arcade') {
     const A = S.ar;
-    header(ctx, 'SIM', [[hg('score'), String(A ? A.score : 0)], [hg('wave'), String(A ? A.wave : 1)], [hg('lives'), '■'.repeat(Math.max(0, A ? A.lives : 0)), A && A.lives < 2]]);
+    header(ctx, tr.replay ? hg('replay').toUpperCase() : 'SIM', [[hg('score'), String(A ? A.score : 0)], [hg('wave'), String(A ? A.wave : 1)], [hg('lives'), '■'.repeat(Math.max(0, A ? A.lives : 0)), A && A.lives < 2]]);
   } else if (tr.mode === 'range') {
     const left = Math.max(0, Math.ceil((tr.end - now) / 1000));
     header(ctx, 'SIM', [[hg('time'), `${left}s`, left <= 10], [hg('score'), String(tr.score)], [hg('best'), String(S.best.range || 0)]]);
