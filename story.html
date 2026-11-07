@@ -1,8 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>KeyQuest</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -428,11 +423,11 @@ body[data-station="sim"] { --st: #3fe0c5; }
 .hg-lock { display: block; margin-top: 6px; font-size: 12px; color: var(--muted); }
 .hangar-btn { position: relative; }
 .badge { position: absolute; top: -8px; right: -8px; font-style: normal; font-size: 9px; font-weight: 700; letter-spacing: .1em; background: #ffb547; color: #1a1206; border-radius: 4px; padding: 1px 5px; animation: blink 1.2s steps(1) infinite; }
-.skills { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
-.sk { border: 1px solid #26313c; border-radius: 8px; padding: 8px 10px; opacity: .5; min-width: 0; }
+.skills { display: grid; grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); gap: 6px; }
+.sk { display: flex; align-items: center; gap: 8px; border: 1px solid #26313c; border-radius: 6px; padding: 5px 8px; opacity: .45; min-width: 0; }
 .sk.own { opacity: 1; border-color: var(--st, #3fe0c5); box-shadow: 0 0 12px color-mix(in srgb, var(--st, #3fe0c5) 25%, transparent); }
-.sk span { font-size: 20px; color: var(--st, #3fe0c5); }
-.sk b { display: block; font-family: var(--f-display); font-size: 13px; letter-spacing: .08em; margin-top: 2px; }
+.sk span { font-size: 16px; color: var(--st, #3fe0c5); flex: none; }
+.sk b { font-family: var(--f-display); font-size: 11px; letter-spacing: .05em; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .sk small { display: block; font-size: 11px; color: var(--muted); margin-top: 2px; }
 @media (max-width: 600px) { .skills { grid-template-columns: 1fr; } }
 
@@ -445,9 +440,38 @@ body.sim-full .log-screen, body.sim-type .log-screen { padding: 6px 10px; }
 body.sim-full .terminal, body.sim-type .terminal { margin-top: 8px; }
 body.sim-full .deck { display: none; }
 body.sim-full .app, body.sim-type .app { grid-template-rows: max-content minmax(300px, 1fr) max-content max-content; }
+
+/* hangar v2: ship + stats on the left, tabbed tree / simulator on the right */
+.hg-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 2px 14px; }
+.hs { display: flex; justify-content: space-between; gap: 8px; padding: 3px 0; border-bottom: 1px dashed #1d2a24; font-size: 11px; color: var(--muted); }
+.hs span { font-family: var(--f-display); letter-spacing: .08em; text-transform: uppercase; font-size: 10px; }
+.hs b { font-weight: 500; color: #8fa49a; font-variant-numeric: tabular-nums; }
+.hs.on b { color: #7dffa8; text-shadow: 0 0 8px rgba(96,255,150,.4); }
+.hg-right { display: grid; gap: 10px; align-content: start; border: 1px solid rgba(96,255,150,.18); border-radius: 10px; padding: 0 12px 12px; background: rgba(2,10,5,.5); min-width: 0; }
+.hg-tabs { display: flex; gap: 0; border-bottom: 1px solid rgba(96,255,150,.25); margin: 0 -12px; padding: 0 12px; }
+.hg-tab { position: relative; background: none; border: 0; border-bottom: 2px solid transparent; color: var(--muted); padding: 12px 14px 9px; font-family: var(--f-display); font-size: 13px; font-weight: 600; letter-spacing: .18em; text-transform: uppercase; cursor: pointer; }
+.hg-tab.on { color: #e6ffee; border-bottom-color: #7dffa8; text-shadow: 0 0 10px rgba(96,255,150,.5); }
+.hg-tab .badge { top: 2px; right: -4px; }
+.hg-tree { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; }
+@media (max-width: 700px) { .hg-tree { grid-template-columns: 1fr; } }
+.branch { display: grid; align-content: start; gap: 0; }
+.branch-h { display: flex; align-items: center; gap: 8px; font-family: var(--f-display); font-size: 12px; font-weight: 700; letter-spacing: .22em; color: #7dffa8; padding: 4px 2px 8px; }
+.branch-h span { font-size: 16px; }
+.branch .link { display: block; width: 2px; height: 12px; margin: 0 auto; background: rgba(96,255,150,.35); }
+.node { display: grid; gap: 4px; padding: 9px 10px; border: 1px solid #1d2a24; border-radius: 8px; background: rgba(0,0,0,.3); }
+.node-h { display: flex; align-items: center; gap: 8px; }
+.node-h .hg-ic { font-size: 16px; width: 18px; }
+.node-h b { font-family: var(--f-display); font-size: 13px; letter-spacing: .06em; color: #e6ffee; font-weight: 600; }
+.node small { font-size: 11px; line-height: 1.35; color: var(--muted); }
+.node small.arc { color: #6aa88a; }
+.node .hg-buy, .node .hg-own, .node .hg-req { justify-self: start; margin-top: 2px; }
+.node .hg-buy { padding: 4px 9px; font-size: 11px; }
+.hg-req { font-size: 10px; color: var(--muted); letter-spacing: .04em; }
+.node.own { border-color: rgba(96,255,150,.5); background: rgba(20,60,35,.25); }
+.node.can { border-color: rgba(255,207,138,.6); box-shadow: 0 0 14px rgba(255,207,138,.12); }
+.node.locked { opacity: .45; }
 </style>
-</head>
-<body>
+
 <div class="app">
   <header class="top plate">
     <div class="brand"><h1>KEYQUEST</h1><div class="seg" role="group" aria-label="Act"><button id="act1">ACT 1</button><button id="act2">ACT 2</button></div><span class="act" id="actLabel">COLD BOOT</span><span class="leds" id="leds"><i></i><i></i><i></i><i></i><i></i></span></div>
@@ -500,8 +524,8 @@ body.sim-full .app, body.sim-type .app { grid-template-rows: max-content minmax(
   <div class="hg-in">
     <div class="hg-head"><h2 id="hgTitle">HANGAR</h2><span class="hg-parts" id="hgParts"></span><button class="btn" id="hgCloseBtn">✕</button></div>
     <div class="hg-grid">
-      <section class="hg-ship"><span class="tag" id="hgShipTag"></span><canvas id="hgShip"></canvas><div class="hg-ups" id="hgUps"></div></section>
-      <section class="hg-sim"><span class="tag" id="hgSimTag"></span><div class="hg-modes" id="hgModes"></div></section>
+      <section class="hg-ship"><span class="tag" id="hgShipTag"></span><canvas id="hgShip"></canvas><span class="tag" id="hgStatsTag"></span><div class="hg-stats" id="hgStats"></div></section>
+      <section class="hg-right"><div class="hg-tabs" id="hgTabs"></div><div class="hg-tree" id="hgTree"></div><div class="hg-modes" id="hgModes" hidden></div></section>
     </div>
     <div class="cine-hint" id="hgClose"></div>
   </div>
@@ -752,7 +776,7 @@ const S = {
   lines: [], lineIdx: 0, ch: 0, levelDone: false, ending: 0, speaker: 'ora',
   correct: 0, total: 0, startT: null, lastStars: 0, lastWpm: 0, lastAcc: 100,
   msg: '', done: { en: blank(), uk: blank() },
-  sound: true, music: true, hands: true, kb: true, parts: 0, up: { armor: false, twin: false, dish: false }, train: {}, best: {}, seen: [], miss: null, cadence: 0, lastKey: 0,
+  sound: true, music: true, hands: true, kb: true, played: [], parts: 0, up: { armor: false, cap: false, reactive: false, twin: false, overdrive: false, flak: false, dish: false, booster: false, chrono: false }, hgTab: 'up', train: {}, best: {}, seen: [], miss: null, cadence: 0, lastKey: 0,
   dlg: [], dlgIdx: 0, dlgCb: null, full: '', shown: '', speaking: false, typer: null, blocking: false,
   dec: null, name: ''
 };
@@ -774,7 +798,7 @@ function codeOf(ch, lang = S.lang) { if (ch === ' ') return 'Space'; for (const 
 function keyLabel(code) { return code === 'Space' ? t('space') : (charOf(code) || '').toUpperCase(); }
 
 /* ---------- Save ---------- */
-function save() { try { localStorage.setItem('keyquest.story', JSON.stringify({ done: S.done, lang: S.lang, name: S.name, music: S.music, hands: S.hands, kb: S.kb, miss: S.miss, parts: S.parts, up: S.up, train: S.train, best: S.best, seen: S.seen })); } catch (e) {} }
+function save() { try { localStorage.setItem('keyquest.story', JSON.stringify({ done: S.done, lang: S.lang, name: S.name, music: S.music, hands: S.hands, kb: S.kb, miss: S.miss, parts: S.parts, up: S.up, train: S.train, best: S.best, seen: S.seen, played: S.played, hgTab: S.hgTab })); } catch (e) {} }
 function load() {
   try {
     const d = JSON.parse(localStorage.getItem('keyquest.story') || localStorage.getItem('keyquest.act1') || 'null');
@@ -790,6 +814,8 @@ function load() {
       if (d.train) S.train = d.train;
       if (d.best) S.best = d.best;
       if (Array.isArray(d.seen)) S.seen = d.seen;
+      if (Array.isArray(d.played)) S.played = d.played;
+      if (d.hgTab === 'sim' || d.hgTab === 'up') S.hgTab = d.hgTab;
       if (d.miss && d.miss.words) S.miss = d.miss;
     }
   } catch (e) {}
@@ -1182,8 +1208,8 @@ const cannon = () => ({ x: view.w * 0.5, y: view.h * 0.8 });
 const perimeterX = () => view.w * 0.13;
 const km = (n) => Math.round(n).toLocaleString('en-US').replace(/,/g, ' ') + ' km';
 const UIW = {
-  en: { status: 'STATUS', comms: 'COMMS', target: 'TARGET', nav: 'NAV', offline: 'OFFLINE', booting: 'BOOTING', low: 'LOW POWER', hull: 'HULL', crew: 'CREW', dist: 'DIST', spd: 'SPD', level: 'Level', freq: 'FREQ', sig: 'SIG', src: 'SRC', unknown: 'UNKNOWN', shields: 'SHIELDS', hostiles: 'HOSTILES', perimeter: 'PERIMETER', lock: 'LOCK', sim: 'SIM', vex: 'VEX · RAIDER COMMAND', heat: 'HEAT', overcharge: 'OVERCHARGE', flagship: 'FLAGSHIP', hullHit: 'HULL HIT', recharge: 'SHIELD +1', repair: 'REPAIR BAY', repaired: 'HULL REPAIRED', ready: 'COMBAT READY', incoming: 'INCOMING', cleared: 'SECTOR CLEARED', sysOnline: 'SYSTEM ONLINE', phase2: 'PHASE 2', flagshipDown: 'FLAGSHIP DOWN', srcUnknown: 'SOURCE UNKNOWN', navOff: 'NAV OFFLINE' },
-  uk: { status: 'СТАТУС', comms: 'ЗВ\'ЯЗОК', target: 'ЦІЛЬ', nav: 'НАВ', offline: 'ВИМКНЕНО', booting: 'ЗАПУСК', low: 'МАЛО ЖИВЛЕННЯ', hull: 'КОРПУС', crew: 'ЕКІПАЖ', dist: 'ВІДСТ', spd: 'ШВИД', level: 'Рівень', freq: 'ЧАСТ', sig: 'СИГН', src: 'ДЖЕР', unknown: 'НЕВІДОМО', shields: 'ЩИТИ', hostiles: 'ВОРОГИ', perimeter: 'ПЕРИМЕТР', lock: 'ЦІЛЬ', sim: 'СИМ', vex: 'ВЕКС · РЕЙДЕРИ', heat: 'ЗАРЯД', overcharge: 'ПЕРЕЗАРЯД', flagship: 'ФЛАГМАН', hullHit: 'ВЛУЧАННЯ', recharge: 'ЩИТ +1', repair: 'РЕМОНТ', repaired: 'КОРПУС ВІДНОВЛЕНО', ready: 'ГОТОВИЙ ДО БОЮ', incoming: 'РАКЕТА', cleared: 'СЕКТОР ЗАЧИЩЕНО', sysOnline: 'СИСТЕМА ПРАЦЮЄ', phase2: 'ФАЗА 2', flagshipDown: 'ФЛАГМАН ЗБИТО', srcUnknown: 'ДЖЕРЕЛО НЕВІДОМЕ', navOff: 'НАВ ВИМКНЕНО' }
+  en: { status: 'STATUS', comms: 'COMMS', target: 'TARGET', nav: 'NAV', offline: 'OFFLINE', booting: 'BOOTING', low: 'LOW POWER', hull: 'HULL', crew: 'CREW', dist: 'DIST', spd: 'SPD', level: 'Level', freq: 'FREQ', sig: 'SIG', src: 'SRC', unknown: 'UNKNOWN', shields: 'SHIELDS', hostiles: 'HOSTILES', perimeter: 'PERIMETER', lock: 'LOCK', sim: 'SIM', vex: 'VEX · RAIDER COMMAND', heat: 'HEAT', overcharge: 'OVERCHARGE', flagship: 'FLAGSHIP', hullHit: 'HULL HIT', absorbed: 'HIT ABSORBED', recharge: 'SHIELD +1', repair: 'REPAIR BAY', repaired: 'HULL REPAIRED', ready: 'COMBAT READY', incoming: 'INCOMING', cleared: 'SECTOR CLEARED', sysOnline: 'SYSTEM ONLINE', phase2: 'PHASE 2', flagshipDown: 'FLAGSHIP DOWN', srcUnknown: 'SOURCE UNKNOWN', navOff: 'NAV OFFLINE' },
+  uk: { status: 'СТАТУС', comms: 'ЗВ\'ЯЗОК', target: 'ЦІЛЬ', nav: 'НАВ', offline: 'ВИМКНЕНО', booting: 'ЗАПУСК', low: 'МАЛО ЖИВЛЕННЯ', hull: 'КОРПУС', crew: 'ЕКІПАЖ', dist: 'ВІДСТ', spd: 'ШВИД', level: 'Рівень', freq: 'ЧАСТ', sig: 'СИГН', src: 'ДЖЕР', unknown: 'НЕВІДОМО', shields: 'ЩИТИ', hostiles: 'ВОРОГИ', perimeter: 'ПЕРИМЕТР', lock: 'ЦІЛЬ', sim: 'СИМ', vex: 'ВЕКС · РЕЙДЕРИ', heat: 'ЗАРЯД', overcharge: 'ПЕРЕЗАРЯД', flagship: 'ФЛАГМАН', hullHit: 'ВЛУЧАННЯ', absorbed: 'ВЛУЧАННЯ ПОГЛИНУТО', recharge: 'ЩИТ +1', repair: 'РЕМОНТ', repaired: 'КОРПУС ВІДНОВЛЕНО', ready: 'ГОТОВИЙ ДО БОЮ', incoming: 'РАКЕТА', cleared: 'СЕКТОР ЗАЧИЩЕНО', sysOnline: 'СИСТЕМА ПРАЦЮЄ', phase2: 'ФАЗА 2', flagshipDown: 'ФЛАГМАН ЗБИТО', srcUnknown: 'ДЖЕРЕЛО НЕВІДОМЕ', navOff: 'НАВ ВИМКНЕНО' }
 };
 const uw = (k) => UIW[S.lang][k];
 
@@ -2189,7 +2215,7 @@ function startDecrypt() {
   const keys = segs.filter(x => x.key);
   const chars = keys.reduce((a, k) => a + k.k.length, 0);
   const factor = [1, 0.92, 0.85, 0.78][S.lvl - ACTS[1].from] || 0.78;
-  const total = (chars * 1150 + keys.length * 1500 + 6000) * factor;
+  const total = (S.up.booster ? 1.2 : 1) * (chars * 1150 + keys.length * 1500 + 6000) * factor;
   S.dec = { segs, keys, ki: 0, ch: 0, total, left: total };
   S.speaker = 'unknown'; S.phase = 'decrypt'; S.msg = '';
   sfx.glitch(); squelch();
@@ -2271,7 +2297,7 @@ const RT = {
 
 function resetCombat() {
   Object.assign(C, { ships: [], missiles: [], boss: null, queue: [], lasers: [], booms: [], chains: [], lock: null, heat: 0, over: false,
-    shields: 3 + (S.up.armor ? 1 : 0), maxShields: 3 + (S.up.armor ? 1 : 0), total: 0, last: -1e9, said: {}, won: 0 });
+    shields: 3 + (S.up.armor ? 1 : 0), maxShields: 3 + (S.up.armor ? 1 : 0), absorb: !!S.up.reactive, total: 0, last: -1e9, said: {}, won: 0 });
 }
 const alive = (e) => e && (e.kind === 'part' ? e.alive && C.boss : e.kind === 'ship' ? C.ships.includes(e) : C.missiles.includes(e));
 function targets() { return [...C.missiles, ...C.ships, ...(C.boss ? C.boss.parts.filter(p => p.alive) : [])]; }
@@ -2348,6 +2374,11 @@ function makeParts(words, phase) {
 }
 
 function loseShield(now, x, y) {
+  if (C.absorb) {
+    C.absorb = false;
+    C.booms.push({ x, y, t: now, r: Math.random() }); sfx.clang(); banner(uw('absorbed'));
+    return false;
+  }
   C.shields--;
   C.booms.push({ x, y, t: now, r: Math.random(), bad: true, big: true });
   view.shake = 380; view.flash = 1; sfx.breach(); flashPlate();
@@ -2360,6 +2391,7 @@ function loseShield(now, x, y) {
 function combatTick(now, dt) {
   if (C.won) { if (now > C.won) { C.won = 0; completeLevel(); } return; }
   if (now < (C.slowUntil || 0)) dt *= 0.25;
+  if (S.up.chrono) dt *= 0.9;
   const lv = L(), cfg = COMBAT[S.lvl], W = view.w;
   // spawning
   if (!C.boss) {
@@ -2437,24 +2469,28 @@ function destroyTarget(e, now) {
     return;
   }
   if (e.kind === 'ship') C.ships = C.ships.filter(o => o !== e);
-  if (e.kind === 'missile') C.missiles = C.missiles.filter(o => o !== e);
+  if (e.kind === 'missile') {
+    C.missiles = C.missiles.filter(o => o !== e);
+    if (S.up.flak && C.missiles.length) { C.missiles.forEach(m => C.booms.push({ x: m.x, y: m.y, t: now + 60, r: Math.random() })); C.missiles = []; }
+  }
   if (e.kind === 'part') e.alive = false;
   C.streak = (C.streak || 0) + 1;
-  if (C.streak >= 4) {
+  if (C.streak >= (S.up.cap ? 3 : 4)) {
     C.streak = 0;
     if (C.shields < C.maxShields) { C.shields++; banner(uw('recharge')); sfx.recharge(); }
   }
   C.booms.push({ x, y, t: now, r: Math.random(), big: e.kind !== 'missile' }); sfx.boom();
   if (C.over) {
     C.over = false; C.heat = 0;
-    const other = targets().filter(o => o.kind !== 'part').sort((a, b) => danger(a) - danger(b))[0];
-    if (other) {
+    const others = targets().filter(o => o.kind !== 'part').sort((a, b) => danger(a) - danger(b)).slice(0, S.up.overdrive ? 2 : 1);
+    if (others.length) sfx.chain();
+    others.forEach(other => {
       const [ox, oy] = pos(other);
-      C.chains.push({ x1: x, y1: y, x2: ox, y2: oy, t: now }); sfx.chain();
+      C.chains.push({ x1: x, y1: y, x2: ox, y2: oy, t: now });
       if (S.phase === 'train' && S.tr) S.tr.score++;
       if (other.kind === 'ship') C.ships = C.ships.filter(o => o !== other); else C.missiles = C.missiles.filter(o => o !== other);
       C.booms.push({ x: ox, y: oy, t: now + 80, r: Math.random(), big: true });
-    }
+    });
   }
   if (e.kind === 'part') checkBoss(now);
 }
@@ -2592,6 +2628,7 @@ function completeLevel() {
   const lt = LT();
   const lines = L().type === 'encounter' ? [{ who: 'vex', text: lt.retreat }, lt.outro] : [lt.outro];
   if (!wasDone) Object.keys(MODES).filter(m => MODES[m].need === S.lvl).forEach(m => lines.push(hg('newProg').replace('{m}', MODES[m][S.lang][0])));
+  if (L().type === 'encounter') { lines.push(hg('replayIntro')); say(lines, () => startReplay(S.lvl)); return; }
   say(lines, () => { S.phase = 'complete'; S.speaker = 'ora'; renderAll(); });
 }
 
@@ -2618,17 +2655,42 @@ function startEnding(n) {
    Simulator programs unlock with story progress and have three tiers.
    Upgrades change the ship everywhere and become skills in Raider Run.
    ====================================================================== */
+const BRANCHES = {
+  def: { icon: '▦', en: 'DEFENCE', uk: 'ЗАХИСТ' },
+  wpn: { icon: '⊕', en: 'WEAPONS', uk: 'ЗБРОЯ' },
+  sys: { icon: 'Ψ', en: 'SYSTEMS', uk: 'СИСТЕМИ' }
+};
+/* [name, effect in story battles, Raider Run skill] */
 const UPG = {
-  armor: { cost: 30, icon: '▦',
-    en: ['Armour plating', '+1 shield in battle.', 'Energy shield: absorbs one hit, recharges in 12 s.'],
-    uk: ['Броня', '+1 щит у бою.', 'Енергощит: поглинає одне влучання, відновлюється за 12 с.'] },
-  twin: { cost: 45, icon: '‖',
+  armor:     { b: 'def', t: 0, cost: 30, icon: '▦',
+    en: ['Armour plating', '+1 shield in battle.', 'Energy shield absorbs a hit.'],
+    uk: ['Броня', '+1 щит у бою.', 'Енергощит поглинає влучання.'] },
+  cap:       { b: 'def', t: 1, cost: 70, req: 'armor', icon: '◈',
+    en: ['Shield capacitor', 'Shield recharges after 3 clean kills (was 4).', 'Shield recharges in 8 s (was 12).'],
+    uk: ['Конденсатор щита', 'Щит відновлюється після 3 чистих влучань (було 4).', 'Щит відновлюється за 8 с (було 12).'] },
+  reactive:  { b: 'def', t: 2, cost: 120, req: 'cap', icon: '⬢',
+    en: ['Reactive hull', 'The first hit in every battle is absorbed.', '+1 life.'],
+    uk: ['Реактивний корпус', 'Перше влучання в кожному бою поглинається.', '+1 життя.'] },
+  twin:      { b: 'wpn', t: 0, cost: 45, icon: '‖',
     en: ['Twin cannon', 'Heat builds 50% faster. Double beams.', 'Double shot.'],
     uk: ['Подвійна гармата', 'Заряд росте на 50% швидше. Подвійні промені.', 'Подвійний постріл.'] },
-  dish: { cost: 60, icon: 'Ψ',
-    en: ['Long-range dish', 'Enemy missiles fly 15% slower.', 'Enemy fire is 35% slower.'],
-    uk: ['Далекобійна антена', 'Ворожі ракети летять на 15% повільніше.', 'Ворожий вогонь на 35% повільніший.'] }
+  overdrive: { b: 'wpn', t: 1, cost: 80, req: 'twin', icon: '»',
+    en: ['Overdrive coils', 'Overcharge chains to 2 targets.', 'Faster fire rate.'],
+    uk: ['Котушки форсажу', 'Перезаряд вражає 2 цілі.', 'Швидша стрільба.'] },
+  flak:      { b: 'wpn', t: 2, cost: 130, req: 'overdrive', icon: '✶',
+    en: ['Flak burst', 'Shooting down a missile destroys every missile in flight.', 'Shots pierce through ships.'],
+    uk: ['Зенітний залп', 'Збита ракета знищує всі ракети в польоті.', 'Постріли пробивають кораблі.'] },
+  dish:      { b: 'sys', t: 0, cost: 60, icon: 'Ψ',
+    en: ['Long-range dish', 'Enemy missiles fly 15% slower.', 'Enemy fire 35% slower.'],
+    uk: ['Далекобійна антена', 'Ворожі ракети летять на 15% повільніше.', 'Ворожий вогонь на 35% повільніший.'] },
+  booster:   { b: 'sys', t: 1, cost: 75, req: 'dish', icon: '≋',
+    en: ['Signal booster', '+20% time to decrypt transmissions.', 'Invaders advance 15% slower.'],
+    uk: ['Підсилювач сигналу', '+20% часу на дешифрування.', 'Загарбники наступають на 15% повільніше.'] },
+  chrono:    { b: 'sys', t: 2, cost: 140, req: 'booster', icon: '◔',
+    en: ['Chrono field', 'Everything in battle moves 10% slower.', 'Enemy fire 50% slower.'],
+    uk: ['Хронополе', 'Усе в бою рухається на 10% повільніше.', 'Ворожий вогонь на 50% повільніший.'] }
 };
+const upgReady = (k) => !UPG[k].req || S.up[UPG[k].req];
 const MODES = {
   range:  { need: 0, icon: '⊙', typing: true, th: [12, 20, 28],
     en: ['Target Range', 'Drones carry letters. Shoot as many as you can in 60 seconds.'],
@@ -2645,19 +2707,26 @@ const HG = {
         tiers: ['Cadet', 'Pilot', 'Ace'], tierLock: 'Get 2★ on the tier before', newProg: 'New simulator program in the hangar: {m}. Train there to earn parts for upgrades.',
         retry: 'retry', back: 'back to mission', hangar: 'hangar', score: 'Score', earned: 'Parts earned', best: 'Best', time: 'TIME', hull: 'HULL', wave: 'WAVE', lives: 'LIVES',
         skills: 'Skills', move: '← → move · Space fire · Esc quit', typeHint: 'Type a target\'s first letter to lock on · Esc quit', simOn: 'Simulator online. {m}, {t} tier.',
-        defeatTip: 'Later, the Target Range in the hangar will sharpen your aim.', over: 'SIMULATION OVER', newBadge: 'NEW' },
+        defeatTip: 'Later, the Target Range in the hangar will sharpen your aim.', over: 'SIMULATION OVER', newBadge: 'NEW',
+        tabUp: 'Upgrade tree', tabSim: 'Simulator', stats: 'Ship stats', requires: 'Requires', replay: 'Battle replay', replayIntro: 'Battle recorded. Let us replay it in the simulator: no typing, just reflexes. Your hangar upgrades are your skills.',
+        replayOn: 'Battle replay. ← → move, Space fire. Your upgrades are your skills.', replayDone: 'REPLAY COMPLETE', cont: 'continue', skip: 'skip', inHangar: 'Raider Run is always available in your Hangar.',
+        st: { shields: 'Shields', recharge: 'Recharge', every: 'every {n} kills', absorb: 'First hit absorbed', heat: 'Heat build', chain: 'Overcharge chain', targets: '{n} target(s)', missiles: 'Missile speed', flak: 'Flak burst', decrypt: 'Decrypt time', speed: 'Battle speed', yes: 'yes', no: '—' } },
   uk: { title: 'АНГАР', parts: 'деталей', ship: 'АРГО-7 · ПОКРАЩЕННЯ', sim: 'СИМУЛЯТОР', buy: 'Встановити', installed: 'Встановлено', need: 'Треба', locked: 'Відкривається після', close: 'Esc · закрити',
         tiers: ['Кадет', 'Пілот', 'Ас'], tierLock: 'Отримай 2★ на попередньому рівні', newProg: 'Нова програма симулятора в ангарі: {m}. Тренуйся там, щоб заробити деталі на покращення.',
         retry: 'ще раз', back: 'до місії', hangar: 'ангар', score: 'Рахунок', earned: 'Зароблено деталей', best: 'Рекорд', time: 'ЧАС', hull: 'КОРПУС', wave: 'ХВИЛЯ', lives: 'ЖИТТЯ',
         skills: 'Навички', move: '← → рух · пробіл вогонь · Esc вихід', typeHint: 'Набери першу літеру цілі · Esc вихід', simOn: 'Симулятор увімкнено. {m}, рівень «{t}».',
-        defeatTip: 'Згодом тир в ангарі відточить твою точність.', over: 'СИМУЛЯЦІЮ ЗАВЕРШЕНО', newBadge: 'НОВЕ' }
+        defeatTip: 'Згодом тир в ангарі відточить твою точність.', over: 'СИМУЛЯЦІЮ ЗАВЕРШЕНО', newBadge: 'НОВЕ',
+        tabUp: 'Дерево покращень', tabSim: 'Симулятор', stats: 'Характеристики', requires: 'Потрібно', replay: 'Повтор бою', replayIntro: 'Бій записано. Повторімо його в симуляторі: без друку, лише реакція. Твої покращення з ангара — це твої навички.',
+        replayOn: 'Повтор бою. ← → рух, пробіл — вогонь. Твої покращення — це навички.', replayDone: 'ПОВТОР ЗАВЕРШЕНО', cont: 'далі', skip: 'пропустити', inHangar: 'Рейдерський забіг завжди доступний в ангарі.',
+        st: { shields: 'Щити', recharge: 'Підзарядка', every: 'кожні {n} влучання', absorb: 'Перше влучання поглинається', heat: 'Ріст заряду', chain: 'Ланцюг перезаряду', targets: '{n} ціль(і)', missiles: 'Швидкість ракет', flak: 'Зенітний залп', decrypt: 'Час дешифрування', speed: 'Швидкість бою', yes: 'так', no: '—' } }
 };
 const hg = (k) => HG[S.lang][k];
 const modeOpen = (m) => S.done[S.lang][MODES[m].need] > 0;
 const tierOpen = (m, t) => t === 0 || ((S.train[m] || [0, 0, 0])[t - 1] || 0) >= 2;
 function hangarNews() {
   const unseenMode = Object.keys(MODES).some(m => modeOpen(m) && !S.seen.includes(m));
-  const buyable = Object.keys(UPG).some(u => !S.up[u] && S.parts >= UPG[u].cost);
+  if (!S.played) S.played = [];
+  const buyable = Object.keys(UPG).some(u => !S.up[u] && upgReady(u) && S.parts >= UPG[u].cost);
   return unseenMode || buyable;
 }
 
@@ -2705,18 +2774,52 @@ function closeHangar() {
   renderChrome();
 }
 function renderHangar() {
+  const st = hg('st');
   $('#hgTitle').textContent = hg('title');
   $('#hgParts').innerHTML = `⚙ <b>${S.parts}</b> ${esc(hg('parts'))}`;
-  $('#hgShipTag').textContent = hg('ship');
-  $('#hgSimTag').textContent = hg('sim');
+  $('#hgShipTag').textContent = 'ARGO-7';
+  $('#hgStatsTag').textContent = hg('stats');
   $('#hgClose').textContent = hg('close');
-  $('#hgUps').innerHTML = Object.entries(UPG).map(([k, u]) => {
-    const own = S.up[k], can = S.parts >= u.cost;
-    const btn = own ? `<span class="hg-own">✓ ${esc(hg('installed'))}</span>`
-      : `<button class="btn hg-buy" data-u="${k}" ${can ? '' : 'disabled'}>${esc(can ? hg('buy') : hg('need'))} · ${u.cost} ⚙</button>`;
-    return `<div class="hg-up ${own ? 'own' : ''}"><span class="hg-ic">${u.icon}</span><div><b>${esc(u[S.lang][0])}</b><small>${esc(u[S.lang][1])}</small></div>${btn}</div>`;
+  const newSim = Object.keys(MODES).some(m => modeOpen(m) && !(S.played || []).includes(m));
+  $('#hgTabs').innerHTML = ['up', 'sim'].map(tb => `<button class="hg-tab ${S.hgTab === tb ? 'on' : ''}" data-tab="${tb}">${esc(tb === 'up' ? hg('tabUp') : hg('tabSim'))}${tb === 'sim' && newSim ? `<i class="badge">${esc(hg('newBadge'))}</i>` : ''}</button>`).join('');
+  $('#hgTabs').querySelectorAll('.hg-tab').forEach(b => b.onclick = () => { b.blur(); S.hgTab = b.dataset.tab; save(); renderHangar(); });
+  // ship stats readout
+  const rows = [
+    [st.shields, String(3 + (S.up.armor ? 1 : 0)), S.up.armor],
+    [st.recharge, st.every.replace('{n}', S.up.cap ? 3 : 4), S.up.cap],
+    [st.absorb, S.up.reactive ? st.yes : st.no, S.up.reactive],
+    [st.heat, S.up.twin ? '×1.5' : '×1', S.up.twin],
+    [st.chain, st.targets.replace('{n}', S.up.overdrive ? 2 : 1), S.up.overdrive],
+    [st.flak, S.up.flak ? st.yes : st.no, S.up.flak],
+    [st.missiles, S.up.dish ? '−15%' : '100%', S.up.dish],
+    [st.decrypt, S.up.booster ? '+20%' : '+0%', S.up.booster],
+    [st.speed, S.up.chrono ? '90%' : '100%', S.up.chrono]
+  ];
+  $('#hgStats').innerHTML = rows.map(([k, v, on]) => `<div class="hs ${on ? 'on' : ''}"><span>${esc(k)}</span><b>${esc(v)}</b></div>`).join('');
+  // upgrade tree
+  const tree = $('#hgTree'), modes = $('#hgModes');
+  tree.hidden = S.hgTab !== 'up'; modes.hidden = S.hgTab !== 'sim';
+  tree.innerHTML = Object.entries(BRANCHES).map(([bk, br]) => {
+    const nodes = Object.entries(UPG).filter(([, u]) => u.b === bk).sort((a, b) => a[1].t - b[1].t).map(([k, u]) => {
+      const own = S.up[k], ready = upgReady(k), can = ready && S.parts >= u.cost;
+      const state = own ? 'own' : ready ? (can ? 'can' : 'ready') : 'locked';
+      let action;
+      if (own) action = `<span class="hg-own">✓ ${esc(hg('installed'))}</span>`;
+      else if (!ready) action = `<span class="hg-req">🔒 ${esc(hg('requires'))}: ${esc(UPG[u.req][S.lang][0])}</span>`;
+      else action = `<button class="btn hg-buy" data-u="${k}" ${can ? '' : 'disabled'}>${esc(can ? hg('buy') : hg('need'))} · ${u.cost} ⚙</button>`;
+      return `<div class="node ${state}"><div class="node-h"><span class="hg-ic">${u.icon}</span><b>${esc(u[S.lang][0])}</b></div><small>${esc(u[S.lang][1])}</small><small class="arc">▲ ${esc(u[S.lang][2])}</small>${action}</div>`;
+    }).join('<i class="link"></i>');
+    return `<div class="branch"><div class="branch-h"><span>${br.icon}</span>${esc(br[S.lang])}</div>${nodes}</div>`;
   }).join('');
-  $('#hgModes').innerHTML = Object.entries(MODES).map(([k, m]) => {
+  tree.querySelectorAll('.hg-buy').forEach(b => b.onclick = () => {
+    const k = b.dataset.u, u = UPG[k];
+    if (S.up[k] || !upgReady(k) || S.parts < u.cost) return;
+    S.parts -= u.cost; S.up[k] = true; save();
+    sfx.assemble(); hgShip.flash = performance.now();
+    renderHangar(); renderChrome();
+  });
+  // simulator
+  modes.innerHTML = Object.entries(MODES).map(([k, m]) => {
     const open = modeOpen(k);
     const stars = S.train[k] || [0, 0, 0];
     const tiersHtml = open ? hg('tiers').map((tn, t) => {
@@ -2726,14 +2829,7 @@ function renderHangar() {
     const best = S.best[k] ? `<em>${esc(hg('best'))} ${S.best[k]}</em>` : '';
     return `<div class="hg-mode ${open ? '' : 'locked'}"><span class="hg-ic">${m.icon}</span><div class="hg-mt"><b>${esc(m[S.lang][0])}${best}</b><small>${esc(m[S.lang][1])}</small><div class="hg-tiers">${tiersHtml}</div></div></div>`;
   }).join('');
-  $('#hgUps').querySelectorAll('.hg-buy').forEach(b => b.onclick = () => {
-    const k = b.dataset.u, u = UPG[k];
-    if (S.up[k] || S.parts < u.cost) return;
-    S.parts -= u.cost; S.up[k] = true; save();
-    sfx.assemble(); hgShip.flash = performance.now();
-    renderHangar(); renderChrome();
-  });
-  $('#hgModes').querySelectorAll('.hg-tier').forEach(b => b.onclick = () => { b.blur(); startTraining(b.dataset.m, +b.dataset.t); });
+  modes.querySelectorAll('.hg-tier').forEach(b => b.onclick = () => { b.blur(); startTraining(b.dataset.m, +b.dataset.t); });
 }
 const hgShip = { cv: null, ctx: null, w: 0, h: 0, flash: 0 };
 function drawHangarShip(now) {
@@ -2759,16 +2855,6 @@ function drawHangarShip(now) {
   [1.45, 2.1].forEach(yy => { const [x, y] = P(-.55, yy); c.strokeRect(x, y, .95 * s, .45 * s); const len = (0.5 + Math.random() * 0.2) * s, my = y + .225 * s; line(c, [[x, my - .13 * s], [x - len, my], [x, my + .13 * s]]); });
   drawUpgrades(c, P, s, now, true);
   c.restore();
-  // slot callouts
-  const slots = { armor: [3.6, 3.15, 2.2, 4.0], twin: [6.6, 0.7, 5.2, -0.9], dish: [8.0, 0.0, 9.4, -0.9] };
-  Object.entries(slots).forEach(([k, [ax, ay, lx, ly]]) => {
-    const own = S.up[k], [x1, y1] = P(ax, ay), [x2, y2] = P(lx, ly);
-    c.strokeStyle = own ? G(.8) : G(.3); c.lineWidth = 1; line(c, [[x1, y1], [x2, y2]], !own);
-    c.fillStyle = own ? G() : 'rgba(0,0,0,0)'; c.strokeStyle = own ? G() : G(.5);
-    c.beginPath(); c.arc(x2, y2, 4, 0, Math.PI * 2); own ? c.fill() : c.stroke();
-    const right = false;
-    vtext(c, (own ? '' : '+ ') + UPG[k][S.lang][0].toUpperCase(), x2 + (right ? 8 : -8), y2, 16, right ? 'left' : 'right', own ? G() : G(.5));
-  });
   if (now - hgShip.flash < 600) { c.fillStyle = `rgba(200,255,220,${0.35 * (1 - (now - hgShip.flash) / 600)})`; c.fillRect(0, 0, W, H); }
 }
 /* upgrades drawn on any ship view: P maps ship units to pixels */
@@ -2785,6 +2871,28 @@ function drawUpgrades(ctx, P, s, now, big) {
   if (S.up.twin) {
     line(ctx, [P(5.9, 0.98), P(6.1, 0.72), P(7.0, 0.72), P(7.2, 0.98)]);
     line(ctx, [P(6.7, 0.74), P(8.0, 0.56)]); line(ctx, [P(6.7, 0.86), P(8.0, 0.72)]);
+  }
+  if (S.up.cap) {
+    [[4.8, 0.82], [4.8, 3.18]].forEach(([x, y]) => { const [cx, cy] = P(x, y); ctx.beginPath(); ctx.arc(cx, cy, 0.15 * s, 0, Math.PI * 2); ctx.stroke(); ctx.fillStyle = G(0.5 + 0.5 * Math.sin(now * 0.006)); ctx.beginPath(); ctx.arc(cx, cy, 0.06 * s, 0, Math.PI * 2); ctx.fill(); });
+  }
+  if (S.up.reactive) {
+    ctx.save(); ctx.strokeStyle = G(.55); ctx.lineWidth = 1;
+    line(ctx, [...HULL.map(([x, y]) => P(4.9 + (x - 4.9) * 1.05, 2 + (y - 2) * 1.12)), P(4.9 + (HULL[0][0] - 4.9) * 1.05, 2)]);
+    ctx.restore();
+  }
+  if (S.up.overdrive) {
+    const pts = []; for (let i = 0; i <= 8; i++) pts.push(P(6.0 + i * 0.12, i % 2 ? 0.5 : 0.6)); line(ctx, pts);
+  }
+  if (S.up.flak) {
+    line(ctx, [P(3.2, 0.92), P(3.7, 0.55)]); line(ctx, [P(3.0, 0.95), P(3.4, 0.95)]);
+    line(ctx, [P(3.2, 3.08), P(3.7, 3.45)]); line(ctx, [P(3.0, 3.05), P(3.4, 3.05)]);
+  }
+  if (S.up.booster) {
+    [8.6, 8.85, 9.1].forEach((x, i) => line(ctx, [P(x, 1.55 - i * 0.07), P(x, 1.15 - i * 0.1)]));
+  }
+  if (S.up.chrono) {
+    ctx.save(); ctx.setLineDash([4, 5]); ctx.lineDashOffset = -now * 0.03; ctx.strokeStyle = G(.6);
+    const [cx, cy] = P(-0.2, 2); ctx.beginPath(); ctx.ellipse(cx, cy, 0.7 * s, 1.15 * s, 0, 0, Math.PI * 2); ctx.stroke(); ctx.restore();
   }
   if (S.up.dish) {
     line(ctx, [P(8.0, 1.1), P(8.0, 0.1)]);
@@ -2813,11 +2921,13 @@ function startTraining(mode, tier) {
   S.levelDone = false; S.ending = 0; S.dec = null; S.msg = '';
   S.correct = 0; S.total = 0; S.startT = null;
   const now = performance.now();
-  S.tr = { mode, tier, t0: now, end: now + 60000, score: 0, hull: 3, done: false, last: -1e9, pool: MODES[mode].typing ? trainPool(tier) : [], cross: [16000, 13000, 10500][tier], gap: [3000, 2500, 2000][tier] };
+  if (!S.played.includes(mode) && !S.replayPending) S.played.push(mode);
+  S.tr = { replay: S.replayPending || null, mode, tier, t0: now, end: now + 60000, score: 0, hull: 3, done: false, last: -1e9, pool: MODES[mode].typing ? trainPool(tier) : [], cross: [16000, 13000, 10500][tier], gap: [3000, 2500, 2000][tier] };
   S.phase = 'train';
   applySimLayout();
   if (mode === 'arcade') initArcade(tier);
-  remark(hg('simOn').replace('{m}', MODES[mode][S.lang][0]).replace('{t}', hg('tiers')[tier]));
+  S.replayPending = null;
+  if (S.tr.replay) remark(hg('replayOn')); else remark(hg('simOn').replace('{m}', MODES[mode][S.lang][0]).replace('{t}', hg('tiers')[tier]));
   renderAll();
 }
 function trainTick(now, dt) {
@@ -2870,8 +2980,19 @@ function endTraining() {
   S.train[tr.mode][tr.tier] = Math.max(S.train[tr.mode][tr.tier], stars);
   S.best[tr.mode] = Math.max(S.best[tr.mode] || 0, sc);
   save();
-  banner(hg('over'), false);
+  banner(tr.replay ? hg('replayDone') : hg('over'), false);
   if (stars) fanfare(stars >= 2); else defeatSting();
+  renderAll();
+}
+function startReplay(lvl) {
+  S.replayPending = lvl;
+  startTraining('arcade', lvl >= 7 ? 1 : 0);
+}
+function endReplay() {
+  const lvl = S.tr.replay;
+  S.tr = null; S.ar = null; resetCombat();
+  S.lvl = lvl; S.levelDone = true; S.phase = 'complete'; S.speaker = 'ora';
+  remark(hg('inHangar'));
   renderAll();
 }
 function leaveTraining() {
@@ -2882,21 +3003,25 @@ function leaveTraining() {
 /* ---------- Raider Run (no typing) ---------- */
 function initArcade(tier) {
   const W = view.w, H = view.h;
-  S.ar = { x: W / 2, keys: {}, shots: [], eshots: [], inv: [], dir: 1, ox: 0, oy: 0, wave: 1, tier,
-    lives: 3, shieldUp: !!S.up.armor, shieldAt: 0, score: 0, cool: 0, fireAt: 0, hurt: 0 };
+  S.ar = { replay: S.tr && S.tr.replay, x: W / 2, keys: {}, shots: [], eshots: [], inv: [], dir: 1, ox: 0, oy: 0, wave: 1, tier,
+    lives: 3 + (S.up.reactive ? 1 : 0), shieldUp: !!S.up.armor, shieldAt: 0, score: 0, cool: 0, fireAt: 0, hurt: 0 };
   buildWave();
 }
 function buildWave() {
   const A = S.ar, W = view.w, H = view.h;
-  const rows = Math.min(5, [3, 4, 4][A.tier] + Math.floor((A.wave - 1) / 2)), cols = 7;
+  const RT_TYPES = { 5: ['scout', 'drone', 'drone'], 6: ['cruiser', 'scout', 'drone', 'drone'], 7: ['kamikaze', 'cruiser', 'scout', 'drone'], 8: ['kamikaze', 'cruiser', 'cruiser', 'scout'] };
+  const rtypes = A.replay ? RT_TYPES[A.replay] : null;
+  const rows = rtypes ? rtypes.length : Math.min(5, [3, 4, 4][A.tier] + Math.floor((A.wave - 1) / 2)), cols = 7;
   A.k = Math.min(1.35, Math.max(0.6, H / 420));
   const gx = Math.min(64 * A.k, (W * 0.6) / cols), gy = Math.max(20, Math.min(40 * A.k, (H - 190) / rows));
   A.inv = [];
-  const types = ['kamikaze', 'scout', 'drone', 'drone', 'drone'];
-  for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) A.inv.push({ c, r, alive: true, type: types[r], dx: c * gx, dy: r * gy });
+  const types = rtypes || ['kamikaze', 'scout', 'drone', 'drone', 'drone'];
+  for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) A.inv.push({ c, r, alive: true, type: types[r], hp: types[r] === 'cruiser' ? 2 : 1, hit: 0, dx: c * gx, dy: r * gy });
+  A.boss = A.replay === 8 ? { x: W / 2, y: 64 + 24 * A.k, dir: 1, hp: 14, max: 14, fireAt: performance.now() + 2500, hit: 0 } : null;
   A.gx = gx; A.ox = (W - (cols - 1) * gx) / 2; A.oy = 58 + 10 * A.k; A.dir = 1;
+  if (A.boss) A.oy += 84 * A.k;
   A.total = A.inv.length;
-  A.speed = (W * 0.00005) * ([1, 1.25, 1.5][A.tier]) * (1 + (A.wave - 1) * 0.18);
+  A.speed = (W * 0.00005) * ([1, 1.25, 1.5][A.tier]) * (1 + (A.wave - 1) * 0.18) * (S.up.booster ? 0.85 : 1);
   A.fireGap = [1150, 900, 700][A.tier] / (1 + (A.wave - 1) * 0.12);
 }
 function arcadeKey(e, down) {
@@ -2914,13 +3039,20 @@ function arcadeTick(now, dt) {
   if (A.keys.right) A.x += sp * dt;
   A.x = Math.max(40, Math.min(W - 40, A.x));
   if (A.keys.fire && now > A.cool) {
-    A.cool = now + 300;
+    A.cool = now + (S.up.overdrive ? 190 : 300);
     if (S.up.twin) { A.shots.push({ x: A.x - 9, y: py - 14 }, { x: A.x + 9, y: py - 14 }); } else A.shots.push({ x: A.x, y: py - 16 });
     sfx.laser();
   }
   // invaders
   const alive = A.inv.filter(v => v.alive);
-  if (!alive.length) { A.wave++; A.score += 5; banner(`${hg('wave')} ${A.wave}`); sfx.recharge(); buildWave(); return; }
+  if (A.boss) {
+    const B = A.boss;
+    B.x += B.dir * W * 0.00008 * dt; if (B.x > W - 90 || B.x < 90) B.dir *= -1;
+    if (now > B.fireAt) { B.fireAt = now + 1500; [-0.35, 0, 0.35].forEach(vx => A.eshots.push({ x: B.x, y: B.y + 24 * A.k, vx })); }
+    if (B.hit > 0) B.hit -= dt;
+  }
+  if (!alive.length && A.replay && (!A.boss || A.boss.hp <= 0)) { A.score += 10; endTraining(); return; }
+  if (!alive.length && !A.replay) { A.wave++; A.score += 5; banner(`${hg('wave')} ${A.wave}`); sfx.recharge(); buildWave(); return; }
   const k = 1 + (1 - alive.length / A.total) * 1.6;
   A.ox += A.dir * A.speed * k * dt;
   const xs = alive.map(v => A.ox + v.dx);
@@ -2934,13 +3066,19 @@ function arcadeTick(now, dt) {
     const shooter = alive.filter(v => v.c === col).sort((a, b) => b.r - a.r)[0];
     A.eshots.push({ x: A.ox + shooter.dx, y: A.oy + shooter.dy + 12 });
   }
-  const ev = H * 0.00032 * (S.up.dish ? 0.65 : 1) * (1 + (A.wave - 1) * 0.06);
-  A.eshots.forEach(b => { b.y += ev * dt; });
+  const ev = H * 0.00032 * (S.up.chrono ? 0.5 : S.up.dish ? 0.65 : 1) * (1 + (A.wave - 1) * 0.06);
+  A.eshots.forEach(b => { b.y += ev * dt; if (b.vx) b.x += b.vx * ev * dt; });
   A.shots.forEach(b => { b.y -= H * 0.0013 * dt; });
   A.shots = A.shots.filter(b => {
     if (b.y < 30) return false;
     const hit = alive.find(v => v.alive && Math.abs(A.ox + v.dx - b.x) < 15 * A.k && Math.abs(A.oy + v.dy - b.y) < 11 * A.k);
-    if (hit) { hit.alive = false; A.score += hit.type === 'kamikaze' ? 3 : hit.type === 'scout' ? 2 : 1; C.booms.push({ x: A.ox + hit.dx, y: A.oy + hit.dy, t: now, r: Math.random() }); sfx.boom(); return false; }
+    if (A.boss && A.boss.hp > 0 && Math.abs(A.boss.x - b.x) < 52 * A.k && Math.abs(A.boss.y - b.y) < 24 * A.k) {
+      A.boss.hp--; A.boss.hit = 90; sfx.clang();
+      if (A.boss.hp <= 0) { A.score += 25; for (let i = 0; i < 6; i++) C.booms.push({ x: A.boss.x + (Math.random() - .5) * 120, y: A.boss.y + (Math.random() - .5) * 40, t: now + i * 90, r: Math.random(), big: true }); sfx.boom(); view.shake = 500; banner(uw('flagshipDown')); }
+      return !S.up.flak;
+    }
+    if (hit && hit.hp > 1) { hit.hp--; hit.hit = 120; sfx.clang(); return !S.up.flak; }
+    if (hit) { hit.alive = false; A.score += hit.type === 'kamikaze' ? 3 : hit.type === 'scout' ? 2 : 1; C.booms.push({ x: A.ox + hit.dx, y: A.oy + hit.dy, t: now, r: Math.random() }); sfx.boom(); return !S.up.flak; }
     return true;
   });
   A.eshots = A.eshots.filter(b => {
@@ -2952,7 +3090,7 @@ function arcadeTick(now, dt) {
 }
 function arcadeHit(now, fatal) {
   const A = S.ar;
-  if (!fatal && A.shieldUp) { A.shieldUp = false; A.shieldAt = now + 12000; sfx.clang(); C.booms.push({ x: A.x, y: arPY(), t: now, r: 0 }); return; }
+  if (!fatal && A.shieldUp) { A.shieldUp = false; A.shieldAt = now + (S.up.cap ? 8000 : 12000); sfx.clang(); C.booms.push({ x: A.x, y: arPY(), t: now, r: 0 }); return; }
   if (!fatal) A.lives--;
   A.hurt = now; view.shake = 320; view.flash = 1; sfx.breach();
   C.booms.push({ x: A.x, y: arPY(), t: now, r: Math.random(), bad: true, big: true });
@@ -2962,10 +3100,17 @@ function drawArcade(ctx, now) {
   const A = S.ar, W = view.w, H = view.h, py = arPY(); if (!A) return;
   view.stars.forEach(st => { st.y += st.z * 0.12; if (st.y > H) { st.y = 0; st.x = Math.random() * W; } ctx.fillStyle = G(0.2 + 0.3 * st.z / 1.8); ctx.fillRect(st.x, st.y, st.z, st.z); });
   // invaders (pointing down)
+  if (A.boss && A.boss.hp > 0) {
+    const B = A.boss, by = B.y;
+    drawBossShape(ctx, B.x, by, 0.75 * A.k, B.hit > 0 ? '#ffffff' : HOT(), now);
+    const bw = 120 * A.k, hy = by + 32 * A.k; ctx.strokeStyle = HOT(.7); ctx.lineWidth = 1; ctx.strokeRect(B.x - bw / 2, hy, bw, 4);
+    ctx.fillStyle = HOT(); ctx.fillRect(B.x - bw / 2, hy, bw * B.hp / B.max, 4);
+  }
   A.inv.forEach(v => {
     if (!v.alive) return;
+    if (v.hit > 0) v.hit -= 16;
     const x = A.ox + v.dx, y = A.oy + v.dy + Math.sin(now * 0.005 + v.c) * 2;
-    ctx.save(); ctx.translate(x, y); ctx.rotate(Math.PI / 2); drawShipShape(ctx, v.type, 0, 0, 0.55 * A.k, HOT(), now); ctx.restore();
+    ctx.save(); ctx.translate(x, y); ctx.rotate(Math.PI / 2); drawShipShape(ctx, v.type, 0, 0, 0.55 * A.k, v.hit > 0 ? '#ffffff' : HOT(), now); ctx.restore();
   });
   // shots
   ctx.fillStyle = G(); A.shots.forEach(b => ctx.fillRect(b.x - 1.5, b.y - 8, 3, 12));
@@ -3007,15 +3152,15 @@ function trainTerminal(el, prompt, chips) {
   if (tr.done) {
     const st = '★★★'.slice(0, tr.stars) + '☆☆☆'.slice(0, 3 - tr.stars);
     el.innerHTML = `<div class="done">
-      <h3>${esc(m[S.lang][0].toUpperCase())} · ${esc(hg('tiers')[tr.tier].toUpperCase())}</h3>
+      <h3>${tr.replay ? esc(hg('replay').toUpperCase()) + ' · ' + esc(LEVELS[tr.replay].sys[S.lang].toUpperCase()) : esc(m[S.lang][0].toUpperCase()) + ' · ' + esc(hg('tiers')[tr.tier].toUpperCase())}</h3>
       <div class="row"><span class="stars">${st}</span><span class="label">${esc(hg('score'))}<b>${tr.final}</b></span><span class="label">${esc(hg('earned'))}<b>+${tr.earned} ⚙</b></span></div>
-      <div class="waiting"><kbd>${esc(t('spaceKey'))}</kbd> ${esc(hg('retry'))} &nbsp; <kbd>H</kbd> ${esc(hg('hangar'))} &nbsp; <kbd>Esc</kbd> ${esc(hg('back'))}</div>
+      ${tr.replay ? `<div class="waiting"><kbd>${esc(t('spaceKey'))}</kbd> ${esc(hg('cont'))} &nbsp; <kbd>H</kbd> ${esc(hg('hangar'))}</div>` : `<div class="waiting"><kbd>${esc(t('spaceKey'))}</kbd> ${esc(hg('retry'))} &nbsp; <kbd>H</kbd> ${esc(hg('hangar'))} &nbsp; <kbd>Esc</kbd> ${esc(hg('back'))}</div>`}
     </div>`;
     return;
   }
   if (tr.mode === 'arcade') {
-    const sk = Object.entries(UPG).map(([k, u]) => `<div class="sk ${S.up[k] ? 'own' : ''}"><span>${S.up[k] ? u.icon : '🔒'}</span><b>${esc(u[S.lang][0])}</b><small>${esc(S.up[k] ? u[S.lang][2] : `${u.cost} ⚙ · ${hg('hangar')}`)}</small></div>`).join('');
-    el.innerHTML = `<div class="term-head"><span class="label kind">${esc(m[S.lang][0])} · ${esc(hg('tiers')[tr.tier])}</span><span class="label">${esc(hg('move'))}</span></div>
+    const sk = Object.entries(UPG).map(([k, u]) => `<div class="sk ${S.up[k] ? 'own' : ''}" title="${esc(u[S.lang][0])}"><span>${S.up[k] ? u.icon : '🔒'}</span><b>${esc(S.up[k] ? u[S.lang][2] : u[S.lang][0])}</b></div>`).join('');
+    el.innerHTML = `<div class="term-head"><span class="label kind">${tr.replay ? esc(hg('replay')) + ' · ' + esc(LEVELS[tr.replay].sys[S.lang]) : esc(m[S.lang][0]) + ' · ' + esc(hg('tiers')[tr.tier])}</span><span class="label">${esc(tr.replay ? hg('move').replace('Esc quit', 'Esc ' + hg('skip')).replace('Esc вихід', 'Esc ' + hg('skip')) : hg('move'))}</span></div>
       <div class="skills">${sk}</div>`;
     return;
   }
@@ -3174,9 +3319,9 @@ window.addEventListener('keydown', (e) => {
   }
   if (S.hangarOpen) { if (e.code === 'Escape' || e.code === 'KeyH') { e.preventDefault(); closeHangar(); } return; }
   if (S.phase === 'train' && S.tr) {
-    if (e.code === 'Escape') { e.preventDefault(); leaveTraining(); return; }
+    if (e.code === 'Escape') { e.preventDefault(); if (S.tr.replay) endReplay(); else leaveTraining(); return; }
     if (S.tr.done) {
-      if (e.code === 'Space' || e.key === 'Enter') { e.preventDefault(); if (!e.repeat) { initAudio(); startTraining(S.tr.mode, S.tr.tier); } }
+      if (e.code === 'Space' || e.key === 'Enter') { e.preventDefault(); if (!e.repeat) { initAudio(); if (S.tr.replay) endReplay(); else startTraining(S.tr.mode, S.tr.tier); } }
       else if (e.code === 'KeyH') { e.preventDefault(); openHangar(); }
       return;
     }
@@ -3358,5 +3503,3 @@ renderChrome();
 if (!S.name) openIntro(); else startLevel(firstOpen());
 requestAnimationFrame(loop);
 </script>
-</body>
-</html>
