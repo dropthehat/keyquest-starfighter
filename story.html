@@ -309,11 +309,11 @@ kbd { font-family: var(--f-mono); border: 1px solid var(--seam); border-bottom-w
 @media (max-width: 520px) { .card-threat { flex-direction: column; align-items: flex-start; } }
 
 /* ---------- Stations ---------- */
-body[data-station="calib"]   { --st: #5fb8ff; }
+body[data-station="calib"]   { --st: #5fc8ff; }
 body[data-station="boot"]    { --st: #6ff0a8; }
-body[data-station="decrypt"] { --st: #e05cff; }
-body[data-station="combat"]  { --st: #ff8a3d; }
-body[data-station="repair"]  { --st: #ffd23a; }
+body[data-station="decrypt"] { --st: #ffb547; }
+body[data-station="combat"]  { --st: #ff5a4e; }
+body[data-station="repair"]  { --st: #f2e14c; }
 .ambient { position: fixed; inset: 0; pointer-events: none; z-index: 30; opacity: 0; transition: opacity .6s ease, box-shadow .6s ease;
   box-shadow: inset 0 0 140px color-mix(in srgb, var(--st, #000) 22%, transparent); }
 body[data-station] .ambient { opacity: 1; }
@@ -329,9 +329,9 @@ body[data-station] .comms { box-shadow: 0 0 0 1px color-mix(in srgb, var(--st) 5
   repeating-linear-gradient(90deg, color-mix(in srgb, var(--st) 7%, transparent) 0 1px, transparent 1px 18px); }
 .terminal[data-st="calib"]:not(.quiet) { background-color: #0b1016; background-image:
   repeating-radial-gradient(circle at 92% 50%, color-mix(in srgb, var(--st) 9%, transparent) 0 1px, transparent 1px 16px); }
-.terminal[data-st="decrypt"]:not(.quiet) { background-color: #0d0b14; background-image:
+.terminal[data-st="decrypt"]:not(.quiet) { background-color: #120f0a; background-image:
   repeating-linear-gradient(45deg, color-mix(in srgb, var(--st) 6%, transparent) 0 1px, transparent 1px 7px); }
-.terminal[data-st="combat"]:not(.quiet) { background-color: #120f0a; background-image:
+.terminal[data-st="combat"]:not(.quiet) { background-color: #140b0b; background-image:
   linear-gradient(90deg, transparent calc(100% - 46px), color-mix(in srgb, var(--st) 12%, transparent) calc(100% - 46px) calc(100% - 45px), transparent calc(100% - 45px)),
   repeating-linear-gradient(90deg, color-mix(in srgb, var(--st) 5%, transparent) 0 1px, transparent 1px 24px); }
 .terminal[data-st="repair"]:not(.quiet) { background-color: #12100a; padding-left: 26px; background-image:
@@ -341,7 +341,7 @@ body[data-station] .comms { box-shadow: 0 0 0 1px color-mix(in srgb, var(--st) 5
   border: 1px solid color-mix(in srgb, var(--st, #74838f) 30%, #26313c); background: rgba(0,0,0,.25); white-space: nowrap; }
 .chip.done { color: #0a0d10; background: var(--st); border-color: var(--st); }
 .chip.cur { color: #fff; border-color: var(--st); box-shadow: 0 0 10px color-mix(in srgb, var(--st) 50%, transparent); animation: pulse 1.2s ease-in-out infinite; }
-.chip.warn { color: #ffd2cc; border-color: var(--alert); }
+.chip.warn { color: #ffd2cc; border-color: #ff8a3d; }
 .chip.lock { opacity: .55; letter-spacing: .05em; }
 /* station switch card */
 .st-switch { position: absolute; inset: 0; z-index: 6; pointer-events: none; display: grid; place-items: center; opacity: 0; border-radius: inherit; overflow: hidden;
@@ -358,6 +358,37 @@ body[data-station] .comms { box-shadow: 0 0 0 1px color-mix(in srgb, var(--st) 5
 @keyframes stShow { 0% { opacity: 0; clip-path: inset(48% 0 48% 0); } 12% { opacity: 1; clip-path: inset(0 0 0 0); } 82% { opacity: 1; clip-path: inset(0 0 0 0); } 100% { opacity: 0; clip-path: inset(50% 0 50% 0); } }
 @keyframes stSlide { 0% { transform: translateX(-30px); opacity: 0; } 18% { transform: none; opacity: 1; } 82% { opacity: 1; } 100% { transform: translateX(20px); opacity: 0; } }
 @media (prefers-reduced-motion: reduce) { .st-switch.run, .st-switch.run .st-in { animation-duration: .01s; } .chip.cur { animation: none; } }
+
+/* ---------- Side context panel ---------- */
+#sideDos { display: grid; gap: 8px; align-content: start; }
+#sideDos .tag { justify-self: start; }
+#sideDos.enemy .tag, #sideDos.combat .tag { color: #ff9b92; border-color: rgba(255,90,82,.45); }
+#sideDos.repair .tag { color: #f2e14c; border-color: rgba(242,225,76,.45); }
+.dos-top { display: grid; grid-template-columns: 74px 1fr; gap: 10px; align-items: center; }
+#sideDos.enemy .dos-top { grid-template-columns: 96px 1fr; }
+.dos-face { position: relative; height: 58px; border-radius: 8px / 10px; overflow: hidden; background: radial-gradient(ellipse at 50% 45%, #1d0b0a 0%, #060303 80%); box-shadow: inset 0 0 18px rgba(0,0,0,.9), 0 0 0 2px #1a2129; }
+#sideDos.enemy .dos-face { height: 66px; }
+#sideDos.repair .dos-face { background: radial-gradient(ellipse at 50% 45%, #18160a 0%, #060503 80%); }
+.dos-face::after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(to bottom, rgba(0,0,0,.28) 0 1px, transparent 1px 3px); }
+.dos-face canvas { width: 100%; height: 100%; display: block; }
+.dos-id b { display: block; font-family: var(--f-display); font-size: 14px; letter-spacing: .14em; color: #ffd6d2; }
+.dos-id small { display: block; font-family: var(--f-crt); font-size: 18px; color: #ff6b5e; line-height: 1; margin-top: 2px; }
+.dos-id em { display: block; font-style: normal; font-size: 10px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); margin-top: 3px; }
+#sideDos.repair .dos-id b { color: #fff6c2; } #sideDos.repair .dos-id small { color: #f2e14c; }
+.dos-rows { display: grid; gap: 3px; }
+.drow { display: flex; justify-content: space-between; align-items: center; gap: 8px; font-size: 11px; padding: 2px 0 3px; border-bottom: 1px dashed #1f2a34; }
+.drow span { color: var(--muted); font-family: var(--f-display); letter-spacing: .12em; text-transform: uppercase; font-size: 10px; }
+.drow b { font-weight: 500; color: var(--text); font-variant-numeric: tabular-nums; text-align: right; }
+.drow.hot b { color: #ff8a7f; }
+.drow kbd { font-size: 11px; padding: 0 5px; margin-left: 3px; }
+.meter { letter-spacing: 1px; color: var(--live); }
+.dimtxt { font-style: normal; color: var(--muted); margin-left: 4px; }
+.meter i { font-style: normal; color: var(--dim); }
+.meter.red { color: #ff6b5e; }
+.meter.green { color: #6ff0a8; text-shadow: 0 0 6px rgba(111,240,168,.5); }
+.hullbar { height: 8px; border-radius: 4px; background: #1a1d10; overflow: hidden; box-shadow: inset 0 0 0 1px rgba(242,225,76,.3); }
+.hullbar i { display: block; height: 100%; background: repeating-linear-gradient(-45deg, #f2e14c 0 6px, #c9b92f 6px 12px); transition: width .25s; }
+.systems[data-mode="enemy"], .systems[data-mode="combat"] { box-shadow: 0 0 0 1px rgba(255,90,82,.35), 0 0 24px rgba(255,90,82,.08), 0 8px 20px rgba(0,0,0,.35); }
 </style>
 </head>
 <body>
@@ -1002,6 +1033,7 @@ function renderCrtText() {
 /* ---------- Pixel faces ---------- */
 const face = { cv: null, ctx: null, w: 0, h: 0 };
 const cineFace = { cv: null, ctx: null, w: 0, h: 0 };
+const sideFace = { cv: null, ctx: null, w: 0, h: 0 };
 function drawFace(obj, now, mode, speaking, forcePowered) {
   const c = obj.ctx, W = obj.w, H = obj.h; if (!c || !W) return;
   c.clearRect(0, 0, W, H);
@@ -1286,6 +1318,14 @@ function drawStatus(ctx, now, pw) {
   vtext(ctx, `${S.name || INTRO_HINT[S.lang].defName} - ${uw('level')} ${S.lvl + 1}`, W / 2, H - 44, 22, 'center');
 }
 
+function drawShipIcon(obj, now) {
+  const c = obj.ctx, W = obj.w, H = obj.h; c.clearRect(0, 0, W, H);
+  const s = Math.min(W / 11, H / 4.2), ox = W / 2 - 4.8 * s, oy = H / 2 - 2 * s;
+  c.strokeStyle = 'rgba(242,225,76,.95)'; c.lineWidth = 1.6; c.lineJoin = 'round';
+  c.beginPath(); HULL.forEach(([x, y], i) => i ? c.lineTo(ox + x * s, oy + y * s) : c.moveTo(ox + x * s, oy + y * s)); c.closePath(); c.stroke();
+  if (Math.floor(now / 300) % 2) { c.fillStyle = 'rgba(255,90,78,.9)'; [[3, 1.4], [6.2, 2.6]].forEach(([x, y]) => { c.beginPath(); c.arc(ox + x * s, oy + y * s, 2.6, 0, Math.PI * 2); c.fill(); }); }
+  const sx = ox + (2 + ((now / 900) % 1) * 6) * s; c.fillStyle = '#fff'; c.fillRect(sx, oy + 1.9 * s, 2, 2);
+}
 function partialPath(ctx, pts, frac) {
   const seg = []; let total = 0;
   for (let i = 1; i < pts.length; i++) { const d = Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]); seg.push(d); total += d; }
@@ -1716,11 +1756,11 @@ const cont = (label) => `<div class="waiting"><kbd>${esc(t('spaceKey'))}</kbd> $
 
 /* ---------- Stations: every activity has its own colour, console layout, sound and switch card ---------- */
 const STATIONS = {
-  calib:   { col: '#5fb8ff', icon: '◎', en: ['CALIBRATION', 'Find the new keys. Return home after each press.'], uk: ['КАЛІБРУВАННЯ', 'Знайди нові клавіші. Після кожного натискання — додому.'] },
+  calib:   { col: '#5fc8ff', icon: '◎', en: ['CALIBRATION', 'Find the new keys. Return home after each press.'], uk: ['КАЛІБРУВАННЯ', 'Знайди нові клавіші. Після кожного натискання — додому.'] },
   boot:    { col: '#6ff0a8', icon: '▶', en: ['SYSTEM INSTALL', 'Type the boot sequence to install the module.'], uk: ['ВСТАНОВЛЕННЯ', 'Набери послідовність запуску, щоб встановити модуль.'] },
-  decrypt: { col: '#e05cff', icon: '#', en: ['DECRYPTION', 'Type each cipher key before the signal fades.'], uk: ['ДЕШИФРУВАННЯ', 'Набери кожен ключ, поки сигнал не зник.'] },
-  combat:  { col: '#ff8a3d', icon: '⊕', en: ['WEAPONS', 'Type a target\'s first letter to lock on, then finish the word.'], uk: ['ЗБРОЯ', 'Набери першу літеру цілі, щоб захопити її, і допиши слово.'] },
-  repair:  { col: '#ffd23a', icon: '✚', en: ['REPAIR BAY', 'Retype the damaged words. Slow and clean.'], uk: ['РЕМОНТНИЙ ВІДСІК', 'Передрукуй пошкоджені слова. Повільно і чисто.'] }
+  decrypt: { col: '#ffb547', icon: '#', en: ['DECRYPTION', 'Type each cipher key before the signal fades.'], uk: ['ДЕШИФРУВАННЯ', 'Набери кожен ключ, поки сигнал не зник.'] },
+  combat:  { col: '#ff5a4e', icon: '⊕', en: ['WEAPONS', 'Type a target\'s first letter to lock on, then finish the word.'], uk: ['ЗБРОЯ', 'Набери першу літеру цілі, щоб захопити її, і допиши слово.'] },
+  repair:  { col: '#f2e14c', icon: '✚', en: ['REPAIR BAY', 'Retype the damaged words. Slow and clean.'], uk: ['РЕМОНТНИЙ ВІДСІК', 'Передрукуй пошкоджені слова. Повільно і чисто.'] }
 };
 function station() {
   if (S.levelDone || S.ending) return null;
@@ -1870,23 +1910,97 @@ function renderTerminal() {
   }
 }
 
+function sideMode() {
+  if (S.phase === 'combat') return 'combat';
+  if (S.phase === 'decrypt' || ((S.speaker === 'vex' || S.speaker === 'unknown') && (S.phase === 'dialogue' || S.levelDone || S.ending === 1))) return 'enemy';
+  if (station() === 'repair') return 'repair';
+  return 'list';
+}
+const SIDE = {
+  en: { tx: 'Enemy · Transmission', tac: 'Tactical', dmg: 'Damage report', vex: 'COMMANDER VEX', unk: '???', faction: 'Faction', raiders: 'Raider Command', vessel: 'Vessel', threat: 'Threat', status: 'Status', dist: 'Distance',
+        encrypted: 'ENCRYPTED', hostile: 'HOSTILE', retreat: 'RETREATING', ident: 'IDENTIFYING…', unknownF: 'Unknown', watching: 'is watching', speaking: 'transmitting',
+        drones: 'Raiders', cruisers: 'Cruisers', kamikaze: 'Kamikaze', missiles: 'Missiles', flagship: 'Flagship', phase: 'Phase', inbound: 'Inbound', shields: 'Shields', recharge: 'Recharge', heat: 'Heat',
+        hull: 'Hull integrity', weak: 'Weakest keys', words: 'Damaged words', none: 'none yet',
+        ships: ['Drone carrier', 'Raider wing', 'Wolf pack', 'Flagship RAZORBACK'] },
+  uk: { tx: 'Ворог · Передача', tac: 'Тактика', dmg: 'Звіт про пошкодження', vex: 'КОМАНДИР ВЕКС', unk: '???', faction: 'Фракція', raiders: 'Рейдери', vessel: 'Корабель', threat: 'Загроза', status: 'Статус', dist: 'Відстань',
+        encrypted: 'ЗАШИФРОВАНО', hostile: 'ВОРОЖИЙ', retreat: 'ВІДСТУПАЄ', ident: 'ВИЗНАЧЕННЯ…', unknownF: 'Невідомо', watching: 'спостерігає', speaking: 'передає',
+        drones: 'Рейдери', cruisers: 'Крейсери', kamikaze: 'Камікадзе', missiles: 'Ракети', flagship: 'Флагман', phase: 'Фаза', inbound: 'На підході', shields: 'Щити', recharge: 'Підзарядка', heat: 'Заряд',
+        hull: 'Цілісність корпусу', weak: 'Найслабші клавіші', words: 'Пошкоджені слова', none: 'поки немає',
+        ships: ['Носій дронів', 'Крило рейдерів', 'Зграя', 'Флагман РАЗОРБЕК'] }
+};
+const row = (k, v, cls = '') => `<div class="drow ${cls}"><span>${esc(k)}</span><b>${v}</b></div>`;
+const meter = (n, max, cls = '') => `<span class="meter ${cls}">${'▮'.repeat(Math.max(0, n))}<i>${'▯'.repeat(Math.max(0, max - n))}</i></span>`;
 function renderSystems() {
   const el = $('#systems');
-  const a = ACTS[actOf(S.lvl)];
-  let html = `<span class="tag">${esc(actOf(S.lvl) ? t('sectors') : t('systems'))}</span>`;
-  for (let i = a.from; i <= a.to; i++) {
-    const lv = LEVELS[i];
-    const stars = S.done[S.lang][i];
-    const current = i === S.lvl && !S.ending;
-    let cls = 'offline', st = '—';
-    if (stars) { cls = 'online'; st = '★★★'.slice(0, stars) + '☆☆☆'.slice(0, 3 - stars); }
-    else if (current && S.phase === 'drill') { cls = 'booting'; st = Math.round(liveProgress() * 100) + '%'; }
-    else if (current && (S.phase === 'decrypt' || S.phase === 'combat')) { cls = 'booting'; st = '!!'; }
-    const keys = lv.newKeys.map(keyLabel).join(' ');
-    html += `<button class="sys ${cls} ${current ? 'current' : ''}" data-i="${i}"><span class="led"></span><span class="nm">${esc(lv.sys[S.lang])}</span><span class="keys">${esc(keys)}</span><span class="st">${esc(st)}</span></button>`;
+  if (!el.dataset.built) {
+    el.innerHTML = `<div id="sideList"></div><div id="sideDos" hidden><span class="tag" id="sideTag"></span><div class="dos-top"><div class="dos-face"><canvas id="sideFace"></canvas></div><div class="dos-id" id="sideId"></div></div><div class="dos-rows" id="sideInfo"></div></div>`;
+    el.dataset.built = '1';
   }
-  el.innerHTML = html;
-  el.querySelectorAll('.sys').forEach(b => b.onclick = () => { initAudio(); b.blur(); startLevel(+b.dataset.i); });
+  const mode = sideMode(), W2 = SIDE[S.lang];
+  const list = $('#sideList'), dos = $('#sideDos');
+  list.hidden = mode !== 'list'; dos.hidden = mode === 'list';
+  el.dataset.mode = mode;
+  if (mode !== S.sideModeLast) { S.sideModeLast = mode; dos.className = mode; requestAnimationFrame(() => fit(sideFace, '#sideFace')); }
+  if (mode === 'list') {
+    const a = ACTS[actOf(S.lvl)];
+    let html = `<span class="tag">${esc(actOf(S.lvl) ? t('sectors') : t('systems'))}</span>`;
+    for (let i = a.from; i <= a.to; i++) {
+      const lv = LEVELS[i];
+      const stars = S.done[S.lang][i];
+      const current = i === S.lvl && !S.ending;
+      let cls = 'offline', st = '—';
+      if (stars) { cls = 'online'; st = '★★★'.slice(0, stars) + '☆☆☆'.slice(0, 3 - stars); }
+      else if (current && S.phase === 'drill') { cls = 'booting'; st = Math.round(liveProgress() * 100) + '%'; }
+      const keys = lv.newKeys.map(keyLabel).join(' ');
+      html += `<button class="sys ${cls} ${current ? 'current' : ''}" data-i="${i}"><span class="led"></span><span class="nm">${esc(lv.sys[S.lang])}</span><span class="keys">${esc(keys)}</span><span class="st">${esc(st)}</span></button>`;
+    }
+    list.innerHTML = html;
+    list.querySelectorAll('.sys').forEach(b => b.onclick = () => { initAudio(); b.blur(); startLevel(+b.dataset.i); });
+    return;
+  }
+  const known = S.lvl >= ACTS[1].from;
+  const sector = Math.max(0, Math.min(3, S.lvl - ACTS[1].from));
+  if (mode === 'enemy') {
+    $('#sideTag').textContent = W2.tx;
+    let status = W2.hostile;
+    if (!known) status = W2.ident;
+    else if (S.phase === 'decrypt') status = W2.encrypted;
+    else if (S.levelDone) status = W2.retreat;
+    const prog = S.phase === 'decrypt' && S.dec ? S.dec.ki / S.dec.keys.length : 1;
+    $('#sideId').innerHTML = `<b>${esc(known && S.phase !== 'decrypt' ? W2.vex : W2.unk)}</b><small>${esc(S.speaking && S.speaker !== 'ora' ? W2.speaking : status)}</small><em>${esc(known && S.phase !== 'decrypt' ? W2.raiders : W2.unknownF)}</em>`;
+    $('#sideInfo').innerHTML =
+      row(W2.vessel, esc(known ? W2.ships[sector] : W2.unknownF)) +
+      row(W2.threat, meter(known ? sector + 2 : 1, 5, 'red')) +
+      row(W2.dist, esc(known ? km(48000 - 41000 * prog) : '—'));
+    return;
+  }
+  if (mode === 'combat') {
+    $('#sideTag').textContent = W2.tac;
+    $('#sideId').innerHTML = `<b>VEX</b><small>${esc(S.speaker === 'vex' && S.speaking ? W2.speaking : W2.watching)}</small>`;
+    const n = (type) => C.ships.filter(x => x.type === type).length;
+    let rows = '';
+    if (C.boss) rows += row(W2.flagship, `${W2.phase} ${C.boss.phase}/2 · ${meter(C.boss.parts.filter(p => p.alive).length, C.boss.parts.length, 'red')}`);
+    let host = `◆${n('drone') + n('scout')}`;
+    if (S.lvl >= 6) host += ` ▮${n('cruiser')}`;
+    if (S.lvl >= 7) host += ` ✦${n('kamikaze')}`;
+    rows += row(W2.drones, `${host} <i class="dimtxt">+${C.queue.length}</i>`);
+    rows += row(W2.missiles, String(C.missiles.length), C.missiles.length ? 'hot' : '');
+    rows += row(W2.shields, meter(C.shields, C.maxShields, C.shields < 2 ? 'red' : 'green'));
+    rows += row(W2.recharge, meter(C.streak || 0, 4, 'green'));
+    $('#sideInfo').innerHTML = rows;
+    return;
+  }
+  // repair
+  $('#sideTag').textContent = W2.dmg;
+  const total = S.lines.filter(l => l.kind === 'repair').reduce((a, l) => a + l.text.length, 0) || 1;
+  let done = 0; S.lines.forEach((l, i) => { if (l.kind !== 'repair') return; done += i < S.lineIdx ? l.text.length : i === S.lineIdx ? S.ch : 0; });
+  const hull = Math.round(35 + 65 * done / total);
+  const weak = S.miss ? Object.entries(S.miss.keys).sort((a, b) => b[1] - a[1]).slice(0, 4).map(([k]) => k) : [];
+  $('#sideId').innerHTML = `<b>ARGO-7</b><small>${esc(W2.hull)} ${hull}%</small>`;
+  $('#sideInfo').innerHTML =
+    `<div class="hullbar"><i style="width:${hull}%"></i></div>` +
+    row(W2.weak, weak.length ? weak.map(k => `<kbd>${esc(k.toUpperCase())}</kbd>`).join('') : esc(W2.none)) +
+    row(W2.words, String(S.lines.filter(l => l.kind === 'repair').reduce((a, l) => a + l.text.split(' ').length, 0)));
 }
 
 function renderStats() {
@@ -2663,7 +2777,7 @@ function fit(obj, sel) {
   cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr);
   obj.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
-function resize() { requestAnimationFrame(updatePads); fit(view, '#view'); fit(face, '#face'); initStars(); if (S.phase === 'intro') resizeCine(); }
+function resize() { requestAnimationFrame(updatePads); if (document.getElementById('sideFace')) fit(sideFace, '#sideFace'); fit(view, '#view'); fit(face, '#face'); initStars(); if (S.phase === 'intro') resizeCine(); }
 window.addEventListener('resize', resize);
 if (window.ResizeObserver) { const ro = new ResizeObserver(() => resize()); ro.observe($('#view')); ro.observe($('#face')); }
 
@@ -2691,6 +2805,12 @@ function loop(now) {
   drawView(now, view.pw);
   drawFace(face, now, S.phase === 'decrypt' ? 'unknown' : S.speaker, S.speaking, false);
   if (S.phase === 'intro') drawCine(now);
+  const sm = S.sideModeLast;
+  if (sm === 'enemy' || sm === 'combat' || sm === 'repair') {
+    if (sm === 'repair') { if (sideFace.ctx) drawShipIcon(sideFace, now); }
+    else drawFace(sideFace, now, sm === 'enemy' && (S.phase === 'decrypt' || S.lvl < ACTS[1].from) ? 'unknown' : 'vex', S.speaking && S.speaker !== 'ora', true);
+  }
+  if ((S.phase === 'combat' || S.phase === 'decrypt') && now - (S.sideAt || 0) > 300) { S.sideAt = now; renderSystems(); }
   updateAudio(now, view.pw);
   requestAnimationFrame(loop);
 }
