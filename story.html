@@ -4049,12 +4049,56 @@ function speak(text, who) {
     const u = new SpeechSynthesisUtterance(clean);
     u.lang = S.lang === 'uk' ? 'uk-UA' : 'en-GB';
     const v = voPick(who); if (v) u.voice = v;
-    const prm = { ora: [1.02, 1.2], vex: [1.08, 0.55], unknown: [0.78, 0.25], crew: [0.96, 0.95] }[who] || [1, 1];
-    u.rate = prm[0]; u.pitch = prm[1]; u.volume = 0.95;
+    // [rate, pitch, volume]: kept well under the game mix
+    const prm = { ora: [0.98, 0.8, 0.32], vex: [1.04, 0.4, 0.36], unknown: [0.72, 0.1, 0.3], crew: [0.94, 0.75, 0.3] }[who] || [1, 1, 0.3];
+    u.rate = prm[0]; u.pitch = prm[1]; u.volume = prm[2];
+    u.onstart = () => voFx.start(who);
+    u.onboundary = (ev) => { if (!ev.name || ev.name === 'word') voFx.word(who); };
+    u.onend = u.onerror = () => voFx.stop();
     speechSynthesis.speak(u);
   } catch (e) {}
 }
-function voStop() { try { if ('speechSynthesis' in window) speechSynthesis.cancel(); } catch (e) {} }
+function voStop() { try { if ('speechSynthesis' in window) speechSynthesis.cancel(); } catch (e) {} voFx.stop(); }
+/* The browser's speech can't be routed through Web Audio, so the grunge is layered around it:
+   a band-passed static bed, a low buzzing carrier, and crackles/dropouts on each word. */
+const voFx = {
+  nodes: null, buf: null,
+  noiseBuf() { if (this.buf) return this.buf; const n = AC.sampleRate * 2, b = AC.createBuffer(1, n, AC.sampleRate), d = b.getChannelData(0); for (let i = 0; i < n; i++) d[i] = Math.random() * 2 - 1; return (this.buf = b); },
+  start(who) {
+    if (!AC || !S.sound) return; this.stop();
+    const t = AC.currentTime, heavy = who === 'vex' || who === 'unknown';
+    const src = AC.createBufferSource(); src.buffer = this.noiseBuf(); src.loop = true;
+    const bp = AC.createBiquadFilter(); bp.type = 'bandpass'; bp.frequency.value = heavy ? 1400 : 2600; bp.Q.value = heavy ? 0.7 : 1.1;
+    const ng = AC.createGain(); ng.gain.setValueAtTime(0, t); ng.gain.linearRampToValueAtTime(heavy ? 0.05 : 0.022, t + 0.08);
+    src.connect(bp); bp.connect(ng); ng.connect(master); src.start(t);
+    // wobbling static, like a bad channel
+    const lfo = AC.createOscillator(), lg = AC.createGain(); lfo.frequency.value = heavy ? 7 : 4.5; lg.gain.value = heavy ? 0.025 : 0.01;
+    lfo.connect(lg); lg.connect(ng.gain); lfo.start(t);
+    // low electrical buzz under the voice
+    const bz = AC.createOscillator(), bf = AC.createBiquadFilter(), bg = AC.createGain();
+    bz.type = 'square'; bz.frequency.value = heavy ? 48 : 60; bf.type = 'lowpass'; bf.frequency.value = heavy ? 420 : 300;
+    bg.gain.setValueAtTime(0, t); bg.gain.linearRampToValueAtTime(heavy ? 0.018 : 0.009, t + 0.1);
+    bz.connect(bf); bf.connect(bg); bg.connect(master); bz.start(t);
+    this.nodes = { src, lfo, bz, ng, bg, heavy };
+    noiseHit(master, t, 0.06, heavy ? 0.08 : 0.04, 1800);   // keying click
+  },
+  word(who) {
+    if (!AC || !S.sound || !this.nodes) return;
+    const t = AC.currentTime, n = this.nodes;
+    if (Math.random() < (n.heavy ? 0.7 : 0.45)) noiseHit(master, t, 0.02 + Math.random() * 0.04, (n.heavy ? 0.06 : 0.03) * (0.5 + Math.random()), 900 + Math.random() * 2400);
+    if (Math.random() < (n.heavy ? 0.3 : 0.15)) {   // signal dropout: the static surges for a moment
+      n.ng.gain.cancelScheduledValues(t); n.ng.gain.setValueAtTime(n.heavy ? 0.12 : 0.06, t); n.ng.gain.linearRampToValueAtTime(n.heavy ? 0.05 : 0.022, t + 0.12);
+      blip('square', 1800 + Math.random() * 1200, 400, 0.05, 0.012);
+    }
+  },
+  stop() {
+    const n = this.nodes; if (!n || !AC) { this.nodes = null; return; }
+    const t = AC.currentTime;
+    try { n.ng.gain.cancelScheduledValues(t); n.ng.gain.setValueAtTime(n.ng.gain.value, t); n.ng.gain.linearRampToValueAtTime(0, t + 0.12); n.bg.gain.linearRampToValueAtTime(0, t + 0.12);
+      [n.src, n.lfo, n.bz].forEach(o => o.stop(t + 0.15)); noiseHit(master, t, 0.05, n.heavy ? 0.06 : 0.03, 2200); } catch (e) {}
+    this.nodes = null;
+  }
+};
 
 /* ---------- pop-ups: ORA steps out of the console for the important stuff ---------- */
 const popFace = { cv: null, ctx: null, w: 0, h: 0 };
