@@ -139,7 +139,7 @@ button:focus-visible { outline: 2px solid var(--phos); outline-offset: 2px; }
 .terminal .term-head .kind { color: var(--st, var(--muted)); }
 .term-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; }
 .term-head .kind { color: var(--tint); }
-.term-line { font-family: var(--f-mono); font-weight: 500; font-size: clamp(22px, 2.8vw, 34px); letter-spacing: .06em; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 2px; min-height: 1.3em; }
+.term-line { font-family: var(--f-mono); font-weight: 500; font-size: clamp(22px, 2.8vw, 34px); letter-spacing: .06em; display: flex; flex-wrap: wrap; align-items: baseline; gap: 0 2px; min-height: 1.4em; }
 .term-line .prompt { color: var(--dim); margin-right: 14px; }
 .c { color: #8b9aa6; padding: 0 1px; border-bottom: 3px solid transparent; }
 .c.ok { color: var(--live); }
@@ -333,7 +333,7 @@ body[data-station] .comms { box-shadow: 0 0 0 1px color-mix(in srgb, var(--st) 5
   repeating-linear-gradient(90deg, color-mix(in srgb, var(--st) 5%, transparent) 0 1px, transparent 1px 24px); }
 .terminal[data-st="repair"]:not(.quiet) { background-color: #12100a; padding-left: 26px; background-image:
   repeating-linear-gradient(-45deg, var(--st) 0 6px, #12100a 6px 12px); background-size: 10px 100%; background-repeat: no-repeat; }
-.chips { display: flex; flex-wrap: wrap; gap: 5px; min-height: 20px; }
+.chips { display: flex; flex-wrap: wrap; gap: 5px; min-height: 22px; }
 .chip { font-family: var(--f-mono); font-size: 12px; line-height: 1; padding: 4px 7px; border-radius: 4px; color: var(--muted);
   border: 1px solid color-mix(in srgb, var(--st, #74838f) 30%, #26313c); background: rgba(0,0,0,.25); white-space: nowrap; }
 .chip.done { color: #0a0d10; background: var(--st); border-color: var(--st); }
@@ -472,6 +472,9 @@ body.sim-full .app, body.sim-type .app { grid-template-rows: max-content minmax(
 .node.own { border-color: rgba(96,255,150,.5); background: rgba(20,60,35,.25); }
 .node.can { border-color: rgba(255,207,138,.6); box-shadow: 0 0 14px rgba(255,207,138,.12); }
 .node.locked { opacity: .45; }
+/* keep the console a steady height whether or not a target is up */
+.term-foot { min-height: 1.45em; }
+.term-line .c.idle { opacity: .45; background: none; box-shadow: none; border-color: transparent; color: var(--muted); }
 </style>
 
 <div class="app">
@@ -3302,7 +3305,7 @@ function trainTerminal(el, prompt, chips) {
     <div class="term-head"><span class="label kind">${esc(m[S.lang][0])} · ${esc(hg('tiers')[tr.tier])}</span><span class="label">${esc(hg('typeHint'))}</span></div>
     <div class="progress"><i style="width:${(prog * 100).toFixed(1)}%"></i></div>
     ${chips}
-    <div class="term-line ${locked ? '' : 'unlocked'}" id="termLine" style="--cur:${curColor}"><span class="prompt">${esc(prompt)}</span>${rec ? charsHtml(rec.word, rec.typed) : `<span class="c">…</span>`}</div>
+    <div class="term-line ${locked ? '' : 'unlocked'}" id="termLine" style="--cur:${curColor}"><span class="prompt">${esc(prompt)}</span>${rec ? charsHtml(rec.word, rec.typed) : `<span class="c cur idle">…</span>`}</div>
     ${footHtml()}`;
 }
 function drawRock(ctx, s, y, col) {
