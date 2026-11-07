@@ -1882,7 +1882,7 @@ const STATIONS = {
   boot:    { col: '#6ff0a8', icon: '▶', en: ['SYSTEM INSTALL', 'Type the boot sequence to install the module.'], uk: ['ВСТАНОВЛЕННЯ', 'Набери послідовність запуску, щоб встановити модуль.'] },
   decrypt: { col: '#ffb547', icon: '#', en: ['DECRYPTION', 'Type each cipher key before the signal fades.'], uk: ['ДЕШИФРУВАННЯ', 'Набери кожен ключ, поки сигнал не зник.'] },
   combat:  { col: '#ff5a4e', icon: '⊕', en: ['WEAPONS', 'Type a target\'s first letter to lock on, then finish the word.'], uk: ['ЗБРОЯ', 'Набери першу літеру цілі, щоб захопити її, і допиши слово.'] },
-  pursuit: { col: '#ff7a3a', icon: '»', en: ['PURSUIT', 'The raiders are fleeing. No typing: ← → steer, Space fire.'], uk: ['ПОГОНЯ', 'Рейдери тікають. Без друку: ← → кермо, пробіл — вогонь.'] },
+  pursuit: { col: '#ff7a3a', icon: '»', en: ['PURSUIT', 'The raiders are fleeing. No typing: arrows fly, Space fire, B bomb.'], uk: ['ПОГОНЯ', 'Рейдери тікають. Без друку: стрілки — політ, пробіл — вогонь, B — бомба.'] },
   sim:     { col: '#3fe0c5', icon: '◇', en: ['SIMULATOR', 'Training program. Earn parts for ship upgrades.'], uk: ['СИМУЛЯТОР', 'Тренувальна програма. Заробляй деталі на покращення.'] },
   repair:  { col: '#f2e14c', icon: '✚', en: ['REPAIR BAY', 'Retype the damaged words. Slow and clean.'], uk: ['РЕМОНТНИЙ ВІДСІК', 'Передрукуй пошкоджені слова. Повільно і чисто.'] }
 };
@@ -2710,8 +2710,8 @@ const MODES = {
     en: ['Target Range', 'Drones carry letters. Shoot as many as you can in 60 seconds.'],
     uk: ['Тир', 'Дрони несуть літери. Збий якомога більше за 60 секунд.'] },
   arcade: { need: 1, icon: '▲', typing: false, th: [12, 28, 45],
-    en: ['Raider Run', 'No typing! ← → to move, Space to fire. Your upgrades become skills.'],
-    uk: ['Рейдерський забіг', 'Без друку! ← → рух, пробіл — вогонь. Твої покращення стають навичками.'] },
+    en: ['Raider Run', 'No typing! Arrows to fly, Space to fire, B for a bomb. Your upgrades become skills.'],
+    uk: ['Рейдерський забіг', 'Без друку! Стрілки — політ, пробіл — вогонь, B — бомба. Твої покращення стають навичками.'] },
   belt:   { need: 2, icon: '✺', typing: true, th: [10, 20, 34],
     en: ['Asteroid Belt', 'Type the words on the rocks before they hit the hull. How long can you last?'],
     uk: ['Пояс астероїдів', 'Набирай слова на каменях, поки вони не влучили в корпус. Скільки протримаєшся?'] }
@@ -2720,18 +2720,18 @@ const HG = {
   en: { title: 'HANGAR', parts: 'parts', ship: 'ARGO-7 · UPGRADES', sim: 'SIMULATOR', buy: 'Install', installed: 'Installed', need: 'Need', locked: 'Unlocks after', close: 'Esc · close',
         tiers: ['Cadet', 'Pilot', 'Ace'], tierLock: 'Get 2★ on the tier before', newProg: 'New simulator program in the hangar: {m}. Train there to earn parts for upgrades.',
         retry: 'retry', back: 'back to mission', hangar: 'hangar', score: 'Score', earned: 'Parts earned', best: 'Best', time: 'TIME', hull: 'HULL', wave: 'WAVE', lives: 'LIVES',
-        skills: 'Skills', move: '← → move · Space fire · Esc quit', typeHint: 'Type a target\'s first letter to lock on · Esc quit', simOn: 'Simulator online. {m}, {t} tier.',
+        skills: 'Skills', move: 'Arrows fly · Space fire · B bomb · Esc quit', typeHint: 'Type a target\'s first letter to lock on · Esc quit', simOn: 'Simulator online. {m}, {t} tier.',
         defeatTip: 'Later, the Target Range in the hangar will sharpen your aim.', over: 'SIMULATION OVER', newBadge: 'NEW',
-        tabUp: 'Upgrade tree', tabSim: 'Simulator', stats: 'Ship stats', requires: 'Requires', replay: 'Pursuit', replayIntro: 'They are running! Take the helm, {name}. No typing now: ← → to steer, Space to fire. Your hangar upgrades are your skills.',
-        replayOn: 'Pursuit! ← → steer, Space fire.', replayDone: 'VICTORY', escaped: 'HE GOT AWAY', cont: 'continue', skip: 'skip', inHangar: 'You can fly that kind of run any time: Raider Run, in the Hangar simulator.', escapedOra: 'He slipped away, but the sector is ours.',
+        tabUp: 'Upgrade tree', tabSim: 'Simulator', stats: 'Ship stats', requires: 'Requires', replay: 'Pursuit', replayIntro: 'They are running! Take the helm, {name}. No typing now: arrows to fly, Space to fire, B for a bomb. Grab the capsules for special weapons. Your hangar upgrades are your skills.',
+        replayOn: 'Pursuit! Arrows fly, Space fire, B bomb.', replayDone: 'VICTORY', escaped: 'HE GOT AWAY', cont: 'continue', skip: 'skip', inHangar: 'You can fly that kind of run any time: Raider Run, in the Hangar simulator.', escapedOra: 'He slipped away, but the sector is ours.', mother: 'Mothership', motherDown: 'MOTHERSHIP DOWN', bombs: 'BOMBS', pw: { spread: 'SPREAD SHOT', rapid: 'RAPID FIRE', homing: 'HOMING MISSILES', bomb: 'BOMB +1' },
         st: { shields: 'Shields', recharge: 'Recharge', every: 'every {n} kills', absorb: 'First hit absorbed', heat: 'Heat build', chain: 'Overcharge chain', targets: '{n} target(s)', missiles: 'Missile speed', flak: 'Flak burst', decrypt: 'Decrypt time', speed: 'Battle speed', yes: 'yes', no: '—' } },
   uk: { title: 'АНГАР', parts: 'деталей', ship: 'АРГО-7 · ПОКРАЩЕННЯ', sim: 'СИМУЛЯТОР', buy: 'Встановити', installed: 'Встановлено', need: 'Треба', locked: 'Відкривається після', close: 'Esc · закрити',
         tiers: ['Кадет', 'Пілот', 'Ас'], tierLock: 'Отримай 2★ на попередньому рівні', newProg: 'Нова програма симулятора в ангарі: {m}. Тренуйся там, щоб заробити деталі на покращення.',
         retry: 'ще раз', back: 'до місії', hangar: 'ангар', score: 'Рахунок', earned: 'Зароблено деталей', best: 'Рекорд', time: 'ЧАС', hull: 'КОРПУС', wave: 'ХВИЛЯ', lives: 'ЖИТТЯ',
-        skills: 'Навички', move: '← → рух · пробіл вогонь · Esc вихід', typeHint: 'Набери першу літеру цілі · Esc вихід', simOn: 'Симулятор увімкнено. {m}, рівень «{t}».',
+        skills: 'Навички', move: 'Стрілки — політ · пробіл вогонь · B бомба · Esc вихід', typeHint: 'Набери першу літеру цілі · Esc вихід', simOn: 'Симулятор увімкнено. {m}, рівень «{t}».',
         defeatTip: 'Згодом тир в ангарі відточить твою точність.', over: 'СИМУЛЯЦІЮ ЗАВЕРШЕНО', newBadge: 'НОВЕ',
-        tabUp: 'Дерево покращень', tabSim: 'Симулятор', stats: 'Характеристики', requires: 'Потрібно', replay: 'Погоня', replayIntro: 'Вони тікають! Бери штурвал, {name}. Тепер без друку: ← → кермо, пробіл — вогонь. Твої покращення з ангара — це навички.',
-        replayOn: 'Погоня! ← → кермо, пробіл — вогонь.', replayDone: 'ПЕРЕМОГА', escaped: 'ВІН ВТІК', cont: 'далі', skip: 'пропустити', inHangar: 'Такий політ можна повторити будь-коли: Рейдерський забіг у симуляторі ангара.', escapedOra: 'Він вислизнув, але сектор наш.',
+        tabUp: 'Дерево покращень', tabSim: 'Симулятор', stats: 'Характеристики', requires: 'Потрібно', replay: 'Погоня', replayIntro: 'Вони тікають! Бери штурвал, {name}. Тепер без друку: стрілки — політ, пробіл — вогонь, B — бомба. Хапай капсули зі спецзброєю. Твої покращення з ангара — це навички.',
+        replayOn: 'Погоня! Стрілки — політ, пробіл — вогонь, B — бомба.', replayDone: 'ПЕРЕМОГА', escaped: 'ВІН ВТІК', cont: 'далі', skip: 'пропустити', inHangar: 'Такий політ можна повторити будь-коли: Рейдерський забіг у симуляторі ангара.', escapedOra: 'Він вислизнув, але сектор наш.', mother: 'Носій', motherDown: 'НОСІЙ ЗБИТО', bombs: 'БОМБИ', pw: { spread: 'РОЗКИДНИЙ ПОСТРІЛ', rapid: 'ШВИДКИЙ ВОГОНЬ', homing: 'САМОНАВІДНІ РАКЕТИ', bomb: 'БОМБА +1' },
         st: { shields: 'Щити', recharge: 'Підзарядка', every: 'кожні {n} влучання', absorb: 'Перше влучання поглинається', heat: 'Ріст заряду', chain: 'Ланцюг перезаряду', targets: '{n} ціль(і)', missiles: 'Швидкість ракет', flak: 'Зенітний залп', decrypt: 'Час дешифрування', speed: 'Швидкість бою', yes: 'так', no: '—' } }
 };
 const hg = (k) => HG[S.lang][k];
@@ -3052,38 +3052,99 @@ function leaveTraining() {
 }
 
 /* ---------- Raider Run (no typing) ---------- */
+/* ---------- Raider Run / Pursuit (no typing) ----------
+   Ships have armour, the mothership soaks many hits, divers break formation,
+   power-ups drop from wrecks, and the player can fly anywhere in the lower deck. */
+const AR_HP = { drone: 1, scout: 1, kamikaze: 1, cruiser: 3 };
+const AR_PTS = { drone: 1, scout: 2, kamikaze: 3, cruiser: 5 };
+const AR_PW = ['spread', 'rapid', 'homing', 'bomb'];
+const AR_PW_ICON = { spread: 'S', rapid: 'R', homing: 'M', bomb: 'B' };
 function initArcade(tier) {
-  const W = view.w, H = view.h;
-  S.ar = { replay: S.tr && S.tr.replay, x: W / 2, keys: {}, shots: [], eshots: [], inv: [], dir: 1, ox: 0, oy: 0, wave: 1, tier,
-    lives: 3 + (S.up.reactive ? 1 : 0), shieldUp: !!S.up.armor, shieldAt: 0, score: 0, cool: 0, fireAt: 0, hurt: 0 };
+  const W = view.w;
+  S.ar = { replay: S.tr && S.tr.replay, x: (W - pursuitCol()) / 2, y: 0, keys: {}, shots: [], eshots: [], inv: [], drops: [], dir: 1, ox: 0, oy: 0, wave: 1, tier,
+    lives: 3 + (S.up.reactive ? 1 : 0), shieldUp: !!S.up.armor, shieldAt: 0, score: 0, cool: 0, fireAt: 0, hurt: -1e9,
+    bombs: 1, pw: null, pwUntil: 0, homingAt: 0, diveAt: performance.now() + 2600, bombFx: -1e9 };
   buildWave();
+  S.ar.y = arPY();
 }
 function buildWave() {
-  const A = S.ar, W = view.w, H = view.h;
+  const A = S.ar, W = view.w, H = view.h, now = performance.now();
   const RT_TYPES = { 5: ['scout', 'drone', 'drone'], 6: ['cruiser', 'scout', 'drone', 'drone'], 7: ['kamikaze', 'cruiser', 'scout', 'drone'], 8: ['kamikaze', 'cruiser', 'cruiser', 'scout'] };
   const rtypes = A.replay ? RT_TYPES[A.replay] : null;
+  const base = A.wave >= 2 ? ['kamikaze', 'cruiser', 'scout', 'drone', 'drone'] : ['kamikaze', 'scout', 'drone', 'drone', 'drone'];
+  const types = rtypes || base;
   const rows = rtypes ? rtypes.length : Math.min(5, [3, 4, 4][A.tier] + Math.floor((A.wave - 1) / 2)), cols = 7;
+  const usable = W - pursuitCol();
   A.k = Math.min(1.35, Math.max(0.6, H / 420));
-  const gx = Math.min(64 * A.k, (W * 0.6) / cols), gy = Math.max(20, Math.min(40 * A.k, (H - 190) / rows));
+  const kind0 = A.replay ? (A.replay === 8 ? 'flagship' : 'carrier') : (A.wave % 3 === 0 ? 'carrier' : null);
+  const top0 = 58 + 10 * A.k + (kind0 === 'flagship' ? 78 : kind0 ? 62 : 0) * A.k;
+  const gx = Math.min(64 * A.k, (usable * 0.6) / cols), gy = Math.max(22, Math.min(42 * A.k, (H * 0.58 - top0) / rows));
   A.inv = [];
-  const types = rtypes || ['kamikaze', 'scout', 'drone', 'drone', 'drone'];
-  for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) A.inv.push({ c, r, alive: true, type: types[r], hp: types[r] === 'cruiser' ? 2 : 1, hit: 0, dx: c * gx, dy: r * gy });
-  A.boss = A.replay === 8 ? { x: (W - pursuitCol()) / 2, y: 64 + 24 * A.k, dir: 1, hp: 14, max: 14, fireAt: performance.now() + 2500, hit: 0 } : null;
-  A.gx = gx; A.ox = (W - pursuitCol() - (cols - 1) * gx) / 2; A.oy = 58 + 10 * A.k; A.dir = 1;
-  if (A.boss) A.oy += 84 * A.k;
+  for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) A.inv.push({ c, r, alive: true, type: types[r], hp: AR_HP[types[r]], max: AR_HP[types[r]], hit: 0, dx: c * gx, dy: r * gy, dive: null });
+  // every pursuit has a mothership; Raider Run brings one every third wave
+  const kind = A.replay ? (A.replay === 8 ? 'flagship' : 'carrier') : (A.wave % 3 === 0 ? 'carrier' : null);
+  A.boss = kind ? { kind, x: usable / 2, y: 60 + 22 * A.k, dir: 1, sc: kind === 'flagship' ? 0.8 : 0.58, phase: 1, hit: 0, fireAt: now + 2600, launchAt: now + 4200,
+    hp: kind === 'flagship' ? 30 : A.replay ? { 5: 8, 6: 10, 7: 12 }[A.replay] : 6 + A.wave * 2 } : null;
+  if (A.boss) A.boss.max = A.boss.hp;
+  A.gx = gx; A.ox = (usable - (cols - 1) * gx) / 2; A.oy = 58 + 10 * A.k; A.dir = 1;
+  if (A.boss) A.oy += (kind === 'flagship' ? 78 : 62) * A.k;
   A.total = A.inv.length;
   A.speed = (W * 0.00005) * ([1, 1.25, 1.5][A.tier]) * (1 + (A.wave - 1) * 0.18) * (S.up.booster ? 0.85 : 1);
   A.fireGap = [1150, 900, 700][A.tier] / (1 + (A.wave - 1) * 0.12);
 }
 function arcadeKey(e, down) {
   const A = S.ar; if (!A) return false;
-  const map = { ArrowLeft: 'left', KeyA: 'left', ArrowRight: 'right', KeyD: 'right', Space: 'fire', ArrowUp: 'fire' };
+  const map = { ArrowLeft: 'left', KeyA: 'left', ArrowRight: 'right', KeyD: 'right', ArrowUp: 'up', KeyW: 'up', ArrowDown: 'down', KeyS: 'down', Space: 'fire', KeyB: 'bomb', KeyX: 'bomb', ShiftLeft: 'bomb', ShiftRight: 'bomb' };
   const k = map[e.code]; if (!k) return false;
+  if (k === 'bomb') { if (down && !e.repeat) arcadeBomb(performance.now()); return true; }
   A.keys[k] = down; return true;
 }
-const arPY = () => view.h - 50 - 22 * ((S.ar && S.ar.k) || 1);
+const arPY = () => view.h - 50 - 22 * ((S.ar && S.ar.k) || 1);   // the defence line (lowest the ship can fly)
+const arTop = () => view.h * 0.62;                                 // highest the ship can fly
+const arPos = (v) => v.dive ? [v.x, v.y] : [S.ar.ox + v.dx, S.ar.oy + v.dy];
+function arNearest(b) {
+  const A = S.ar; let best = null, bd = 1e9;
+  A.inv.forEach(v => { if (!v.alive) return; const [x, y] = arPos(v); if (y > b.y + 30) return; const d = Math.hypot(x - b.x, y - b.y); if (d < bd) { bd = d; best = [x, y]; } });
+  if (A.boss && A.boss.hp > 0) { const d = Math.hypot(A.boss.x - b.x, A.boss.y - b.y); if (d < bd) best = [A.boss.x, A.boss.y]; }
+  return best;
+}
+function arDrop(x, y, kind) { S.ar.drops.push({ x, y, kind: kind || AR_PW[(Math.random() * AR_PW.length) | 0], t0: performance.now() }); }
+function arPickup(now, kind) {
+  const A = S.ar;
+  if (kind === 'bomb') A.bombs = Math.min(3, A.bombs + 1);
+  else { A.pw = kind; A.pwUntil = now + 9000; }
+  banner(hg('pw')[kind]); sfx.recharge(); blip('square', 990, 1480, 0.12, 0.04, 0.08);
+}
+function arShipDmg(now, v, n) {
+  const A = S.ar, [x, y] = arPos(v);
+  v.hp -= n; v.hit = 120;
+  if (v.hp > 0) { sfx.clang(); C.booms.push({ x: x + (Math.random() - .5) * 10, y, t: now, r: Math.random() * 0.3 }); return; }
+  v.alive = false; A.score += AR_PTS[v.type] + (v.dive ? 2 : 0);
+  C.booms.push({ x, y, t: now, r: Math.random(), big: v.type === 'cruiser' }); sfx.boom();
+  if (Math.random() < (v.type === 'cruiser' ? 0.35 : v.dive ? 0.2 : 0.06)) arDrop(x, y);
+}
+function arBossDmg(now, n) {
+  const A = S.ar, B = A.boss;
+  B.hp = Math.max(0, B.hp - n); B.hit = 90; sfx.clang();
+  C.booms.push({ x: B.x + (Math.random() - .5) * 90 * B.sc * A.k, y: B.y + (Math.random() - .5) * 30 * A.k, t: now, r: Math.random() * 0.4 });
+  if (B.hp <= 0) {
+    A.score += B.kind === 'flagship' ? 40 : 15;
+    for (let i = 0; i < 7; i++) C.booms.push({ x: B.x + (Math.random() - .5) * 150 * B.sc, y: B.y + (Math.random() - .5) * 40, t: now + i * 90, r: Math.random(), big: true });
+    sfx.boom(); view.shake = 600;
+    banner(B.kind === 'flagship' ? uw('flagshipDown') : hg('motherDown'));
+    arDrop(B.x - 24, B.y, 'bomb'); arDrop(B.x + 24, B.y);
+  }
+}
+function arcadeBomb(now) {
+  const A = S.ar; if (!A || !A.bombs || A.endAt || (S.tr && S.tr.done)) return;
+  A.bombs--; A.bombFx = now; A.eshots = [];
+  A.inv.forEach(v => { if (v.alive && arPos(v)[1] > 20) arShipDmg(now, v, 2); });
+  if (A.boss && A.boss.hp > 0) arBossDmg(now, 4);
+  view.shake = 500; sfx.boom();
+  if (AC && S.sound) noiseHit(master, AC.currentTime, 0.4, 0.12, 900);
+}
 function arcadeTick(now, dt) {
-  const A = S.ar, W = view.w, H = view.h, py = arPY();
+  const A = S.ar, W = view.w, H = view.h;
   if (!A) return;
   if (A.replay) {
     pursuitFx(now, dt);
@@ -3092,61 +3153,149 @@ function arcadeTick(now, dt) {
     if (!A.said) A.said = {};
     if (!A.said.start && now - S.tr.t0 > 900) { A.said.start = 1; ptauntKey('start', now); }
   }
+  const usable = W - pursuitCol();
+  // free flight in the lower deck
   const sp = W * 0.00065;
   if (A.keys.left) A.x -= sp * dt;
   if (A.keys.right) A.x += sp * dt;
+  if (A.keys.up) A.y -= sp * 0.8 * dt;
+  if (A.keys.down) A.y += sp * 0.8 * dt;
   A.x = Math.max(40, Math.min(W - 40, A.x));
+  A.y = Math.max(arTop(), Math.min(arPY(), A.y));
+  const py = A.y;
+  if (A.pw && now > A.pwUntil) A.pw = null;
   if (A.keys.fire && now > A.cool) {
-    A.cool = now + (S.up.overdrive ? 190 : 300);
-    if (S.up.twin) { A.shots.push({ x: A.x - 9, y: py - 14 }, { x: A.x + 9, y: py - 14 }); } else A.shots.push({ x: A.x, y: py - 16 });
+    A.cool = now + (S.up.overdrive ? 190 : 300) * (A.pw === 'rapid' ? 0.45 : 1);
+    (S.up.twin ? [-9, 9] : [0]).forEach(o => A.shots.push({ x: A.x + o, y: py - 14, vx: 0, vy: -1 }));
+    if (A.pw === 'spread') [-0.34, 0.34].forEach(vx => A.shots.push({ x: A.x, y: py - 14, vx, vy: -0.94 }));
     sfx.laser();
   }
-  // invaders
-  const alive = A.inv.filter(v => v.alive);
-  if (A.boss) {
-    const B = A.boss;
-    B.x += B.dir * W * 0.00008 * dt; if (B.x > W - 90 - pursuitCol() || B.x < 90) B.dir *= -1;
-    if (now > B.fireAt) { B.fireAt = now + 1500; [-0.35, 0, 0.35].forEach(vx => A.eshots.push({ x: B.x, y: B.y + 24 * A.k, vx })); }
-    if (B.hit > 0) B.hit -= dt;
+  if (A.pw === 'homing' && now > A.homingAt) {
+    A.homingAt = now + 650;
+    [-1, 1].forEach(sd => A.shots.push({ x: A.x + sd * 14, y: py, vx: sd * 0.45, vy: -0.6, homing: true }));
+    blip('square', 1400, 700, 0.06, 0.025);
   }
-  if (!alive.length && A.replay && (!A.boss || A.boss.hp <= 0)) { pursuitEnd(now, true); return; }
+  const alive = A.inv.filter(v => v.alive), form = alive.filter(v => !v.dive);
+  // mothership
+  const B = A.boss;
+  if (B && B.hp > 0) {
+    if (B.hit > 0) B.hit -= dt;
+    B.x += B.dir * W * (B.phase === 2 ? 0.00014 : 0.00008) * dt;
+    if (B.x > usable - 90) { B.x = usable - 90; B.dir = -1; } else if (B.x < 90) { B.x = 90; B.dir = 1; }
+    if (B.kind === 'flagship' && B.phase === 1 && B.hp <= B.max / 2) { B.phase = 2; banner(uw('phase2'), true); view.shake = 400; sfx.breach(); }
+    if (now > B.fireAt) {
+      B.fireAt = now + (B.kind === 'flagship' ? (B.phase === 2 ? 1000 : 1500) : 1900);
+      const fan = B.kind === 'flagship' ? (B.phase === 2 ? [-0.5, -0.25, 0, 0.25, 0.5] : [-0.35, 0, 0.35]) : [-0.2, 0.2];
+      fan.forEach(vx => A.eshots.push({ x: B.x, y: B.y + 22 * A.k, vx }));
+    }
+    if (now > B.launchAt) {   // launches a raider that dives straight at you
+      B.launchAt = now + (B.kind === 'flagship' ? (B.phase === 2 ? 2200 : 3800) : 4600);
+      A.inv.push({ c: -1, r: -1, alive: true, type: 'kamikaze', hp: 1, max: 1, hit: 0, dx: 0, dy: 0, spawned: true, x: B.x, y: B.y + 20 * A.k, dive: { t0: now, sx: B.x, mode: 'home' } });
+      blip('sawtooth', 260, 900, 0.22, 0.04);
+    }
+  }
+  const bossDown = !B || B.hp <= 0;
+  if (!alive.length && bossDown) {
+    if (A.replay) { pursuitEnd(now, true); return; }
+    A.wave++; A.score += 5; banner(`${hg('wave')} ${A.wave}`); sfx.recharge(); buildWave(); return;
+  }
   if (A.replay) {
     if (!A.said.half && alive.length <= A.total / 2) { A.said.half = 1; ptauntKey('half', now); }
     else if (!A.said.few && alive.length <= 3 && alive.length) { A.said.few = 1; ptauntKey('few', now); }
-    if (A.boss && !A.said.boss && A.boss.hp <= A.boss.max / 2) { A.said.boss = 1; ptauntKey('boss', now); }
+    if (B && !A.said.boss && B.hp <= B.max / 2) { A.said.boss = 1; ptauntKey('boss', now); }
   }
-  if (!alive.length && !A.replay) { A.wave++; A.score += 5; banner(`${hg('wave')} ${A.wave}`); sfx.recharge(); buildWave(); return; }
-  const k = 1 + (1 - alive.length / A.total) * 1.6;
-  A.ox += A.dir * A.speed * k * dt;
-  const xs = alive.map(v => A.ox + v.dx);
-  if (Math.max(...xs) > W - 40 - pursuitCol() || Math.min(...xs) < 40) { A.dir *= -1; A.ox += A.dir * 4; A.oy += 14; }
-  const bottom = Math.max(...alive.map(v => A.oy + v.dy));
-  if (bottom > py - 30) { A.lives = 0; arcadeHit(now, true); return; }
-  // enemy fire
-  if (now > A.fireAt) {
+  // formation drift
+  if (form.length) {
+    const kk = 1 + (1 - alive.length / A.total) * 1.6;
+    A.ox += A.dir * A.speed * kk * dt;
+    const xs = form.map(v => A.ox + v.dx);
+    if (Math.max(...xs) > usable - 40 || Math.min(...xs) < 40) { A.dir *= -1; A.ox += A.dir * 4; A.oy += 14; }
+    const bottom = Math.max(...form.map(v => A.oy + v.dy));
+    if (bottom > arPY() - 30) { A.lives = 0; arcadeHit(now, true); return; }
+  }
+  // some raiders break formation and fly their own path
+  if (now > A.diveAt && form.length) {
+    A.diveAt = now + [3400, 2700, 2100][A.tier] * (0.7 + Math.random() * 0.6) / (1 + (A.wave - 1) * 0.1);
+    const cand = form.filter(v => v.type === 'kamikaze' || v.type === 'scout');
+    const v = cand[(Math.random() * cand.length) | 0];
+    if (v) { const [x, y] = arPos(v); v.x = x; v.y = y; v.dive = { t0: now, sx: x, mode: v.type === 'kamikaze' ? 'home' : 'weave' }; blip('sawtooth', 700, 250, 0.25, 0.03); }
+  }
+  const dv = H * 0.00026;
+  alive.forEach(v => {
+    const d = v.dive; if (!d) return;
+    const x0 = v.x, y0 = v.y;
+    if (d.ret) {   // flying back into its slot
+      const tx = A.ox + v.dx, ty = A.oy + v.dy;
+      v.x += (tx - v.x) * Math.min(1, 0.004 * dt); v.y += Math.min(dv * dt, ty - v.y);
+      if (Math.abs(ty - v.y) < 2 && Math.abs(tx - v.x) < 4) { v.dive = null; return; }
+    } else if (d.mode === 'home') {   // kamikaze: swoops at you
+      v.y += dv * 1.25 * dt;
+      if (v.y < py - 50) v.x += Math.max(-1, Math.min(1, (A.x - v.x) / 60)) * W * 0.0003 * dt;
+    } else {                          // scout: weaves down and takes one aimed shot
+      v.y += dv * 0.85 * dt;
+      v.x = d.sx + Math.sin((now - d.t0) * 0.0035) * Math.min(160, usable * 0.16);
+      if (!d.shot && v.y > H * 0.32) { d.shot = true; A.eshots.push({ x: v.x, y: v.y + 10, vx: (A.x - v.x) / Math.max(120, py - v.y) }); }
+    }
+    v.ang = Math.atan2(v.y - y0, v.x - x0);
+    if (!d.ret && v.y > H + 30) {
+      if (v.spawned) { v.alive = false; return; }
+      d.ret = true; v.x = A.ox + v.dx; v.y = -30;
+    }
+  });
+  // ramming
+  alive.forEach(v => {
+    if (!v.alive) return;
+    const [x, y] = arPos(v);
+    if (Math.abs(x - A.x) < 22 * A.k && Math.abs(y - py) < 18 * A.k) { v.alive = false; C.booms.push({ x, y, t: now, r: Math.random() }); sfx.boom(); arcadeHit(now, false); }
+  });
+  if (!S.ar || A.endAt) return;
+  // formation fire
+  if (now > A.fireAt && form.length) {
     A.fireAt = now + A.fireGap * (0.6 + Math.random() * 0.8);
-    const col = alive[(Math.random() * alive.length) | 0].c;
-    const shooter = alive.filter(v => v.c === col).sort((a, b) => b.r - a.r)[0];
+    const col = form[(Math.random() * form.length) | 0].c;
+    const shooter = form.filter(v => v.c === col).sort((a, b) => b.r - a.r)[0];
     A.eshots.push({ x: A.ox + shooter.dx, y: A.oy + shooter.dy + 12 });
   }
   const ev = H * 0.00032 * (S.up.chrono ? 0.5 : S.up.dish ? 0.65 : 1) * (1 + (A.wave - 1) * 0.06);
   A.eshots.forEach(b => { b.y += ev * dt; if (b.vx) b.x += b.vx * ev * dt; });
-  A.shots.forEach(b => { b.y -= H * 0.0013 * dt; });
-  A.shots = A.shots.filter(b => {
-    if (b.y < 30) return false;
-    const hit = alive.find(v => v.alive && Math.abs(A.ox + v.dx - b.x) < 15 * A.k && Math.abs(A.oy + v.dy - b.y) < 11 * A.k);
-    if (A.boss && A.boss.hp > 0 && Math.abs(A.boss.x - b.x) < 52 * A.k && Math.abs(A.boss.y - b.y) < 24 * A.k) {
-      A.boss.hp--; A.boss.hit = 90; sfx.clang();
-      if (A.boss.hp <= 0) { A.score += 25; for (let i = 0; i < 6; i++) C.booms.push({ x: A.boss.x + (Math.random() - .5) * 120, y: A.boss.y + (Math.random() - .5) * 40, t: now + i * 90, r: Math.random(), big: true }); sfx.boom(); view.shake = 500; banner(uw('flagshipDown')); }
-      return !S.up.flak;
+  // player shots
+  const sv = H * 0.0013;
+  A.shots.forEach(b => {
+    if (b.homing) {
+      const tg = arNearest(b);
+      if (tg) {
+        const want = Math.atan2(tg[1] - b.y, tg[0] - b.x), cur = Math.atan2(b.vy, b.vx);
+        let da = want - cur; while (da > Math.PI) da -= Math.PI * 2; while (da < -Math.PI) da += Math.PI * 2;
+        const na = cur + Math.max(-1, Math.min(1, da)) * Math.min(1, 0.006 * dt);
+        b.vx = Math.cos(na) * 0.8; b.vy = Math.sin(na) * 0.8;
+      }
     }
-    if (hit && hit.hp > 1) { hit.hp--; hit.hit = 120; sfx.clang(); return !S.up.flak; }
-    if (hit) { hit.alive = false; A.score += hit.type === 'kamikaze' ? 3 : hit.type === 'scout' ? 2 : 1; C.booms.push({ x: A.ox + hit.dx, y: A.oy + hit.dy, t: now, r: Math.random() }); sfx.boom(); return !S.up.flak; }
-    return true;
+    b.x += b.vx * sv * dt; b.y += b.vy * sv * dt;
+  });
+  A.shots = A.shots.filter(b => {
+    if (b.y < 26 || b.y > H || b.x < 0 || b.x > W) return false;
+    const BB = A.boss;
+    if (BB && BB.hp > 0 && Math.abs(BB.x - b.x) < 66 * BB.sc * A.k && Math.abs(BB.y - b.y) < 30 * BB.sc * A.k) { arBossDmg(now, b.homing ? 2 : 1); return false; }
+    const hit = A.inv.find(v => {
+      if (!v.alive || (b.hits && b.hits.has(v))) return false;
+      const [x, y] = arPos(v), w = v.type === 'cruiser' ? 19 : 15;
+      return Math.abs(x - b.x) < w * A.k && Math.abs(y - b.y) < 12 * A.k;
+    });
+    if (!hit) return true;
+    arShipDmg(now, hit, b.homing ? 2 : 1);
+    if (S.up.flak && !b.homing) { (b.hits = b.hits || new Set()).add(hit); return true; }   // flak: shots pierce
+    return false;
   });
   A.eshots = A.eshots.filter(b => {
-    if (b.y > H - 30) return false;
+    if (b.y > H - 30 || b.x < 0 || b.x > W) return false;
     if (Math.abs(b.x - A.x) < 18 * A.k && Math.abs(b.y - py) < 14 * A.k) { arcadeHit(now, false); return false; }
+    return true;
+  });
+  // power-ups
+  A.drops.forEach(d => { d.y += H * 0.00016 * dt; });
+  A.drops = A.drops.filter(d => {
+    if (d.y > H - 20) return false;
+    if (Math.abs(d.x - A.x) < 28 * A.k && Math.abs(d.y - py) < 26 * A.k) { arPickup(now, d.kind); return false; }
     return true;
   });
   if (S.up.armor && !A.shieldUp && now > A.shieldAt) { A.shieldUp = true; sfx.recharge(); }
@@ -3154,32 +3303,57 @@ function arcadeTick(now, dt) {
 function arcadeHit(now, fatal) {
   const A = S.ar;
   if (A.endAt) return;
-  if (!fatal && A.shieldUp) { A.shieldUp = false; A.shieldAt = now + (S.up.cap ? 8000 : 12000); sfx.clang(); C.booms.push({ x: A.x, y: arPY(), t: now, r: 0 }); return; }
+  if (!fatal && now - A.hurt < 1000) return;   // a moment of grace after each hit
+  if (!fatal && A.shieldUp) { A.shieldUp = false; A.shieldAt = now + (S.up.cap ? 8000 : 12000); A.hurt = now - 400; sfx.clang(); C.booms.push({ x: A.x, y: A.y, t: now, r: 0 }); return; }
   if (!fatal) A.lives--;
   A.hurt = now; view.shake = 320; view.flash = 1; sfx.breach();
-  C.booms.push({ x: A.x, y: arPY(), t: now, r: Math.random(), bad: true, big: true });
+  C.booms.push({ x: A.x, y: A.y, t: now, r: Math.random(), bad: true, big: true });
   if (A.lives <= 0) { if (A.replay) pursuitEnd(now, false); else endTraining(); return; }
   if (A.replay && !fatal) ptauntKey('hit', now);
 }
 function drawArcade(ctx, now) {
-  const A = S.ar, W = view.w, H = view.h, py = arPY(); if (!A) return;
+  const A = S.ar, W = view.w, H = view.h; if (!A) return;
+  const py = A.y || arPY();
   view.stars.forEach(st => { st.y += st.z * 0.12; if (st.y > H) { st.y = 0; st.x = Math.random() * W; } ctx.fillStyle = G(0.2 + 0.3 * st.z / 1.8); ctx.fillRect(st.x, st.y, st.z, st.z); });
-  // invaders (pointing down)
-  if (A.boss && A.boss.hp > 0) {
-    const B = A.boss, by = B.y;
-    drawBossShape(ctx, B.x, by, 0.75 * A.k, B.hit > 0 ? '#ffffff' : HOT(), now);
-    const bw = 120 * A.k, hy = by + 32 * A.k; ctx.strokeStyle = HOT(.7); ctx.lineWidth = 1; ctx.strokeRect(B.x - bw / 2, hy, bw, 4);
+  // flight zone
+  ctx.strokeStyle = G(.12); ctx.setLineDash([3, 7]); ctx.beginPath(); ctx.moveTo(30, arTop() - 18); ctx.lineTo(W - 30 - pursuitCol(), arTop() - 18); ctx.stroke(); ctx.setLineDash([]);
+  // mothership
+  const B = A.boss;
+  if (B && B.hp > 0) {
+    const col = B.hit > 0 ? '#ffffff' : (B.phase === 2 && Math.floor(now / 160) % 2 ? 'rgba(255,120,80,1)' : HOT());
+    drawBossShape(ctx, B.x, B.y, B.sc * A.k, col, now);
+    const bw = 150 * B.sc * A.k, hy = B.y + 40 * B.sc * A.k;
+    ctx.strokeStyle = HOT(.7); ctx.lineWidth = 1; ctx.strokeRect(B.x - bw / 2, hy, bw, 4);
     ctx.fillStyle = HOT(); ctx.fillRect(B.x - bw / 2, hy, bw * B.hp / B.max, 4);
+    vtext(ctx, B.kind === 'flagship' ? uw('flagship') : hg('mother').toUpperCase(), B.x, hy + 13, 14, 'center', HOT(.8));
   }
+  // raiders
   A.inv.forEach(v => {
     if (!v.alive) return;
     if (v.hit > 0) v.hit -= 16;
-    const x = A.ox + v.dx, y = A.oy + v.dy + Math.sin(now * 0.005 + v.c) * 2;
-    ctx.save(); ctx.translate(x, y); ctx.rotate(Math.PI / 2); drawShipShape(ctx, v.type, 0, 0, 0.55 * A.k, v.hit > 0 ? '#ffffff' : HOT(), now); ctx.restore();
+    let [x, y] = arPos(v);
+    if (!v.dive) y += Math.sin(now * 0.005 + v.c) * 2;
+    const col = v.hit > 0 ? '#ffffff' : v.dive ? 'rgba(255,140,70,1)' : HOT();
+    ctx.save(); ctx.translate(x, y); ctx.rotate(v.dive && v.ang != null ? v.ang : Math.PI / 2);
+    drawShipShape(ctx, v.type, 0, 0, (v.type === 'cruiser' ? 0.56 : 0.5) * A.k, col, now); ctx.restore();
+    if (v.max > 1) for (let i = 0; i < v.max; i++) { ctx.fillStyle = i < v.hp ? HOT() : HOT(.2); ctx.fillRect(x + 14 * A.k, y - (v.max * 6) / 2 + i * 6, 3, 4); }
+  });
+  // power-up capsules
+  A.drops.forEach(d => {
+    const r = 11 * A.k, pulse = 0.6 + 0.4 * Math.sin((now - d.t0) * 0.01);
+    ctx.strokeStyle = d.kind === 'bomb' ? HOT(pulse) : G(pulse); ctx.lineWidth = 2;
+    ctx.beginPath(); for (let i = 0; i < 6; i++) { const a = i / 6 * Math.PI * 2 + Math.PI / 6; ctx[i ? 'lineTo' : 'moveTo'](d.x + Math.cos(a) * r, d.y + Math.sin(a) * r); } ctx.closePath(); ctx.stroke();
+    vtext(ctx, AR_PW_ICON[d.kind], d.x, d.y + 1, 18 * A.k, 'center', d.kind === 'bomb' ? HOT() : G());
   });
   // shots
-  ctx.fillStyle = G(); A.shots.forEach(b => ctx.fillRect(b.x - 1.5, b.y - 8, 3, 12));
+  A.shots.forEach(b => {
+    if (b.homing) { ctx.fillStyle = G(); ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(Math.atan2(b.vy, b.vx)); ctx.fillRect(-6, -2, 12, 4); ctx.fillStyle = G(.35); ctx.fillRect(-16, -1, 10, 2); ctx.restore(); }
+    else { ctx.fillStyle = G(); ctx.save(); ctx.translate(b.x, b.y); ctx.rotate(Math.atan2(b.vy, b.vx) + Math.PI / 2); ctx.fillRect(-1.5, -8, 3, 12); ctx.restore(); }
+  });
   ctx.fillStyle = HOT(); A.eshots.forEach(b => { ctx.beginPath(); ctx.moveTo(b.x, b.y + 7); ctx.lineTo(b.x - 4, b.y - 4); ctx.lineTo(b.x + 4, b.y - 4); ctx.fill(); });
+  // bomb shockwave
+  const bt = now - A.bombFx;
+  if (bt >= 0 && bt < 600) { ctx.strokeStyle = `rgba(255,255,255,${1 - bt / 600})`; ctx.lineWidth = 4; ctx.beginPath(); ctx.arc(A.x, py, bt * Math.max(W, H) / 600, 0, Math.PI * 2); ctx.stroke(); ctx.fillStyle = `rgba(255,240,200,${0.25 * (1 - bt / 600)})`; ctx.fillRect(0, 0, W, H); }
   // player ship
   const blink = now - A.hurt < 900 && Math.floor(now / 90) % 2;
   ctx.save(); ctx.translate(A.x, py); ctx.scale(A.k, A.k); ctx.translate(-A.x, -py);
@@ -3189,15 +3363,23 @@ function drawArcade(ctx, now) {
     if (S.up.twin) { line(ctx, [[A.x - 9, py - 6], [A.x - 9, py - 18]]); line(ctx, [[A.x + 9, py - 6], [A.x + 9, py - 18]]); }
     if (S.up.dish) { ctx.beginPath(); ctx.arc(A.x + 16, py - 6, 6, Math.PI, Math.PI * 2); ctx.stroke(); }
     if (S.up.armor) { ctx.strokeRect(A.x - 16, py + 4, 8, 5); ctx.strokeRect(A.x + 8, py + 4, 8, 5); }
-    const fl = 6 + Math.random() * 6; line(ctx, [[A.x - 6, py + 12], [A.x, py + 12 + fl], [A.x + 6, py + 12]]);
+    const fl = 6 + Math.random() * 6 + (A.keys.up ? 8 : 0); line(ctx, [[A.x - 6, py + 12], [A.x, py + 12 + fl], [A.x + 6, py + 12]]);
     if (A.shieldUp) { ctx.strokeStyle = G(0.5 + 0.3 * Math.sin(now * 0.01)); ctx.beginPath(); ctx.ellipse(A.x, py, 34, 26, 0, 0, Math.PI * 2); ctx.stroke(); }
+    if (A.pw) { ctx.strokeStyle = G(0.35 + 0.25 * Math.sin(now * 0.02)); ctx.beginPath(); ctx.arc(A.x, py, 30, 0, Math.PI * 2); ctx.stroke(); }
   }
   ctx.restore();
-  // shield charge under the ship (skills are listed in the console below)
   if (S.up.armor) {
-    const ready = A.shieldUp ? 1 : Math.max(0, 1 - (A.shieldAt - now) / 12000);
-    ctx.strokeStyle = G(.5); ctx.lineWidth = 1; ctx.strokeRect(A.x - 20, py + 20, 40, 4);
-    ctx.fillStyle = G(ready >= 1 ? 1 : .55); ctx.fillRect(A.x - 20, py + 20, 40 * ready, 4);
+    const ready = A.shieldUp ? 1 : Math.max(0, 1 - (A.shieldAt - now) / (S.up.cap ? 8000 : 12000));
+    ctx.strokeStyle = G(.5); ctx.lineWidth = 1; ctx.strokeRect(A.x - 20, py + 22 * A.k, 40, 4);
+    ctx.fillStyle = G(ready >= 1 ? 1 : .55); ctx.fillRect(A.x - 20, py + 22 * A.k, 40 * ready, 4);
+  }
+  // weapons readout, bottom left
+  const hy = H - 58;
+  vtext(ctx, `${hg('bombs')} ${'◆'.repeat(A.bombs)}${'◇'.repeat(Math.max(0, 3 - A.bombs))}`, 26, hy, 18, 'left', A.bombs ? HOT() : HOT(.4));
+  if (A.pw) {
+    const left = Math.max(0, A.pwUntil - now);
+    const w = vtext(ctx, hg('pw')[A.pw], 26, hy - 22, 18, 'left', G());
+    ctx.strokeStyle = G(.5); ctx.strokeRect(36 + w, hy - 26, 60, 6); ctx.fillStyle = G(); ctx.fillRect(36 + w, hy - 26, 60 * left / 9000, 6);
   }
 }
 const pf = { cv: null, ctx: null, w: 0, h: 0 };
