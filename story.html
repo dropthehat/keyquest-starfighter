@@ -563,7 +563,7 @@ body.sim-full .app, body.sim-type .app { grid-template-rows: max-content minmax(
       <button class="btn" id="introBtn">INTRO</button>
       <button class="btn hangar-btn reveal-btn" id="hangarBtn" hidden>HANGAR</button>
       <button class="btn hangar-btn reveal-btn" id="logsBtn" hidden>LOGS</button>
-      <span class="audio-seg"><button class="btn mini" id="musicBtn" title="Music">♪</button><button class="btn mini" id="soundBtn" title="Sound effects">SFX</button><button class="btn mini" id="voiceBtn" title="Voice-over">VO</button></span>
+      <span class="audio-seg"><button class="btn mini" id="musicBtn" title="Music">♪</button><button class="btn mini" id="soundBtn" title="Sound effects">SFX</button><button class="btn mini" id="voiceBtn" title="Voice-over" hidden>VO</button></span>
     </div>
     <div class="readout">
       <div><span>WPM</span><b id="rWpm">0</b></div>
@@ -2261,6 +2261,7 @@ function renderChrome() {
   $('#soundBtn').textContent = S.sound ? p2('soundOn') : p2('soundOff');
   $('#musicBtn').textContent = S.music ? p2('musicOn') : p2('musicOff');
   $('#voiceBtn').textContent = S.voice ? p2('voiceOn') : p2('voiceOff');
+  $('#voiceBtn').hidden = !VO_ENABLED;
   $('#soundBtn').classList.toggle('off', !S.sound); $('#musicBtn').classList.toggle('off', !S.music); $('#voiceBtn').classList.toggle('off', !S.voice);
   $('#hangarBtn').hidden = !S.pops.includes('hangar');
   $('#logsBtn').hidden = !S.pops.includes('logs');
@@ -4027,9 +4028,10 @@ const anyLog = () => LOGS.some((_, i) => logOpen(i));
 const logsNews = () => LOGS.some((_, i) => logOpen(i) && !S.logsRead.includes(i));
 
 /* ---------- voice-over (the browser's built-in speech) ---------- */
+const VO_ENABLED = false;   // voice-over parked for now (it made the game stutter); flip to true to bring it back
 const VO = { voices: [] };
 function voLoad() { try { VO.voices = speechSynthesis.getVoices() || []; } catch (e) {} }
-if ('speechSynthesis' in window) { voLoad(); try { speechSynthesis.onvoiceschanged = voLoad; } catch (e) {} }
+if (VO_ENABLED && 'speechSynthesis' in window) { voLoad(); try { speechSynthesis.onvoiceschanged = voLoad; } catch (e) {} }
 function voPick(who) {
   const lang = S.lang === 'uk' ? 'uk' : 'en';
   const vs = VO.voices.filter(v => (v.lang || '').toLowerCase().startsWith(lang));
@@ -4041,7 +4043,7 @@ function voPick(who) {
   return vs[0];
 }
 function speak(text, who) {
-  if (!('speechSynthesis' in window) || !S.sound || !S.voice) return;
+  if (!VO_ENABLED || !('speechSynthesis' in window) || !S.sound || !S.voice) return;
   try {
     speechSynthesis.cancel();
     const clean = String(text).replace(/[\[\]{}#%&@$*▓▒░<>|=+_~]/g, ' ').replace(/\.{3}/g, ', ').replace(/\s+/g, ' ').trim();
@@ -4058,7 +4060,7 @@ function speak(text, who) {
     speechSynthesis.speak(u);
   } catch (e) {}
 }
-function voStop() { try { if ('speechSynthesis' in window) speechSynthesis.cancel(); } catch (e) {} voFx.stop(); }
+function voStop() { if (!VO_ENABLED) return; try { if ('speechSynthesis' in window) speechSynthesis.cancel(); } catch (e) {} voFx.stop(); }
 /* The browser's speech can't be routed through Web Audio, so the grunge is layered around it:
    a band-passed static bed, a low buzzing carrier, and crackles/dropouts on each word. */
 const voFx = {
