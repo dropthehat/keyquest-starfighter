@@ -435,6 +435,16 @@ body[data-station="sim"] { --st: #3fe0c5; }
 .sk b { display: block; font-family: var(--f-display); font-size: 13px; letter-spacing: .08em; margin-top: 2px; }
 .sk small { display: block; font-size: 11px; color: var(--muted); margin-top: 2px; }
 @media (max-width: 600px) { .skills { grid-template-columns: 1fr; } }
+
+/* ---------- Simulator layouts: the game takes the room ---------- */
+body.sim-full .bridge, body.sim-type .bridge { grid-template-columns: 1fr; }
+body.sim-full .systems, body.sim-type .systems { display: none; }
+body.sim-full .comms, body.sim-type .comms { grid-template-columns: 1fr; padding: 8px 10px; }
+body.sim-full .face-screen, body.sim-type .face-screen, body.sim-full .crt-text, body.sim-type .crt-text { display: none; }
+body.sim-full .log-screen, body.sim-type .log-screen { padding: 6px 10px; }
+body.sim-full .terminal, body.sim-type .terminal { margin-top: 8px; }
+body.sim-full .deck { display: none; }
+body.sim-full .app, body.sim-type .app { grid-template-rows: max-content minmax(300px, 1fr) max-content max-content; }
 </style>
 </head>
 <body>
@@ -2108,7 +2118,7 @@ function renderChrome() {
   for (let i = A.from; i <= A.to; i++) { const d = document.createElement('i'); if (S.done[S.lang][i]) d.className = 'on'; leds.appendChild(d); }
 }
 
-function renderAll() { renderChrome(); renderTerminal(); renderSystems(); renderKeyboard(); renderStats(); renderCrtText(); }
+function renderAll() { applySimLayout(); renderChrome(); renderTerminal(); renderSystems(); renderKeyboard(); renderStats(); renderCrtText(); }
 
 /* ======================================================================
    FLOW
@@ -2788,6 +2798,13 @@ function drawUpgrades(ctx, P, s, now, big) {
 }
 
 /* ---------- Training: Target Range + Asteroid Belt (typing) ---------- */
+function applySimLayout() {
+  const train = S.phase === 'train' && S.tr;
+  const full = !!(train && S.tr.mode === 'arcade'), type = !!(train && S.tr.mode !== 'arcade');
+  const b = document.body, changed = b.classList.contains('sim-full') !== full || b.classList.contains('sim-type') !== type;
+  b.classList.toggle('sim-full', full); b.classList.toggle('sim-type', type);
+  if (changed) resize();
+}
 function startTraining(mode, tier) {
   closeHangar();
   clearInterval(S.typer);
@@ -2798,6 +2815,7 @@ function startTraining(mode, tier) {
   const now = performance.now();
   S.tr = { mode, tier, t0: now, end: now + 60000, score: 0, hull: 3, done: false, last: -1e9, pool: MODES[mode].typing ? trainPool(tier) : [], cross: [16000, 13000, 10500][tier], gap: [3000, 2500, 2000][tier] };
   S.phase = 'train';
+  applySimLayout();
   if (mode === 'arcade') initArcade(tier);
   remark(hg('simOn').replace('{m}', MODES[mode][S.lang][0]).replace('{t}', hg('tiers')[tier]));
   renderAll();
@@ -2871,11 +2889,12 @@ function initArcade(tier) {
 function buildWave() {
   const A = S.ar, W = view.w, H = view.h;
   const rows = Math.min(5, [3, 4, 4][A.tier] + Math.floor((A.wave - 1) / 2)), cols = 7;
-  const gx = Math.min(60, (W * 0.6) / cols), gy = Math.max(20, Math.min(30, (H - 190) / rows));
+  A.k = Math.min(1.35, Math.max(0.6, H / 420));
+  const gx = Math.min(64 * A.k, (W * 0.6) / cols), gy = Math.max(20, Math.min(40 * A.k, (H - 190) / rows));
   A.inv = [];
   const types = ['kamikaze', 'scout', 'drone', 'drone', 'drone'];
   for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) A.inv.push({ c, r, alive: true, type: types[r], dx: c * gx, dy: r * gy });
-  A.gx = gx; A.ox = (W - (cols - 1) * gx) / 2; A.oy = 58; A.dir = 1;
+  A.gx = gx; A.ox = (W - (cols - 1) * gx) / 2; A.oy = 58 + 10 * A.k; A.dir = 1;
   A.total = A.inv.length;
   A.speed = (W * 0.00005) * ([1, 1.25, 1.5][A.tier]) * (1 + (A.wave - 1) * 0.18);
   A.fireGap = [1150, 900, 700][A.tier] / (1 + (A.wave - 1) * 0.12);
@@ -2886,7 +2905,7 @@ function arcadeKey(e, down) {
   const k = map[e.code]; if (!k) return false;
   A.keys[k] = down; return true;
 }
-const arPY = () => view.h - 64;
+const arPY = () => view.h - 50 - 22 * ((S.ar && S.ar.k) || 1);
 function arcadeTick(now, dt) {
   const A = S.ar, W = view.w, H = view.h, py = arPY();
   if (!A) return;
@@ -2920,13 +2939,13 @@ function arcadeTick(now, dt) {
   A.shots.forEach(b => { b.y -= H * 0.0013 * dt; });
   A.shots = A.shots.filter(b => {
     if (b.y < 30) return false;
-    const hit = alive.find(v => v.alive && Math.abs(A.ox + v.dx - b.x) < 15 && Math.abs(A.oy + v.dy - b.y) < 11);
+    const hit = alive.find(v => v.alive && Math.abs(A.ox + v.dx - b.x) < 15 * A.k && Math.abs(A.oy + v.dy - b.y) < 11 * A.k);
     if (hit) { hit.alive = false; A.score += hit.type === 'kamikaze' ? 3 : hit.type === 'scout' ? 2 : 1; C.booms.push({ x: A.ox + hit.dx, y: A.oy + hit.dy, t: now, r: Math.random() }); sfx.boom(); return false; }
     return true;
   });
   A.eshots = A.eshots.filter(b => {
     if (b.y > H - 30) return false;
-    if (Math.abs(b.x - A.x) < 18 && Math.abs(b.y - py) < 14) { arcadeHit(now, false); return false; }
+    if (Math.abs(b.x - A.x) < 18 * A.k && Math.abs(b.y - py) < 14 * A.k) { arcadeHit(now, false); return false; }
     return true;
   });
   if (S.up.armor && !A.shieldUp && now > A.shieldAt) { A.shieldUp = true; sfx.recharge(); }
@@ -2946,13 +2965,14 @@ function drawArcade(ctx, now) {
   A.inv.forEach(v => {
     if (!v.alive) return;
     const x = A.ox + v.dx, y = A.oy + v.dy + Math.sin(now * 0.005 + v.c) * 2;
-    ctx.save(); ctx.translate(x, y); ctx.rotate(Math.PI / 2); drawShipShape(ctx, v.type, 0, 0, 0.55, HOT(), now); ctx.restore();
+    ctx.save(); ctx.translate(x, y); ctx.rotate(Math.PI / 2); drawShipShape(ctx, v.type, 0, 0, 0.55 * A.k, HOT(), now); ctx.restore();
   });
   // shots
   ctx.fillStyle = G(); A.shots.forEach(b => ctx.fillRect(b.x - 1.5, b.y - 8, 3, 12));
   ctx.fillStyle = HOT(); A.eshots.forEach(b => { ctx.beginPath(); ctx.moveTo(b.x, b.y + 7); ctx.lineTo(b.x - 4, b.y - 4); ctx.lineTo(b.x + 4, b.y - 4); ctx.fill(); });
   // player ship
   const blink = now - A.hurt < 900 && Math.floor(now / 90) % 2;
+  ctx.save(); ctx.translate(A.x, py); ctx.scale(A.k, A.k); ctx.translate(-A.x, -py);
   if (!blink) {
     ctx.strokeStyle = G(); ctx.lineWidth = 2;
     line(ctx, [[A.x - 22, py + 12], [A.x - 10, py - 4], [A.x, py - 16], [A.x + 10, py - 4], [A.x + 22, py + 12], [A.x - 22, py + 12]]);
@@ -2962,6 +2982,7 @@ function drawArcade(ctx, now) {
     const fl = 6 + Math.random() * 6; line(ctx, [[A.x - 6, py + 12], [A.x, py + 12 + fl], [A.x + 6, py + 12]]);
     if (A.shieldUp) { ctx.strokeStyle = G(0.5 + 0.3 * Math.sin(now * 0.01)); ctx.beginPath(); ctx.ellipse(A.x, py, 34, 26, 0, 0, Math.PI * 2); ctx.stroke(); }
   }
+  ctx.restore();
   // shield charge under the ship (skills are listed in the console below)
   if (S.up.armor) {
     const ready = A.shieldUp ? 1 : Math.max(0, 1 - (A.shieldAt - now) / 12000);
