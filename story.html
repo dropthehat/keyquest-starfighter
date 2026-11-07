@@ -389,6 +389,52 @@ body[data-station] .comms { box-shadow: 0 0 0 1px color-mix(in srgb, var(--st) 5
 .hullbar { height: 8px; border-radius: 4px; background: #1a1d10; overflow: hidden; box-shadow: inset 0 0 0 1px rgba(242,225,76,.3); }
 .hullbar i { display: block; height: 100%; background: repeating-linear-gradient(-45deg, #f2e14c 0 6px, #c9b92f 6px 12px); transition: width .25s; }
 .systems[data-mode="enemy"], .systems[data-mode="combat"] { box-shadow: 0 0 0 1px rgba(255,90,82,.35), 0 0 24px rgba(255,90,82,.08), 0 8px 20px rgba(0,0,0,.35); }
+
+/* ---------- Hangar ---------- */
+body[data-station="sim"] { --st: #3fe0c5; }
+.hangar { position: fixed; inset: 0; z-index: 42; background: rgba(2,5,8,.84); backdrop-filter: blur(3px); -webkit-backdrop-filter: blur(3px); transition: opacity .3s; overflow-y: auto; }
+.hangar.gone { opacity: 0; pointer-events: none; }
+.hg-in { margin: clamp(16px, 4vh, 50px) auto; width: min(94vw, 1060px); padding: 18px 22px 14px; border-radius: 14px; border: 1px solid rgba(96,255,150,.3);
+  background: radial-gradient(ellipse at 30% 0%, #0b2214 0%, #050b07 70%); box-shadow: 0 0 0 5px #0c1116, 0 0 0 6px #26313c, 0 30px 80px rgba(0,0,0,.6);
+  color: #cfe9d8; display: grid; gap: 12px; animation: cardIn .4s both; }
+.hg-head { display: flex; align-items: center; gap: 16px; }
+.hg-head h2 { margin: 0; font-family: var(--f-display); font-size: 28px; letter-spacing: .24em; color: #e6ffee; text-shadow: 0 0 16px rgba(96,255,150,.5); }
+.hg-parts { font-family: var(--f-crt); font-size: 26px; color: #ffcf8a; margin-left: auto; }
+.hg-parts b { color: #fff; font-weight: 400; }
+.hg-grid { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 14px; }
+@media (max-width: 860px) { .hg-grid { grid-template-columns: 1fr; } }
+.hg-ship, .hg-sim { display: grid; gap: 8px; align-content: start; border: 1px solid rgba(96,255,150,.18); border-radius: 10px; padding: 12px; background: rgba(2,10,5,.5); min-width: 0; }
+.hg-ship .tag, .hg-sim .tag { justify-self: start; color: #7dffa8; border-color: rgba(96,255,150,.35); }
+.hg-ship canvas { width: 100%; height: 210px; display: block; }
+.hg-ups, .hg-modes { display: grid; gap: 7px; }
+.hg-up, .hg-mode { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 8px 10px; border: 1px solid #1d2a24; border-radius: 8px; background: rgba(0,0,0,.25); }
+.hg-mode { grid-template-columns: 30px minmax(0, 1fr); align-items: start; }
+.hg-ic { font-size: 21px; color: #7dffa8; text-align: center; text-shadow: 0 0 10px rgba(96,255,150,.6); line-height: 1.2; }
+.hg-up b, .hg-mode b { display: block; font-family: var(--f-display); letter-spacing: .08em; font-size: 14px; color: #e6ffee; }
+.hg-up small, .hg-mode small { display: block; font-size: 12px; color: var(--muted); margin-top: 2px; }
+.hg-mode b em { font-style: normal; font-family: var(--f-mono); font-size: 11px; color: #ffcf8a; margin-left: 10px; letter-spacing: 0; }
+.hg-up.own { border-color: rgba(96,255,150,.45); }
+.hg-own { color: #7dffa8; font-size: 11px; font-family: var(--f-display); letter-spacing: .12em; white-space: nowrap; }
+.hg-buy { white-space: nowrap; }
+.hg-buy:disabled { opacity: .45; cursor: not-allowed; }
+.hg-buy:not(:disabled) { color: #0a0d10; background: #7dffa8; border-color: #7dffa8; }
+.hg-tiers { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.hg-tier { display: flex; gap: 8px; align-items: center; background: #0a120d; border: 1px solid rgba(96,255,150,.35); color: #cfe9d8; border-radius: 6px; padding: 5px 10px;
+  font-family: var(--f-display); font-size: 12px; letter-spacing: .1em; cursor: pointer; }
+.hg-tier i { font-style: normal; color: #ffcf8a; letter-spacing: 1px; }
+.hg-tier:hover:not(:disabled) { border-color: #7dffa8; box-shadow: 0 0 12px rgba(96,255,150,.3); }
+.hg-tier:disabled { opacity: .4; cursor: not-allowed; }
+.hg-mode.locked { opacity: .55; }
+.hg-lock { display: block; margin-top: 6px; font-size: 12px; color: var(--muted); }
+.hangar-btn { position: relative; }
+.badge { position: absolute; top: -8px; right: -8px; font-style: normal; font-size: 9px; font-weight: 700; letter-spacing: .1em; background: #ffb547; color: #1a1206; border-radius: 4px; padding: 1px 5px; animation: blink 1.2s steps(1) infinite; }
+.skills { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; }
+.sk { border: 1px solid #26313c; border-radius: 8px; padding: 8px 10px; opacity: .5; min-width: 0; }
+.sk.own { opacity: 1; border-color: var(--st, #3fe0c5); box-shadow: 0 0 12px color-mix(in srgb, var(--st, #3fe0c5) 25%, transparent); }
+.sk span { font-size: 20px; color: var(--st, #3fe0c5); }
+.sk b { display: block; font-family: var(--f-display); font-size: 13px; letter-spacing: .08em; margin-top: 2px; }
+.sk small { display: block; font-size: 11px; color: var(--muted); margin-top: 2px; }
+@media (max-width: 600px) { .skills { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
@@ -401,6 +447,7 @@ body[data-station] .comms { box-shadow: 0 0 0 1px color-mix(in srgb, var(--st) 5
         <button id="langUK">UA · ЙЦУКЕН</button>
       </div>
       <button class="btn" id="introBtn">INTRO</button>
+      <button class="btn hangar-btn" id="hangarBtn">HANGAR</button>
       <button class="btn" id="musicBtn">MUSIC ON</button>
       <button class="btn" id="soundBtn">SOUND ON</button>
     </div>
@@ -439,6 +486,16 @@ body[data-station] .comms { box-shadow: 0 0 0 1px color-mix(in srgb, var(--st) 5
 
 
 <div class="ambient" aria-hidden="true"></div>
+<div class="hangar" id="hangar" hidden>
+  <div class="hg-in">
+    <div class="hg-head"><h2 id="hgTitle">HANGAR</h2><span class="hg-parts" id="hgParts"></span><button class="btn" id="hgCloseBtn">✕</button></div>
+    <div class="hg-grid">
+      <section class="hg-ship"><span class="tag" id="hgShipTag"></span><canvas id="hgShip"></canvas><div class="hg-ups" id="hgUps"></div></section>
+      <section class="hg-sim"><span class="tag" id="hgSimTag"></span><div class="hg-modes" id="hgModes"></div></section>
+    </div>
+    <div class="cine-hint" id="hgClose"></div>
+  </div>
+</div>
 <div class="card" id="card" hidden>
   <div class="card-in">
     <div class="card-eyebrow" id="cardEyebrow"></div>
@@ -685,7 +742,7 @@ const S = {
   lines: [], lineIdx: 0, ch: 0, levelDone: false, ending: 0, speaker: 'ora',
   correct: 0, total: 0, startT: null, lastStars: 0, lastWpm: 0, lastAcc: 100,
   msg: '', done: { en: blank(), uk: blank() },
-  sound: true, music: true, hands: true, kb: true, miss: null, cadence: 0, lastKey: 0,
+  sound: true, music: true, hands: true, kb: true, parts: 0, up: { armor: false, twin: false, dish: false }, train: {}, best: {}, seen: [], miss: null, cadence: 0, lastKey: 0,
   dlg: [], dlgIdx: 0, dlgCb: null, full: '', shown: '', speaking: false, typer: null, blocking: false,
   dec: null, name: ''
 };
@@ -707,7 +764,7 @@ function codeOf(ch, lang = S.lang) { if (ch === ' ') return 'Space'; for (const 
 function keyLabel(code) { return code === 'Space' ? t('space') : (charOf(code) || '').toUpperCase(); }
 
 /* ---------- Save ---------- */
-function save() { try { localStorage.setItem('keyquest.story', JSON.stringify({ done: S.done, lang: S.lang, name: S.name, music: S.music, hands: S.hands, kb: S.kb, miss: S.miss })); } catch (e) {} }
+function save() { try { localStorage.setItem('keyquest.story', JSON.stringify({ done: S.done, lang: S.lang, name: S.name, music: S.music, hands: S.hands, kb: S.kb, miss: S.miss, parts: S.parts, up: S.up, train: S.train, best: S.best, seen: S.seen })); } catch (e) {} }
 function load() {
   try {
     const d = JSON.parse(localStorage.getItem('keyquest.story') || localStorage.getItem('keyquest.act1') || 'null');
@@ -718,6 +775,11 @@ function load() {
       if (typeof d.music === 'boolean') S.music = d.music;
       if (typeof d.hands === 'boolean') S.hands = d.hands;
       if (typeof d.kb === 'boolean') S.kb = d.kb;
+      if (typeof d.parts === 'number') S.parts = d.parts;
+      if (d.up) Object.assign(S.up, d.up);
+      if (d.train) S.train = d.train;
+      if (d.best) S.best = d.best;
+      if (Array.isArray(d.seen)) S.seen = d.seen;
       if (d.miss && d.miss.words) S.miss = d.miss;
     }
   } catch (e) {}
@@ -736,7 +798,7 @@ function curLine() { return S.lines[S.lineIdx]; }
 function expectedChar() {
   if (S.phase === 'drill') { const l = curLine(); return l ? l.text[S.ch] : null; }
   if (S.phase === 'decrypt') { const k = S.dec.keys[S.dec.ki]; return k ? k.k[S.dec.ch] : null; }
-  if (S.phase === 'combat') { const e = alive(C.lock) ? C.lock : recommended(); return e ? e.word[e.typed] : null; }
+  if (S.phase === 'combat' || (S.phase === 'train' && S.tr && !S.tr.done && S.tr.mode !== 'arcade')) { const e = alive(C.lock) ? C.lock : recommended(); return e ? e.word[e.typed] : null; }
   return null;
 }
 function expectedCode() { const ch = expectedChar(); return ch ? codeOf(ch) : null; }
@@ -871,6 +933,7 @@ function tenseStep(step, t) {
 function musicMood() {
   if (!S.music || performance.now() < MUS.duckUntil) return { calm: 0, tense: 0 };
   if (S.phase === 'intro') return { calm: 0.7, tense: 0 };
+  if (S.phase === 'train') { MUS.intensity = 0.55; return { calm: 0, tense: 0.75 }; }
   if (S.phase === 'combat') {
     const r = recommended();
     const close = r ? Math.max(0, Math.min(1, 1 - danger(r) / 8)) : 0;
@@ -1109,12 +1172,13 @@ const cannon = () => ({ x: view.w * 0.5, y: view.h * 0.8 });
 const perimeterX = () => view.w * 0.13;
 const km = (n) => Math.round(n).toLocaleString('en-US').replace(/,/g, ' ') + ' km';
 const UIW = {
-  en: { status: 'STATUS', comms: 'COMMS', target: 'TARGET', nav: 'NAV', offline: 'OFFLINE', booting: 'BOOTING', low: 'LOW POWER', hull: 'HULL', crew: 'CREW', dist: 'DIST', spd: 'SPD', level: 'Level', freq: 'FREQ', sig: 'SIG', src: 'SRC', unknown: 'UNKNOWN', shields: 'SHIELDS', hostiles: 'HOSTILES', perimeter: 'PERIMETER', lock: 'LOCK', vex: 'VEX · RAIDER COMMAND', heat: 'HEAT', overcharge: 'OVERCHARGE', flagship: 'FLAGSHIP', hullHit: 'HULL HIT', recharge: 'SHIELD +1', repair: 'REPAIR BAY', repaired: 'HULL REPAIRED', ready: 'COMBAT READY', incoming: 'INCOMING', cleared: 'SECTOR CLEARED', sysOnline: 'SYSTEM ONLINE', phase2: 'PHASE 2', flagshipDown: 'FLAGSHIP DOWN', srcUnknown: 'SOURCE UNKNOWN', navOff: 'NAV OFFLINE' },
-  uk: { status: 'СТАТУС', comms: 'ЗВ\'ЯЗОК', target: 'ЦІЛЬ', nav: 'НАВ', offline: 'ВИМКНЕНО', booting: 'ЗАПУСК', low: 'МАЛО ЖИВЛЕННЯ', hull: 'КОРПУС', crew: 'ЕКІПАЖ', dist: 'ВІДСТ', spd: 'ШВИД', level: 'Рівень', freq: 'ЧАСТ', sig: 'СИГН', src: 'ДЖЕР', unknown: 'НЕВІДОМО', shields: 'ЩИТИ', hostiles: 'ВОРОГИ', perimeter: 'ПЕРИМЕТР', lock: 'ЦІЛЬ', vex: 'ВЕКС · РЕЙДЕРИ', heat: 'ЗАРЯД', overcharge: 'ПЕРЕЗАРЯД', flagship: 'ФЛАГМАН', hullHit: 'ВЛУЧАННЯ', recharge: 'ЩИТ +1', repair: 'РЕМОНТ', repaired: 'КОРПУС ВІДНОВЛЕНО', ready: 'ГОТОВИЙ ДО БОЮ', incoming: 'РАКЕТА', cleared: 'СЕКТОР ЗАЧИЩЕНО', sysOnline: 'СИСТЕМА ПРАЦЮЄ', phase2: 'ФАЗА 2', flagshipDown: 'ФЛАГМАН ЗБИТО', srcUnknown: 'ДЖЕРЕЛО НЕВІДОМЕ', navOff: 'НАВ ВИМКНЕНО' }
+  en: { status: 'STATUS', comms: 'COMMS', target: 'TARGET', nav: 'NAV', offline: 'OFFLINE', booting: 'BOOTING', low: 'LOW POWER', hull: 'HULL', crew: 'CREW', dist: 'DIST', spd: 'SPD', level: 'Level', freq: 'FREQ', sig: 'SIG', src: 'SRC', unknown: 'UNKNOWN', shields: 'SHIELDS', hostiles: 'HOSTILES', perimeter: 'PERIMETER', lock: 'LOCK', sim: 'SIM', vex: 'VEX · RAIDER COMMAND', heat: 'HEAT', overcharge: 'OVERCHARGE', flagship: 'FLAGSHIP', hullHit: 'HULL HIT', recharge: 'SHIELD +1', repair: 'REPAIR BAY', repaired: 'HULL REPAIRED', ready: 'COMBAT READY', incoming: 'INCOMING', cleared: 'SECTOR CLEARED', sysOnline: 'SYSTEM ONLINE', phase2: 'PHASE 2', flagshipDown: 'FLAGSHIP DOWN', srcUnknown: 'SOURCE UNKNOWN', navOff: 'NAV OFFLINE' },
+  uk: { status: 'СТАТУС', comms: 'ЗВ\'ЯЗОК', target: 'ЦІЛЬ', nav: 'НАВ', offline: 'ВИМКНЕНО', booting: 'ЗАПУСК', low: 'МАЛО ЖИВЛЕННЯ', hull: 'КОРПУС', crew: 'ЕКІПАЖ', dist: 'ВІДСТ', spd: 'ШВИД', level: 'Рівень', freq: 'ЧАСТ', sig: 'СИГН', src: 'ДЖЕР', unknown: 'НЕВІДОМО', shields: 'ЩИТИ', hostiles: 'ВОРОГИ', perimeter: 'ПЕРИМЕТР', lock: 'ЦІЛЬ', sim: 'СИМ', vex: 'ВЕКС · РЕЙДЕРИ', heat: 'ЗАРЯД', overcharge: 'ПЕРЕЗАРЯД', flagship: 'ФЛАГМАН', hullHit: 'ВЛУЧАННЯ', recharge: 'ЩИТ +1', repair: 'РЕМОНТ', repaired: 'КОРПУС ВІДНОВЛЕНО', ready: 'ГОТОВИЙ ДО БОЮ', incoming: 'РАКЕТА', cleared: 'СЕКТОР ЗАЧИЩЕНО', sysOnline: 'СИСТЕМА ПРАЦЮЄ', phase2: 'ФАЗА 2', flagshipDown: 'ФЛАГМАН ЗБИТО', srcUnknown: 'ДЖЕРЕЛО НЕВІДОМЕ', navOff: 'НАВ ВИМКНЕНО' }
 };
 const uw = (k) => UIW[S.lang][k];
 
 function screenMode() {
+  if (S.phase === 'train') return 'sim';
   if (S.phase === 'combat') return 'target';
   if (S.phase === 'decrypt' || S.speaker === 'vex' || S.speaker === 'unknown') return 'comms';
   return 'status';
@@ -1157,7 +1221,7 @@ function header(ctx, title, segs) {
 }
 function tabs(ctx, active) {
   const W = view.w, H = view.h, y = H - 20, L = 18;
-  const names = ['status', 'comms', 'target', 'nav'];
+  const names = ['status', 'comms', 'target', 'sim'];
   ctx.lineWidth = 2; ctx.strokeStyle = G(.95);
   ctx.font = `20px ${MONO}`;
   const widths = names.map(n => ctx.measureText(uw(n)).width + 22);
@@ -1272,6 +1336,7 @@ function drawStatus(ctx, now, pw) {
     line(ctx, [P(8.75, 1.55), P(9.5, 1.85), P(9.5, 2.15), P(8.75, 2.45), P(8.75, 1.55)]); ctx.setLineDash([]);
     if (on(4) && Math.floor(now / 600) % 2) { const [cx, cy] = P(9.1, 2); ctx.fillStyle = G(); ctx.fillRect(cx - 2, cy - 2, 4, 4); } }
 
+  drawUpgrades(ctx, P, s, now, false);
   // a system snapping into place: flash ring + sparks + clunk
   for (let i = 0; i < 5; i++) {
     const [nx, ny] = P(...SYS[i].node);
@@ -1470,9 +1535,11 @@ function drawTarget(ctx, now) {
   for (let i = -10; i <= 10; i++) line(ctx, [[vx + i * 14, hz], [vx + i * W * 0.12, H - 40]]);
   const off = (now * (0.0005 + S.cadence * 0.0008)) % 1;
   for (let k = 0; k < 8; k++) { const t = (k + off) / 8, y = hz + (H - 40 - hz) * t * t; line(ctx, [[30, y], [W - 30, y]]); }
-  ctx.strokeStyle = HOT(.75); ctx.lineWidth = 1.5;
-  line(ctx, [[perimeterX(), 48], [perimeterX(), H - 40]], true);
-  vtext(ctx, uw('perimeter'), perimeterX() + 6, 62, 16, 'left', HOT(.8));
+  if (S.phase !== 'train' || (S.tr && S.tr.mode === 'belt')) {
+    ctx.strokeStyle = HOT(.75); ctx.lineWidth = 1.5;
+    line(ctx, [[perimeterX(), 48], [perimeterX(), H - 40]], true);
+    vtext(ctx, uw('perimeter'), perimeterX() + 6, 62, 16, 'left', HOT(.8));
+  }
 
   // flagship
   if (C.boss) {
@@ -1491,7 +1558,7 @@ function drawTarget(ctx, now) {
   C.ships.forEach(s => {
     const y = s.y + Math.sin(now * 0.004 + s.phase) * 4;
     const col = s.hit > 0 ? '#ffffff' : (s.type === 'kamikaze' && C.lock === s ? 'rgba(255,90,82,.95)' : HOT());
-    drawShipShape(ctx, s.type, s.x, y, 1, col, now);
+    if (s.type === 'rock') drawRock(ctx, s, y, s.hit > 0 ? '#ffffff' : G(.85)); else drawShipShape(ctx, s.type, s.x, y, 1, col, now);
     if (s.type === 'cruiser') for (let i = 0; i < s.armor; i++) { ctx.fillStyle = HOT(); ctx.fillRect(s.x - 8 + i * 10, y + 20, 7, 3); }
     if (C.lock === s) reticle(ctx, s.x, y, s, now);
     wordLabel(ctx, s, s.x, y - 34, now);
@@ -1514,6 +1581,7 @@ function drawTarget(ctx, now) {
   ctx.strokeStyle = C.over ? '#ffffff' : G(); ctx.lineWidth = 2;
   line(ctx, [[cn.x - 30, cn.y + 14], [cn.x - 18, cn.y], [cn.x + 18, cn.y], [cn.x + 30, cn.y + 14]]);
   line(ctx, [[cn.x - 4, cn.y], [cn.x - 4, cn.y - 12]]); line(ctx, [[cn.x + 4, cn.y], [cn.x + 4, cn.y - 12]]);
+  if (S.up.twin) { line(ctx, [[cn.x - 12, cn.y], [cn.x - 12, cn.y - 10]]); line(ctx, [[cn.x + 12, cn.y], [cn.x + 12, cn.y - 10]]); }
   if (C.heat > 0.05) { ctx.fillStyle = C.over ? `rgba(255,255,255,${0.6 + 0.4 * Math.sin(now * 0.02)})` : G(0.25 + C.heat * 0.6); ctx.fillRect(cn.x - 14, cn.y + 4, 28 * C.heat, 4); }
   // beams, chains, explosions
   C.lasers = C.lasers.filter(l => now - l.t < 150);
@@ -1521,6 +1589,7 @@ function drawTarget(ctx, now) {
     const a = 1 - (now - l.t) / 150;
     ctx.strokeStyle = C.over ? `rgba(255,255,255,${a})` : G(a); ctx.lineWidth = 2.5;
     line(ctx, [[cn.x + l.off * 0.5, cn.y - 12], [l.x, l.y]]);
+    if (S.up.twin) line(ctx, [[cn.x - l.off * 0.5, cn.y - 12], [l.x, l.y]]);
     ctx.fillStyle = G(a); ctx.beginPath(); ctx.arc(l.x, l.y, 4 * a + 1, 0, Math.PI * 2); ctx.fill();
   });
   C.chains = C.chains.filter(c => now - c.t < 320);
@@ -1622,6 +1691,10 @@ function drawView(now, pw) {
     const dist = drawComms(ctx, now);
     header(ctx, uw('comms'), [[uw('freq'), '147.3'], [uw('sig'), `${Math.round(sig * 100)}%`, sig < 0.3], [uw('src'), isVex && prog >= 1 ? 'VEX' : uw('unknown'), true], [uw('dist'), isVex ? km(dist) : '—']]);
     tabs(ctx, 'comms');
+  } else if (mode === 'sim') {
+    if (S.tr && S.tr.mode === 'arcade') drawArcade(ctx, now); else drawTarget(ctx, now);
+    if (S.tr) simHeader(ctx, now);
+    tabs(ctx, 'sim');
   } else {
     drawTarget(ctx, now);
     const remaining = C.queue.length + C.ships.length + C.missiles.length;
@@ -1760,9 +1833,11 @@ const STATIONS = {
   boot:    { col: '#6ff0a8', icon: '▶', en: ['SYSTEM INSTALL', 'Type the boot sequence to install the module.'], uk: ['ВСТАНОВЛЕННЯ', 'Набери послідовність запуску, щоб встановити модуль.'] },
   decrypt: { col: '#ffb547', icon: '#', en: ['DECRYPTION', 'Type each cipher key before the signal fades.'], uk: ['ДЕШИФРУВАННЯ', 'Набери кожен ключ, поки сигнал не зник.'] },
   combat:  { col: '#ff5a4e', icon: '⊕', en: ['WEAPONS', 'Type a target\'s first letter to lock on, then finish the word.'], uk: ['ЗБРОЯ', 'Набери першу літеру цілі, щоб захопити її, і допиши слово.'] },
+  sim:     { col: '#3fe0c5', icon: '◇', en: ['SIMULATOR', 'Training program. Earn parts for ship upgrades.'], uk: ['СИМУЛЯТОР', 'Тренувальна програма. Заробляй деталі на покращення.'] },
   repair:  { col: '#f2e14c', icon: '✚', en: ['REPAIR BAY', 'Retype the damaged words. Slow and clean.'], uk: ['РЕМОНТНИЙ ВІДСІК', 'Передрукуй пошкоджені слова. Повільно і чисто.'] }
 };
 function station() {
+  if (S.phase === 'train') return S.tr && !S.tr.done ? 'sim' : null;
   if (S.levelDone || S.ending) return null;
   if (S.phase === 'decrypt') return 'decrypt';
   if (S.phase === 'combat') return 'combat';
@@ -1818,7 +1893,7 @@ function chipsHtml(st) {
       else if (i === S.dec.ki) items.push({ t: k.k.slice(0, S.dec.ch) + '▒'.repeat(k.k.length - S.dec.ch), s: 'cur' });
       else items.push({ t: '▒'.repeat(k.k.length), s: 'lock' });
     });
-  } else if (S.phase === 'combat') {
+  } else if (S.phase === 'combat' || (S.phase === 'train' && S.tr && S.tr.mode !== 'arcade')) {
     targets().slice(0, 7).forEach(e => {
       const tag = e.kind === 'missile' ? '! ' : e.kind === 'part' ? '◉ ' : e.type === 'cruiser' ? '▮ ' : e.type === 'kamikaze' ? '✦ ' : '';
       items.push({ t: tag + e.word, s: C.lock === e ? 'cur' : e.kind === 'missile' ? 'warn' : '' });
@@ -1833,12 +1908,13 @@ function renderTerminal() {
   const el = $('#terminal');
   const lv = L();
   updateStation();
-  const typing = ['drill', 'decrypt', 'combat'].includes(S.phase) && !S.levelDone && !S.ending;
+  const typing = (['drill', 'decrypt', 'combat'].includes(S.phase) && !S.levelDone && !S.ending) || (S.phase === 'train' && S.tr && !S.tr.done);
   el.classList.toggle('quiet', !typing);
   const stn = station();
   if (stn) { const d = STATIONS[stn]; el.dataset.st = stn; el.dataset.label = `${d.icon}  ${d[S.lang][0]}`; }
   const prompt = stn ? STATIONS[stn].icon : '>';
   const chips = stn ? chipsHtml(stn) : '';
+  if (S.phase === 'train' && S.tr) { trainTerminal(el, prompt, chips); return; }
 
   if (S.phase === 'ending' && S.ending === 1) {
     el.innerHTML = `<div class="done enc"><h3>${esc(t('encrypted'))}</h3><div class="waiting">${esc(t('decOff'))}</div>${cont(t('startAct2'))}</div>`;
@@ -1858,8 +1934,8 @@ function renderTerminal() {
     const word = lv.type === 'encounter' ? t('cleared') : t('online');
     el.innerHTML = `<div class="done">
       <h3>${esc(lv.sys[S.lang].toUpperCase())} · ${esc(word)}</h3>
-      <div class="row"><span class="stars">${stars}</span><span class="label">${esc(t('acc'))}<b>${S.lastAcc}%</b></span><span class="label">${esc(t('wpm'))}<b>${S.lastWpm}</b></span></div>
-      ${cont(S.phase === 'complete' ? t('nextSys') : t('cont'))}
+      <div class="row"><span class="stars">${stars}</span><span class="label">${esc(t('acc'))}<b>${S.lastAcc}%</b></span><span class="label">${esc(t('wpm'))}<b>${S.lastWpm}</b></span><span class="label">⚙<b>+${S.lastParts || 0}</b></span></div>
+      ${cont(S.phase === 'complete' ? t('nextSys') : t('cont'))}${S.phase === 'complete' ? `<div class="waiting"><kbd>H</kbd> ${esc(hg('hangar'))}${hangarNews() ? ' · <span style="color:#ffb547">' + esc(hg('newBadge')) + '</span>' : ''}</div>` : ''}
     </div>`;
     return;
   }
@@ -2021,6 +2097,7 @@ function renderChrome() {
   $('#soundBtn').textContent = t('sound')[S.sound ? 0 : 1];
   $('#musicBtn').textContent = (S.lang === 'uk' ? ['МУЗИКА УВІМК', 'МУЗИКА ВИМК'] : ['MUSIC ON', 'MUSIC OFF'])[S.music ? 0 : 1];
   $('.deck').classList.toggle('collapsed', !S.kb);
+  $('#hangarBtn').innerHTML = `${esc(hg('title'))} · ⚙${S.parts}${hangarNews() ? `<i class="badge">${esc(hg('newBadge'))}</i>` : ''}`;
   $('#kbBtn').textContent = (S.lang === 'uk' ? ['СХОВАТИ КЛАВІАТУРУ', 'ПОКАЗАТИ КЛАВІАТУРУ'] : ['HIDE KEYBOARD', 'SHOW KEYBOARD'])[S.kb ? 0 : 1];
   $('#handsBtn').textContent = (S.lang === 'uk' ? ['РУКИ УВІМК', 'РУКИ ВИМК'] : ['HANDS ON', 'HANDS OFF'])[S.hands ? 0 : 1];
   $('#langEN').classList.toggle('on', S.lang === 'en');
@@ -2184,7 +2261,7 @@ const RT = {
 
 function resetCombat() {
   Object.assign(C, { ships: [], missiles: [], boss: null, queue: [], lasers: [], booms: [], chains: [], lock: null, heat: 0, over: false,
-    shields: 3, maxShields: 3, total: 0, last: -1e9, said: {}, won: 0 });
+    shields: 3 + (S.up.armor ? 1 : 0), maxShields: 3 + (S.up.armor ? 1 : 0), total: 0, last: -1e9, said: {}, won: 0 });
 }
 const alive = (e) => e && (e.kind === 'part' ? e.alive && C.boss : e.kind === 'ship' ? C.ships.includes(e) : C.missiles.includes(e));
 function targets() { return [...C.missiles, ...C.ships, ...(C.boss ? C.boss.parts.filter(p => p.alive) : [])]; }
@@ -2230,7 +2307,7 @@ function missileCode(len) {
 function fireMissile(fx, fy, now) {
   if (C.missiles.length >= 2) return;
   const cn = cannon(), cfg = COMBAT[S.lvl];
-  C.missiles.push({ kind: 'missile', word: missileCode(cfg.mlen), typed: 0, sx: fx - 14, sy: fy, x: fx, y: fy, tx: cn.x, ty: cn.y - 14, p: 0, dur: cfg.mspeed + EASE.mspeed, hit: 0 });
+  C.missiles.push({ kind: 'missile', word: missileCode(cfg.mlen), typed: 0, sx: fx - 14, sy: fy, x: fx, y: fy, tx: cn.x, ty: cn.y - 14, p: 0, dur: (cfg.mspeed + EASE.mspeed) * (S.up.dish ? 1.15 : 1), hit: 0 });
   sfx.missile();
   if (!C.said.missile) { C.said.missile = 1; banner(uw('incoming'), true); remark(tw('missile')); }
   renderTerminal(); renderKeyboard();
@@ -2266,7 +2343,7 @@ function loseShield(now, x, y) {
   view.shake = 380; view.flash = 1; sfx.breach(); flashPlate();
   banner(uw('hullHit'), true);
   if (!C.said.hit && S.lvl >= ACTS[1].from) { C.said.hit = 1; taunt(tw('firstHit')); }
-  if (C.shields <= 0) { defeatSting(); C.lock = null; S.phase = 'dialogue'; say([t('breach'), RT[S.lang].defeat], () => startRepair(startCombat)); return true; }
+  if (C.shields <= 0) { defeatSting(); C.lock = null; S.phase = 'dialogue'; say([t('breach'), RT[S.lang].defeat].concat(modeOpen('range') ? [hg('defeatTip')] : []), () => startRepair(startCombat)); return true; }
   return false;
 }
 
@@ -2331,7 +2408,7 @@ function combatKey(ch, now) {
   e.typed++; e.hit = 90;
   const [x, y] = pos(e);
   C.lasers.push({ x, y, t: now, off: (e.typed % 2 ? -8 : 8) });
-  C.heat = Math.min(1, C.heat + 0.045);
+  C.heat = Math.min(1, C.heat + 0.045 * (S.up.twin ? 1.5 : 1));
   if (C.heat >= 1 && !C.over) {
     C.over = true; banner(uw('overcharge')); sfx.charge();
     if (!C.said.over) { C.said.over = 1; remark(tw('over')); }
@@ -2343,6 +2420,7 @@ function combatKey(ch, now) {
 function destroyTarget(e, now) {
   const [x, y] = pos(e);
   C.lock = null;
+  if (S.phase === 'train' && S.tr && !(e.kind === 'ship' && e.rest.length)) S.tr.score++;
   if (e.kind === 'ship' && e.rest.length) {          // cruiser: armour plate falls off, next word
     e.word = e.rest.shift(); e.typed = 0; e.armor--;
     C.booms.push({ x, y, t: now, r: Math.random() }); sfx.clang();
@@ -2363,6 +2441,7 @@ function destroyTarget(e, now) {
     if (other) {
       const [ox, oy] = pos(other);
       C.chains.push({ x1: x, y1: y, x2: ox, y2: oy, t: now }); sfx.chain();
+      if (S.phase === 'train' && S.tr) S.tr.score++;
       if (other.kind === 'ship') C.ships = C.ships.filter(o => o !== other); else C.missiles = C.missiles.filter(o => o !== other);
       C.booms.push({ x: ox, y: oy, t: now + 80, r: Math.random(), big: true });
     }
@@ -2491,6 +2570,8 @@ function drawThreat(type) {
 function completeLevel() {
   const { wpm, acc } = renderStats();
   const stars = acc >= 97 ? 3 : acc >= 90 ? 2 : 1;
+  const wasDone = S.done[S.lang][S.lvl] > 0;
+  S.lastParts = 8 + stars * 4; S.parts += S.lastParts;
   S.lastStars = stars; S.lastWpm = wpm; S.lastAcc = acc;
   S.done[S.lang][S.lvl] = Math.max(S.done[S.lang][S.lvl], stars);
   save();
@@ -2500,6 +2581,7 @@ function completeLevel() {
   fanfare(L().type === 'encounter');
   const lt = LT();
   const lines = L().type === 'encounter' ? [{ who: 'vex', text: lt.retreat }, lt.outro] : [lt.outro];
+  if (!wasDone) Object.keys(MODES).filter(m => MODES[m].need === S.lvl).forEach(m => lines.push(hg('newProg').replace('{m}', MODES[m][S.lang][0])));
   say(lines, () => { S.phase = 'complete'; S.speaker = 'ora'; renderAll(); });
 }
 
@@ -2519,6 +2601,421 @@ function startEnding(n) {
     fanfare(true);
     S.phase = 'ending'; S.speaker = 'ora'; renderAll();
   }
+}
+
+/* ======================================================================
+   HANGAR · parts (⚙), ship upgrades, and the simulator
+   Simulator programs unlock with story progress and have three tiers.
+   Upgrades change the ship everywhere and become skills in Raider Run.
+   ====================================================================== */
+const UPG = {
+  armor: { cost: 30, icon: '▦',
+    en: ['Armour plating', '+1 shield in battle.', 'Energy shield: absorbs one hit, recharges in 12 s.'],
+    uk: ['Броня', '+1 щит у бою.', 'Енергощит: поглинає одне влучання, відновлюється за 12 с.'] },
+  twin: { cost: 45, icon: '‖',
+    en: ['Twin cannon', 'Heat builds 50% faster. Double beams.', 'Double shot.'],
+    uk: ['Подвійна гармата', 'Заряд росте на 50% швидше. Подвійні промені.', 'Подвійний постріл.'] },
+  dish: { cost: 60, icon: 'Ψ',
+    en: ['Long-range dish', 'Enemy missiles fly 15% slower.', 'Enemy fire is 35% slower.'],
+    uk: ['Далекобійна антена', 'Ворожі ракети летять на 15% повільніше.', 'Ворожий вогонь на 35% повільніший.'] }
+};
+const MODES = {
+  range:  { need: 0, icon: '⊙', typing: true, th: [12, 20, 28],
+    en: ['Target Range', 'Drones carry letters. Shoot as many as you can in 60 seconds.'],
+    uk: ['Тир', 'Дрони несуть літери. Збий якомога більше за 60 секунд.'] },
+  arcade: { need: 1, icon: '▲', typing: false, th: [12, 28, 45],
+    en: ['Raider Run', 'No typing! ← → to move, Space to fire. Your upgrades become skills.'],
+    uk: ['Рейдерський забіг', 'Без друку! ← → рух, пробіл — вогонь. Твої покращення стають навичками.'] },
+  belt:   { need: 2, icon: '✺', typing: true, th: [10, 20, 34],
+    en: ['Asteroid Belt', 'Type the words on the rocks before they hit the hull. How long can you last?'],
+    uk: ['Пояс астероїдів', 'Набирай слова на каменях, поки вони не влучили в корпус. Скільки протримаєшся?'] }
+};
+const HG = {
+  en: { title: 'HANGAR', parts: 'parts', ship: 'ARGO-7 · UPGRADES', sim: 'SIMULATOR', buy: 'Install', installed: 'Installed', need: 'Need', locked: 'Unlocks after', close: 'Esc · close',
+        tiers: ['Cadet', 'Pilot', 'Ace'], tierLock: 'Get 2★ on the tier before', newProg: 'New simulator program in the hangar: {m}. Train there to earn parts for upgrades.',
+        retry: 'retry', back: 'back to mission', hangar: 'hangar', score: 'Score', earned: 'Parts earned', best: 'Best', time: 'TIME', hull: 'HULL', wave: 'WAVE', lives: 'LIVES',
+        skills: 'Skills', move: '← → move · Space fire · Esc quit', typeHint: 'Type a target\'s first letter to lock on · Esc quit', simOn: 'Simulator online. {m}, {t} tier.',
+        defeatTip: 'Later, the Target Range in the hangar will sharpen your aim.', over: 'SIMULATION OVER', newBadge: 'NEW' },
+  uk: { title: 'АНГАР', parts: 'деталей', ship: 'АРГО-7 · ПОКРАЩЕННЯ', sim: 'СИМУЛЯТОР', buy: 'Встановити', installed: 'Встановлено', need: 'Треба', locked: 'Відкривається після', close: 'Esc · закрити',
+        tiers: ['Кадет', 'Пілот', 'Ас'], tierLock: 'Отримай 2★ на попередньому рівні', newProg: 'Нова програма симулятора в ангарі: {m}. Тренуйся там, щоб заробити деталі на покращення.',
+        retry: 'ще раз', back: 'до місії', hangar: 'ангар', score: 'Рахунок', earned: 'Зароблено деталей', best: 'Рекорд', time: 'ЧАС', hull: 'КОРПУС', wave: 'ХВИЛЯ', lives: 'ЖИТТЯ',
+        skills: 'Навички', move: '← → рух · пробіл вогонь · Esc вихід', typeHint: 'Набери першу літеру цілі · Esc вихід', simOn: 'Симулятор увімкнено. {m}, рівень «{t}».',
+        defeatTip: 'Згодом тир в ангарі відточить твою точність.', over: 'СИМУЛЯЦІЮ ЗАВЕРШЕНО', newBadge: 'НОВЕ' }
+};
+const hg = (k) => HG[S.lang][k];
+const modeOpen = (m) => S.done[S.lang][MODES[m].need] > 0;
+const tierOpen = (m, t) => t === 0 || ((S.train[m] || [0, 0, 0])[t - 1] || 0) >= 2;
+function hangarNews() {
+  const unseenMode = Object.keys(MODES).some(m => modeOpen(m) && !S.seen.includes(m));
+  const buyable = Object.keys(UPG).some(u => !S.up[u] && S.parts >= UPG[u].cost);
+  return unseenMode || buyable;
+}
+
+/* ---------- learned keys and word pools ---------- */
+function learnedCodes() {
+  const set = new Set();
+  LEVELS.forEach((lv, i) => { if (S.done[S.lang][i] > 0 || i < S.lvl) lv.newKeys.forEach(k => set.add(k)); });
+  if (!set.size) LEVELS[0].newKeys.forEach(k => set.add(k));
+  return set;
+}
+function trainPool(tier) {
+  const codes = learnedCodes();
+  const letters = [...codes].map(c => charOf(c)).filter(ch => ch && /\p{L}/u.test(ch));
+  const pick = () => letters[(Math.random() * letters.length) | 0];
+  if (tier === 0) return Array.from({ length: 80 }, pick);
+  if (tier === 1) return Array.from({ length: 80 }, () => { let w = ''; const n = 2 + ((Math.random() * 2) | 0); for (let i = 0; i < n; i++) w += pick(); return w; });
+  const ok = (w) => w.length >= 3 && [...w].every(ch => codes.has(codeOf(ch)));
+  const words = new Set();
+  LEVELS.forEach(lv => { const lt = lv[S.lang]; [...(lt.drills || []), lt.code || '', ...(lt.wave || [])].join(' ').replace(/[;:,.!?]/g, ' ').split(/\s+/).forEach(w => { if (ok(w)) words.add(w); }); });
+  const arr = [...words];
+  if (arr.length < 6) return Array.from({ length: 80 }, () => { let w = ''; for (let i = 0; i < 4; i++) w += pick(); return w; });
+  return Array.from({ length: 80 }, () => arr[(Math.random() * arr.length) | 0]);
+}
+function poolWord(used) {
+  const P = S.tr.pool;
+  for (let tries = 0; tries < 30; tries++) { const w = P[(Math.random() * P.length) | 0]; if (!used.has(w[0])) return w; }
+  return P[(Math.random() * P.length) | 0];
+}
+
+/* ---------- Hangar screen ---------- */
+function openHangar() {
+  if (S.phase === 'intro') return;
+  S.hangarOpen = true;
+  Object.keys(MODES).forEach(m => { if (modeOpen(m) && !S.seen.includes(m)) S.seen.push(m); });
+  save();
+  const el = $('#hangar'); el.hidden = false; el.classList.remove('gone');
+  renderHangar(); sfx.card();
+  requestAnimationFrame(() => fit(hgShip, '#hgShip'));
+  renderChrome();
+}
+function closeHangar() {
+  S.hangarOpen = false;
+  const el = $('#hangar'); el.classList.add('gone');
+  setTimeout(() => { if (!S.hangarOpen) el.hidden = true; }, 300);
+  renderChrome();
+}
+function renderHangar() {
+  $('#hgTitle').textContent = hg('title');
+  $('#hgParts').innerHTML = `⚙ <b>${S.parts}</b> ${esc(hg('parts'))}`;
+  $('#hgShipTag').textContent = hg('ship');
+  $('#hgSimTag').textContent = hg('sim');
+  $('#hgClose').textContent = hg('close');
+  $('#hgUps').innerHTML = Object.entries(UPG).map(([k, u]) => {
+    const own = S.up[k], can = S.parts >= u.cost;
+    const btn = own ? `<span class="hg-own">✓ ${esc(hg('installed'))}</span>`
+      : `<button class="btn hg-buy" data-u="${k}" ${can ? '' : 'disabled'}>${esc(can ? hg('buy') : hg('need'))} · ${u.cost} ⚙</button>`;
+    return `<div class="hg-up ${own ? 'own' : ''}"><span class="hg-ic">${u.icon}</span><div><b>${esc(u[S.lang][0])}</b><small>${esc(u[S.lang][1])}</small></div>${btn}</div>`;
+  }).join('');
+  $('#hgModes').innerHTML = Object.entries(MODES).map(([k, m]) => {
+    const open = modeOpen(k);
+    const stars = S.train[k] || [0, 0, 0];
+    const tiersHtml = open ? hg('tiers').map((tn, t) => {
+      const to = tierOpen(k, t);
+      return `<button class="hg-tier" data-m="${k}" data-t="${t}" ${to ? '' : 'disabled'} title="${to ? '' : esc(hg('tierLock'))}"><span>${esc(tn)}</span><i>${to ? '★★★'.slice(0, stars[t] || 0) + '☆☆☆'.slice(0, 3 - (stars[t] || 0)) : '🔒'}</i></button>`;
+    }).join('') : `<span class="hg-lock">🔒 ${esc(hg('locked'))}: ${esc(LEVELS[m.need].sys[S.lang])}</span>`;
+    const best = S.best[k] ? `<em>${esc(hg('best'))} ${S.best[k]}</em>` : '';
+    return `<div class="hg-mode ${open ? '' : 'locked'}"><span class="hg-ic">${m.icon}</span><div class="hg-mt"><b>${esc(m[S.lang][0])}${best}</b><small>${esc(m[S.lang][1])}</small><div class="hg-tiers">${tiersHtml}</div></div></div>`;
+  }).join('');
+  $('#hgUps').querySelectorAll('.hg-buy').forEach(b => b.onclick = () => {
+    const k = b.dataset.u, u = UPG[k];
+    if (S.up[k] || S.parts < u.cost) return;
+    S.parts -= u.cost; S.up[k] = true; save();
+    sfx.assemble(); hgShip.flash = performance.now();
+    renderHangar(); renderChrome();
+  });
+  $('#hgModes').querySelectorAll('.hg-tier').forEach(b => b.onclick = () => { b.blur(); startTraining(b.dataset.m, +b.dataset.t); });
+}
+const hgShip = { cv: null, ctx: null, w: 0, h: 0, flash: 0 };
+function drawHangarShip(now) {
+  const c = hgShip.ctx, W = hgShip.w, H = hgShip.h; if (!c || !W) return;
+  c.clearRect(0, 0, W, H);
+  // floor grid
+  c.strokeStyle = G(.12); c.lineWidth = 1;
+  for (let i = -8; i <= 8; i++) line(c, [[W / 2 + i * 12, H * 0.62], [W / 2 + i * W * 0.1, H]]);
+  for (let k = 0; k < 6; k++) { const y = H * 0.62 + (H * 0.38) * Math.pow(k / 6, 1.6); line(c, [[0, y], [W, y]]); }
+  const s = Math.min(W / 13, H / 5.6), ox = W / 2 - 4.5 * s, oy = H * 0.56 - 2 * s + Math.sin(now * 0.0015) * 3;
+  const P = (x, y) => [ox + x * s, oy + y * s];
+  c.save(); c.shadowColor = G(.8); c.shadowBlur = 8;
+  c.lineWidth = 2.4; c.lineJoin = 'round'; c.strokeStyle = G();
+  const hp = [...HULL.map(p => P(...p)), P(...HULL[0])];
+  c.fillStyle = G(.06); c.beginPath(); hp.forEach(([x, y], i) => i ? c.lineTo(x, y) : c.moveTo(x, y)); c.fill(); line(c, hp);
+  c.lineWidth = 1; c.strokeStyle = G(.3);
+  line(c, [P(1.2, 1.15), P(2.2, .85), P(5, 1.1), P(8.4, 1.35), P(9.6, 2)]);
+  line(c, [P(1.2, 2.85), P(2.2, 3.15), P(5, 2.9), P(8.4, 2.65), P(9.6, 2)]);
+  [2.2, 3.6, 5.2, 6.4, 7.6].forEach(rx => line(c, [P(rx, 1.0), P(rx, 3.0)]));
+  [3.0, 3.35, 3.7, 5.6, 5.95, 6.3, 6.65, 7.0].forEach(wx => { const [x, y] = P(wx, 1.4); c.fillStyle = G(.8); c.fillRect(x, y, Math.max(3, .16 * s), Math.max(3, .13 * s)); });
+  vtext(c, 'ARGO-7', P(6.0, 2.42)[0], P(6.0, 2.42)[1], Math.max(14, s * 0.42), 'center', G(.75));
+  c.lineWidth = 2; c.strokeStyle = G();
+  [1.45, 2.1].forEach(yy => { const [x, y] = P(-.55, yy); c.strokeRect(x, y, .95 * s, .45 * s); const len = (0.5 + Math.random() * 0.2) * s, my = y + .225 * s; line(c, [[x, my - .13 * s], [x - len, my], [x, my + .13 * s]]); });
+  drawUpgrades(c, P, s, now, true);
+  c.restore();
+  // slot callouts
+  const slots = { armor: [3.6, 3.15, 2.2, 4.0], twin: [6.6, 0.7, 5.2, -0.9], dish: [8.0, 0.0, 9.4, -0.9] };
+  Object.entries(slots).forEach(([k, [ax, ay, lx, ly]]) => {
+    const own = S.up[k], [x1, y1] = P(ax, ay), [x2, y2] = P(lx, ly);
+    c.strokeStyle = own ? G(.8) : G(.3); c.lineWidth = 1; line(c, [[x1, y1], [x2, y2]], !own);
+    c.fillStyle = own ? G() : 'rgba(0,0,0,0)'; c.strokeStyle = own ? G() : G(.5);
+    c.beginPath(); c.arc(x2, y2, 4, 0, Math.PI * 2); own ? c.fill() : c.stroke();
+    const right = false;
+    vtext(c, (own ? '' : '+ ') + UPG[k][S.lang][0].toUpperCase(), x2 + (right ? 8 : -8), y2, 16, right ? 'left' : 'right', own ? G() : G(.5));
+  });
+  if (now - hgShip.flash < 600) { c.fillStyle = `rgba(200,255,220,${0.35 * (1 - (now - hgShip.flash) / 600)})`; c.fillRect(0, 0, W, H); }
+}
+/* upgrades drawn on any ship view: P maps ship units to pixels */
+function drawUpgrades(ctx, P, s, now, big) {
+  ctx.save();
+  ctx.strokeStyle = G(); ctx.lineWidth = big ? 2 : 1.6;
+  if (S.up.armor) {
+    for (let x = 2.4; x < 8.0; x += 0.8) {
+      const a = P(x, 0.98 - (x - 2.4) * 0.02), b = P(x + 0.65, 3.02 + (x - 2.4) * 0.02);
+      ctx.strokeRect(a[0], a[1], 0.65 * s, 0.16 * s);
+      ctx.strokeRect(b[0] - 0.65 * s, b[1] - 0.16 * s, 0.65 * s, 0.16 * s);
+    }
+  }
+  if (S.up.twin) {
+    line(ctx, [P(5.9, 0.98), P(6.1, 0.72), P(7.0, 0.72), P(7.2, 0.98)]);
+    line(ctx, [P(6.7, 0.74), P(8.0, 0.56)]); line(ctx, [P(6.7, 0.86), P(8.0, 0.72)]);
+  }
+  if (S.up.dish) {
+    line(ctx, [P(8.0, 1.1), P(8.0, 0.1)]);
+    const [cx, cy] = P(8.0, 0.05);
+    ctx.beginPath(); ctx.arc(cx, cy, 0.55 * s, Math.PI * 1.05, Math.PI * 1.95); ctx.stroke();
+    line(ctx, [[cx - 0.5 * s, cy - 0.15 * s], [cx, cy + 0.05 * s], [cx + 0.5 * s, cy - 0.15 * s]]);
+    const k = (now % 1500) / 1500; ctx.strokeStyle = G(1 - k);
+    ctx.beginPath(); ctx.arc(cx, cy - 0.2 * s, (0.6 + k * 1.2) * s, Math.PI * 1.25, Math.PI * 1.75); ctx.stroke();
+  }
+  ctx.restore();
+}
+
+/* ---------- Training: Target Range + Asteroid Belt (typing) ---------- */
+function startTraining(mode, tier) {
+  closeHangar();
+  clearInterval(S.typer);
+  if (S.phase !== 'train') S.returnLvl = S.lvl;
+  resetCombat(); C.shields = C.maxShields;
+  S.levelDone = false; S.ending = 0; S.dec = null; S.msg = '';
+  S.correct = 0; S.total = 0; S.startT = null;
+  const now = performance.now();
+  S.tr = { mode, tier, t0: now, end: now + 60000, score: 0, hull: 3, done: false, last: -1e9, pool: MODES[mode].typing ? trainPool(tier) : [], cross: [16000, 13000, 10500][tier], gap: [3000, 2500, 2000][tier] };
+  S.phase = 'train';
+  if (mode === 'arcade') initArcade(tier);
+  remark(hg('simOn').replace('{m}', MODES[mode][S.lang][0]).replace('{t}', hg('tiers')[tier]));
+  renderAll();
+}
+function trainTick(now, dt) {
+  const tr = S.tr; if (!tr || tr.done) return;
+  if (tr.mode === 'arcade') { arcadeTick(now, dt); return; }
+  const W = view.w, H = view.h;
+  if (tr.mode === 'range') {
+    if (C.ships.length < 3 && now - tr.last > [1100, 950, 800][tr.tier]) {
+      tr.last = now;
+      const used = new Set(C.ships.map(e => e.word[0]));
+      C.ships.push({ kind: 'ship', type: 'drone', word: poolWord(used), rest: [], armor: 1, typed: 0, x: W * (0.22 + Math.random() * 0.62), y: H * (0.28 + Math.random() * 0.34), vx: 0, hit: 0, phase: Math.random() * 6, born: now, life: [5200, 4400, 3600][tr.tier], fireAt: 1e15 });
+      renderTerminal(); renderKeyboard();
+    }
+    for (const sh of [...C.ships]) {
+      if (sh.hit > 0) sh.hit -= dt;
+      if (now - sh.born > sh.life) { C.ships = C.ships.filter(o => o !== sh); if (C.lock === sh) C.lock = null; C.streak = 0; renderTerminal(); renderKeyboard(); }
+    }
+    if (now > tr.end) endTraining();
+  } else {
+    const speedK = Math.max(0.45, 1 - tr.score * 0.025);
+    if (C.ships.length < 4 && now - tr.last > tr.gap * speedK) {
+      tr.last = now;
+      const used = new Set(C.ships.map(e => e.word[0]));
+      const pts = Array.from({ length: 9 }, (_, i) => { const a = i / 9 * Math.PI * 2; const r = 14 + Math.random() * 7; return [Math.cos(a) * r, Math.sin(a) * r]; });
+      C.ships.push({ kind: 'ship', type: 'rock', pts, rot: Math.random() * 6, spin: (Math.random() - .5) * 0.002, word: poolWord(used), rest: [], armor: 1, typed: 0, x: W + 30, y: H * (0.28 + Math.random() * 0.42), vx: (W * 0.85) / (tr.cross * speedK), hit: 0, phase: Math.random() * 6, fireAt: 1e15 });
+      renderTerminal(); renderKeyboard();
+    }
+    for (const sh of [...C.ships]) {
+      sh.x -= sh.vx * dt; sh.rot += sh.spin * dt; if (sh.hit > 0) sh.hit -= dt;
+      if (sh.x < perimeterX()) {
+        C.ships = C.ships.filter(o => o !== sh); if (C.lock === sh) C.lock = null;
+        tr.hull--; C.streak = 0;
+        C.booms.push({ x: sh.x, y: sh.y, t: now, r: Math.random(), bad: true, big: true });
+        view.shake = 300; view.flash = 1; sfx.breach();
+        if (tr.hull <= 0) { endTraining(); return; }
+        renderTerminal(); renderKeyboard();
+      }
+    }
+  }
+}
+function endTraining() {
+  const tr = S.tr; if (!tr || tr.done) return;
+  tr.done = true; C.ships = []; C.lock = null;
+  const th = MODES[tr.mode].th, sc = tr.mode === 'arcade' ? S.ar.score : tr.score;
+  const stars = sc >= th[2] ? 3 : sc >= th[1] ? 2 : sc >= th[0] ? 1 : 0;
+  const earned = Math.min(45, Math.round(sc * [0.5, 0.75, 1][tr.tier])) + stars * 3;
+  tr.stars = stars; tr.earned = earned; tr.final = sc;
+  S.parts += earned;
+  if (!S.train[tr.mode]) S.train[tr.mode] = [0, 0, 0];
+  S.train[tr.mode][tr.tier] = Math.max(S.train[tr.mode][tr.tier], stars);
+  S.best[tr.mode] = Math.max(S.best[tr.mode] || 0, sc);
+  save();
+  banner(hg('over'), false);
+  if (stars) fanfare(stars >= 2); else defeatSting();
+  renderAll();
+}
+function leaveTraining() {
+  S.tr = null; S.ar = null; resetCombat();
+  startLevel(S.returnLvl != null ? S.returnLvl : S.lvl);
+}
+
+/* ---------- Raider Run (no typing) ---------- */
+function initArcade(tier) {
+  const W = view.w, H = view.h;
+  S.ar = { x: W / 2, keys: {}, shots: [], eshots: [], inv: [], dir: 1, ox: 0, oy: 0, wave: 1, tier,
+    lives: 3, shieldUp: !!S.up.armor, shieldAt: 0, score: 0, cool: 0, fireAt: 0, hurt: 0 };
+  buildWave();
+}
+function buildWave() {
+  const A = S.ar, W = view.w, H = view.h;
+  const rows = Math.min(5, [3, 4, 4][A.tier] + Math.floor((A.wave - 1) / 2)), cols = 7;
+  const gx = Math.min(60, (W * 0.6) / cols), gy = Math.max(20, Math.min(30, (H - 190) / rows));
+  A.inv = [];
+  const types = ['kamikaze', 'scout', 'drone', 'drone', 'drone'];
+  for (let r = 0; r < rows; r++) for (let c = 0; c < cols; c++) A.inv.push({ c, r, alive: true, type: types[r], dx: c * gx, dy: r * gy });
+  A.gx = gx; A.ox = (W - (cols - 1) * gx) / 2; A.oy = 58; A.dir = 1;
+  A.total = A.inv.length;
+  A.speed = (W * 0.00005) * ([1, 1.25, 1.5][A.tier]) * (1 + (A.wave - 1) * 0.18);
+  A.fireGap = [1150, 900, 700][A.tier] / (1 + (A.wave - 1) * 0.12);
+}
+function arcadeKey(e, down) {
+  const A = S.ar; if (!A) return false;
+  const map = { ArrowLeft: 'left', KeyA: 'left', ArrowRight: 'right', KeyD: 'right', Space: 'fire', ArrowUp: 'fire' };
+  const k = map[e.code]; if (!k) return false;
+  A.keys[k] = down; return true;
+}
+const arPY = () => view.h - 64;
+function arcadeTick(now, dt) {
+  const A = S.ar, W = view.w, H = view.h, py = arPY();
+  if (!A) return;
+  const sp = W * 0.00065;
+  if (A.keys.left) A.x -= sp * dt;
+  if (A.keys.right) A.x += sp * dt;
+  A.x = Math.max(40, Math.min(W - 40, A.x));
+  if (A.keys.fire && now > A.cool) {
+    A.cool = now + 300;
+    if (S.up.twin) { A.shots.push({ x: A.x - 9, y: py - 14 }, { x: A.x + 9, y: py - 14 }); } else A.shots.push({ x: A.x, y: py - 16 });
+    sfx.laser();
+  }
+  // invaders
+  const alive = A.inv.filter(v => v.alive);
+  if (!alive.length) { A.wave++; A.score += 5; banner(`${hg('wave')} ${A.wave}`); sfx.recharge(); buildWave(); return; }
+  const k = 1 + (1 - alive.length / A.total) * 1.6;
+  A.ox += A.dir * A.speed * k * dt;
+  const xs = alive.map(v => A.ox + v.dx);
+  if (Math.max(...xs) > W - 40 || Math.min(...xs) < 40) { A.dir *= -1; A.ox += A.dir * 4; A.oy += 14; }
+  const bottom = Math.max(...alive.map(v => A.oy + v.dy));
+  if (bottom > py - 30) { A.lives = 0; arcadeHit(now, true); return; }
+  // enemy fire
+  if (now > A.fireAt) {
+    A.fireAt = now + A.fireGap * (0.6 + Math.random() * 0.8);
+    const col = alive[(Math.random() * alive.length) | 0].c;
+    const shooter = alive.filter(v => v.c === col).sort((a, b) => b.r - a.r)[0];
+    A.eshots.push({ x: A.ox + shooter.dx, y: A.oy + shooter.dy + 12 });
+  }
+  const ev = H * 0.00032 * (S.up.dish ? 0.65 : 1) * (1 + (A.wave - 1) * 0.06);
+  A.eshots.forEach(b => { b.y += ev * dt; });
+  A.shots.forEach(b => { b.y -= H * 0.0013 * dt; });
+  A.shots = A.shots.filter(b => {
+    if (b.y < 30) return false;
+    const hit = alive.find(v => v.alive && Math.abs(A.ox + v.dx - b.x) < 15 && Math.abs(A.oy + v.dy - b.y) < 11);
+    if (hit) { hit.alive = false; A.score += hit.type === 'kamikaze' ? 3 : hit.type === 'scout' ? 2 : 1; C.booms.push({ x: A.ox + hit.dx, y: A.oy + hit.dy, t: now, r: Math.random() }); sfx.boom(); return false; }
+    return true;
+  });
+  A.eshots = A.eshots.filter(b => {
+    if (b.y > H - 30) return false;
+    if (Math.abs(b.x - A.x) < 18 && Math.abs(b.y - py) < 14) { arcadeHit(now, false); return false; }
+    return true;
+  });
+  if (S.up.armor && !A.shieldUp && now > A.shieldAt) { A.shieldUp = true; sfx.recharge(); }
+}
+function arcadeHit(now, fatal) {
+  const A = S.ar;
+  if (!fatal && A.shieldUp) { A.shieldUp = false; A.shieldAt = now + 12000; sfx.clang(); C.booms.push({ x: A.x, y: arPY(), t: now, r: 0 }); return; }
+  if (!fatal) A.lives--;
+  A.hurt = now; view.shake = 320; view.flash = 1; sfx.breach();
+  C.booms.push({ x: A.x, y: arPY(), t: now, r: Math.random(), bad: true, big: true });
+  if (A.lives <= 0) endTraining();
+}
+function drawArcade(ctx, now) {
+  const A = S.ar, W = view.w, H = view.h, py = arPY(); if (!A) return;
+  view.stars.forEach(st => { st.y += st.z * 0.12; if (st.y > H) { st.y = 0; st.x = Math.random() * W; } ctx.fillStyle = G(0.2 + 0.3 * st.z / 1.8); ctx.fillRect(st.x, st.y, st.z, st.z); });
+  // invaders (pointing down)
+  A.inv.forEach(v => {
+    if (!v.alive) return;
+    const x = A.ox + v.dx, y = A.oy + v.dy + Math.sin(now * 0.005 + v.c) * 2;
+    ctx.save(); ctx.translate(x, y); ctx.rotate(Math.PI / 2); drawShipShape(ctx, v.type, 0, 0, 0.55, HOT(), now); ctx.restore();
+  });
+  // shots
+  ctx.fillStyle = G(); A.shots.forEach(b => ctx.fillRect(b.x - 1.5, b.y - 8, 3, 12));
+  ctx.fillStyle = HOT(); A.eshots.forEach(b => { ctx.beginPath(); ctx.moveTo(b.x, b.y + 7); ctx.lineTo(b.x - 4, b.y - 4); ctx.lineTo(b.x + 4, b.y - 4); ctx.fill(); });
+  // player ship
+  const blink = now - A.hurt < 900 && Math.floor(now / 90) % 2;
+  if (!blink) {
+    ctx.strokeStyle = G(); ctx.lineWidth = 2;
+    line(ctx, [[A.x - 22, py + 12], [A.x - 10, py - 4], [A.x, py - 16], [A.x + 10, py - 4], [A.x + 22, py + 12], [A.x - 22, py + 12]]);
+    if (S.up.twin) { line(ctx, [[A.x - 9, py - 6], [A.x - 9, py - 18]]); line(ctx, [[A.x + 9, py - 6], [A.x + 9, py - 18]]); }
+    if (S.up.dish) { ctx.beginPath(); ctx.arc(A.x + 16, py - 6, 6, Math.PI, Math.PI * 2); ctx.stroke(); }
+    if (S.up.armor) { ctx.strokeRect(A.x - 16, py + 4, 8, 5); ctx.strokeRect(A.x + 8, py + 4, 8, 5); }
+    const fl = 6 + Math.random() * 6; line(ctx, [[A.x - 6, py + 12], [A.x, py + 12 + fl], [A.x + 6, py + 12]]);
+    if (A.shieldUp) { ctx.strokeStyle = G(0.5 + 0.3 * Math.sin(now * 0.01)); ctx.beginPath(); ctx.ellipse(A.x, py, 34, 26, 0, 0, Math.PI * 2); ctx.stroke(); }
+  }
+  // shield charge under the ship (skills are listed in the console below)
+  if (S.up.armor) {
+    const ready = A.shieldUp ? 1 : Math.max(0, 1 - (A.shieldAt - now) / 12000);
+    ctx.strokeStyle = G(.5); ctx.lineWidth = 1; ctx.strokeRect(A.x - 20, py + 20, 40, 4);
+    ctx.fillStyle = G(ready >= 1 ? 1 : .55); ctx.fillRect(A.x - 20, py + 20, 40 * ready, 4);
+  }
+}
+function simHeader(ctx, now) {
+  const tr = S.tr;
+  if (tr.mode === 'arcade') {
+    const A = S.ar;
+    header(ctx, 'SIM', [[hg('score'), String(A ? A.score : 0)], [hg('wave'), String(A ? A.wave : 1)], [hg('lives'), '■'.repeat(Math.max(0, A ? A.lives : 0)), A && A.lives < 2]]);
+  } else if (tr.mode === 'range') {
+    const left = Math.max(0, Math.ceil((tr.end - now) / 1000));
+    header(ctx, 'SIM', [[hg('time'), `${left}s`, left <= 10], [hg('score'), String(tr.score)], [hg('best'), String(S.best.range || 0)]]);
+  } else {
+    header(ctx, 'SIM', [[hg('hull'), '■'.repeat(Math.max(0, tr.hull)) + '□'.repeat(Math.max(0, 3 - tr.hull)), tr.hull < 2], [hg('score'), String(tr.score)], [hg('best'), String(S.best.belt || 0)]]);
+  }
+}
+function trainTerminal(el, prompt, chips) {
+  const tr = S.tr, m = MODES[tr.mode];
+  if (tr.done) {
+    const st = '★★★'.slice(0, tr.stars) + '☆☆☆'.slice(0, 3 - tr.stars);
+    el.innerHTML = `<div class="done">
+      <h3>${esc(m[S.lang][0].toUpperCase())} · ${esc(hg('tiers')[tr.tier].toUpperCase())}</h3>
+      <div class="row"><span class="stars">${st}</span><span class="label">${esc(hg('score'))}<b>${tr.final}</b></span><span class="label">${esc(hg('earned'))}<b>+${tr.earned} ⚙</b></span></div>
+      <div class="waiting"><kbd>${esc(t('spaceKey'))}</kbd> ${esc(hg('retry'))} &nbsp; <kbd>H</kbd> ${esc(hg('hangar'))} &nbsp; <kbd>Esc</kbd> ${esc(hg('back'))}</div>
+    </div>`;
+    return;
+  }
+  if (tr.mode === 'arcade') {
+    const sk = Object.entries(UPG).map(([k, u]) => `<div class="sk ${S.up[k] ? 'own' : ''}"><span>${S.up[k] ? u.icon : '🔒'}</span><b>${esc(u[S.lang][0])}</b><small>${esc(S.up[k] ? u[S.lang][2] : `${u.cost} ⚙ · ${hg('hangar')}`)}</small></div>`).join('');
+    el.innerHTML = `<div class="term-head"><span class="label kind">${esc(m[S.lang][0])} · ${esc(hg('tiers')[tr.tier])}</span><span class="label">${esc(hg('move'))}</span></div>
+      <div class="skills">${sk}</div>`;
+    return;
+  }
+  const locked = alive(C.lock) ? C.lock : null, rec = locked || recommended();
+  const curCode = rec ? codeOf(rec.word[rec.typed]) : null;
+  const curColor = curCode ? FINGER_COLOR[KEY[curCode].finger] : 'var(--live)';
+  const prog = tr.mode === 'range' ? Math.max(0, (tr.end - performance.now()) / 60000) : tr.hull / 3;
+  el.innerHTML = `
+    <div class="term-head"><span class="label kind">${esc(m[S.lang][0])} · ${esc(hg('tiers')[tr.tier])}</span><span class="label">${esc(hg('typeHint'))}</span></div>
+    <div class="progress"><i style="width:${(prog * 100).toFixed(1)}%"></i></div>
+    ${chips}
+    <div class="term-line ${locked ? '' : 'unlocked'}" id="termLine" style="--cur:${curColor}"><span class="prompt">${esc(prompt)}</span>${rec ? charsHtml(rec.word, rec.typed) : `<span class="c">…</span>`}</div>
+    ${footHtml()}`;
+}
+function drawRock(ctx, s, y, col) {
+  ctx.save(); ctx.translate(s.x, y); ctx.rotate(s.rot);
+  ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.lineJoin = 'round';
+  ctx.beginPath(); s.pts.forEach(([px, py], i) => i ? ctx.lineTo(px, py) : ctx.moveTo(px, py)); ctx.closePath(); ctx.stroke();
+  ctx.lineWidth = 1; ctx.beginPath(); ctx.arc(4, -3, 4, 0, Math.PI * 2); ctx.stroke();
+  ctx.beginPath(); ctx.arc(-6, 5, 2.5, 0, Math.PI * 2); ctx.stroke();
+  ctx.restore();
 }
 
 /* ---------- Cinematic intro flow ---------- */
@@ -2654,6 +3151,16 @@ window.addEventListener('keydown', (e) => {
     if (e.code === 'Space' || e.key === 'Enter') { e.preventDefault(); if (e.repeat) return; initAudio(); introAdvance(); }
     return;
   }
+  if (S.hangarOpen) { if (e.code === 'Escape' || e.code === 'KeyH') { e.preventDefault(); closeHangar(); } return; }
+  if (S.phase === 'train' && S.tr) {
+    if (e.code === 'Escape') { e.preventDefault(); leaveTraining(); return; }
+    if (S.tr.done) {
+      if (e.code === 'Space' || e.key === 'Enter') { e.preventDefault(); if (!e.repeat) { initAudio(); startTraining(S.tr.mode, S.tr.tier); } }
+      else if (e.code === 'KeyH') { e.preventDefault(); openHangar(); }
+      return;
+    }
+    if (S.tr.mode === 'arcade') { initAudio(); if (arcadeKey(e, true)) e.preventDefault(); return; }
+  }
   initAudio();
   const kEl = document.getElementById('k-' + e.code);
   if (kEl) kEl.classList.add('pressed');
@@ -2668,6 +3175,7 @@ window.addEventListener('keydown', (e) => {
     return;
   }
   if (S.phase === 'dialogue' || S.phase === 'complete' || S.phase === 'ending') {
+    if (S.phase === 'complete' && e.code === 'KeyH') { e.preventDefault(); openHangar(); return; }
     if (e.code === 'Space' || e.key === 'Enter') {
       e.preventDefault();
       if (e.repeat) return;
@@ -2681,7 +3189,7 @@ window.addEventListener('keydown', (e) => {
   if (KEY[e.code] || e.code === 'Space') e.preventDefault();
   if (switching()) return;   // station switch card is showing
 
-  if (S.phase === 'combat') {
+  if (S.phase === 'combat' || S.phase === 'train') {
     if (e.code === 'Space') return;   // habit-space between words is harmless in combat
     const now = performance.now();
     if (!S.startT) S.startT = now;
@@ -2754,6 +3262,7 @@ window.addEventListener('keydown', (e) => {
   if (!ok) shakeLine();
 });
 window.addEventListener('keyup', (e) => {
+  if (S.phase === 'train' && S.ar) arcadeKey(e, false);
   const el = document.getElementById('k-' + e.code); if (el) el.classList.remove('pressed');
 });
 
@@ -2762,6 +3271,8 @@ $('#langEN').onclick = (e) => { e.currentTarget.blur(); if (S.phase === 'intro')
 $('#langUK').onclick = (e) => { e.currentTarget.blur(); if (S.phase === 'intro') { S.lang = 'uk'; save(); renderChrome(); showIntroStep(); return; } if (S.lang !== 'uk') { S.lang = 'uk'; save(); const a = ACTS[actOf(S.lvl)]; startLevel(firstOpen(a.from, a.to)); } };
 $('#act1').onclick = (e) => { e.currentTarget.blur(); initAudio(); startLevel(firstOpen(ACTS[0].from, ACTS[0].to)); };
 $('#act2').onclick = (e) => { e.currentTarget.blur(); initAudio(); startLevel(firstOpen(ACTS[1].from, ACTS[1].to)); };
+$('#hangarBtn').onclick = (e) => { e.currentTarget.blur(); initAudio(); if (S.phase === 'train' && S.tr && !S.tr.done) return; S.hangarOpen ? closeHangar() : openHangar(); };
+$('#hgCloseBtn').onclick = (e) => { e.currentTarget.blur(); closeHangar(); };
 $('#musicBtn').onclick = (e) => { e.currentTarget.blur(); initAudio(); S.music = !S.music; save(); renderChrome(); };
 $('#kbBtn').onclick = (e) => { e.currentTarget.blur(); S.kb = !S.kb; save(); renderChrome(); requestAnimationFrame(resize); };
 $('#handsBtn').onclick = (e) => { e.currentTarget.blur(); S.hands = !S.hands; save(); renderChrome(); renderKeyboard(); };
@@ -2777,7 +3288,7 @@ function fit(obj, sel) {
   cv.width = Math.round(r.width * dpr); cv.height = Math.round(r.height * dpr);
   obj.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
 }
-function resize() { requestAnimationFrame(updatePads); if (document.getElementById('sideFace')) fit(sideFace, '#sideFace'); fit(view, '#view'); fit(face, '#face'); initStars(); if (S.phase === 'intro') resizeCine(); }
+function resize() { if (S.hangarOpen) requestAnimationFrame(() => fit(hgShip, '#hgShip')); requestAnimationFrame(updatePads); if (document.getElementById('sideFace')) fit(sideFace, '#sideFace'); fit(view, '#view'); fit(face, '#face'); initStars(); if (S.phase === 'intro') resizeCine(); }
 window.addEventListener('resize', resize);
 if (window.ResizeObserver) { const ro = new ResizeObserver(() => resize()); ro.observe($('#view')); ro.observe($('#face')); }
 
@@ -2787,7 +3298,7 @@ function loop(now) {
   if (now - S.lastKey > 900) S.cadence *= 0.985;
   if (view.shake > 0) view.shake -= dt;
 
-  const paused = switching();
+  const paused = switching() || S.hangarOpen;
   if (S.phase === 'decrypt' && S.dec) {
     if (!paused) S.dec.left -= dt;
     if (now - lastNoise > 110) { lastNoise = now; renderCrtText(); }
@@ -2799,6 +3310,9 @@ function loop(now) {
     if (S.dec.left <= 0) signalLost();
   }
   if (S.phase === 'combat' && !paused) combatTick(now, dt);
+  if (S.phase === 'train' && !paused) trainTick(now, dt);
+  else if (S.phase === 'train' && S.tr && S.tr.mode === 'range' && !S.tr.done) S.tr.end += dt;
+  if (S.hangarOpen) drawHangarShip(now);
 
   const target = targetPowers();
   for (let i = 0; i < 5; i++) view.pw[i] += (target[i] - view.pw[i]) * 0.05;
